@@ -41,6 +41,6 @@ document
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
 
-    const msg = `${name}\n${date}\n: ${time}`;
+    const msg = `${name}\n${date}\n${time}`;
     sendText(msg);
   });
