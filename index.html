@@ -9,7 +9,19 @@
   <body>
     <form id="reservationForm">
       <div class="form-group">
-        <label for="name">名前(代表者)：</label>
+        <input
+          type="radio"
+          id="individual"
+          name="nameType"
+          value="individual"
+          checked
+        />
+        <label for="individual">個人</label>
+        <input type="radio" id="group" name="nameType" value="group" />
+        <label for="group">バンド</label>
+      </div>
+      <div class="form-group">
+        <label for="name">名前：</label>
         <input type="text" id="name" name="name" required />
       </div>
       <div class="form-group">

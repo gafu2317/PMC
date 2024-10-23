@@ -37,10 +37,13 @@ document
   .addEventListener("submit", function (event) {
     event.preventDefault(); // デフォルトのフォーム送信を防ぐ
 
+    const nameType = document.querySelector(
+      'input[name="nameType"]:checked'
+    ).value; // 選択された名前の種類を取得
     const name = document.getElementById("name").value;
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
 
-    const msg = `${name}\n${date}\n${time}`;
+    const msg = `${nameType === "individual" ? "個人名" : "グループ名"}\n${name}\n${date}\n${time}`;
     sendText(msg);
   });
