@@ -23,30 +23,28 @@ document
   .addEventListener("submit", function (event) {
     event.preventDefault(); // デフォルトのフォーム送信を防ぐ
 
-    // フォームの入力値を取得
-    const nameType = document.querySelector(
-      'input[name="nameType"]:checked'
-    ).value;
-
-
     // ユーザープロフィールを取得
     liff
       .getProfile()
       .then((profile) => {
-        const userId = profile.userId; // LINEのユーザーID
-        const name = document.getElementById("name").value;
-        const date = document.getElementById("date").value;
-        const time = document.getElementById("time").value;
+        const sendData = {
+          nameType: document.querySelector('input[name="nameType"]:checked').value,
+          userId: profile.userId,
+          name: document.getElementById("name").value,
+          date: document.getElementById("date").value,
+          time: document.getElementById("time").value,
+        };
     
         //gasにデータを送信
         fetch(
           "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec",
           {
             method: "POST",
+            mode: "no-cors",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ nameType, userId, name, date, time }),
+            body: JSON.stringify(sendData),
           }
         )
           .then((response) => response.json())
