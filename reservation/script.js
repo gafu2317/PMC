@@ -34,33 +34,33 @@ document
       .getProfile()
       .then((profile) => {
         const userId = profile.userId; // LINEのユーザーID
+        const name = document.getElementById("name").value;
+        const date = document.getElementById("date").value;
+        const time = document.getElementById("time").value;
+    
+        //gasにデータを送信
+        fetch(
+          "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ nameType,userId, name, date, time }),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            alert("予約が完了しました");
+            document.getElementById("reservationForm").reset(); // フォームをリセット
+          })
+          .catch((error) => {
+            alert("エラーが発生しました: " + error);
+            console.error("Error:", error);
+          });
       })
       .catch((err) => {
         console.error("Error getting profile: ", err);
       });
 
-    const name = document.getElementById("name").value;
-    const date = document.getElementById("date").value;
-    const time = document.getElementById("time").value;
-
-    //gasにデータを送信
-    fetch(
-      "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ nameType,userId, name, date, time }),
-      }
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        alert("予約が完了しました");
-        document.getElementById("reservationForm").reset(); // フォームをリセット
-      })
-      .catch((error) => {
-        alert("エラーが発生しました: " + error);
-        console.error("Error:", error);
-      });
   });
