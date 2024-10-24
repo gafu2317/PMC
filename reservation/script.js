@@ -46,7 +46,7 @@ document
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ nameType,userId, name, date, time }),
+            body: JSON.stringify({ nameType, userId, name, date, time }),
           }
         )
           .then((response) => response.json())
