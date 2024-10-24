@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PMC学スタ予約削除</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <form id="reservationForm">
+      <p>削除する予約を選択してください</p>
+      <div class="form-group">
+        <input
+          type="radio"
+          id="individual"
+          name="nameType"
+          value="individual"
+          checked
+        />
+        <label for="individual">個人</label>
+        <input type="radio" id="group" name="nameType" value="group" />
+        <label for="group">バンド</label>
+      </div>
+      <div class="form-group">
+        <label for="name">名前：</label>
+        <input type="text" id="name" name="name" required />
+      </div>
+      <div class="form-group">
+        <label for="date">日付を選択：</label>
+        <input type="date" id="date" name="date" required />
+      </div>
+      <div class="form-group">
+        <label for="time">時間を選択：</label>
+        <select id="time" name="time">
+          <option value="9:00~10:00">"9:00~10:00"</option>
+          <option value="10:00~11:00">"10:00~11:00"</option>
+          <option value="11:00~12:00">"11:00~12:00"</option>
+          <option value="12:00~13:00">"12:00~13:00"</option>
+          <option value="13:00~14:00">"13:00~14:00"</option>
+          <option value="14:00~15:00">"14:00~15:00"</option>
+          <option value="15:00~16:00">"15:00~16:00"</option>
+          <option value="16:00~17:00">"16:00~17:00"</option>
+          <option value="17:00~18:00">"17:00~18:00"</option>
+          <option value="18:00~19:00">"18:00~19:00"</option>
+          <option value="19:00~20:00">"19:00~20:00"</option>
+          <option value="20:00~21:30">"20:00~21:30"</option>
+        </select>
+      </div>
+
+      <input type="submit" value="送信" />
+    </form>
+
+    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    <script src="script.js" defer></script>
+  </body>
+</html>

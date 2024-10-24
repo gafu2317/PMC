@@ -44,6 +44,8 @@ document
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
 
-    const msg = `${nameType === "individual" ? "個人名" : "グループ名"}\n${name}\n${date}\n${time}`;
+    const msg = `${
+      nameType === "individual" ? "個人名" : "グループ名"
+    }\n${name}\n${date}\n${time}`;
     sendText(msg);
   });
