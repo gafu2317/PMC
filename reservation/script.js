@@ -26,7 +26,19 @@ document
     // フォームの入力値を取得
     const nameType = document.querySelector(
       'input[name="nameType"]:checked'
-    ).value; 
+    ).value;
+
+
+    // ユーザープロフィールを取得
+    liff
+      .getProfile()
+      .then((profile) => {
+        const userId = profile.userId; // LINEのユーザーID
+      })
+      .catch((err) => {
+        console.error("Error getting profile: ", err);
+      });
+
     const name = document.getElementById("name").value;
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
@@ -39,7 +51,7 @@ document
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nameType, name, date, time }),
+        body: JSON.stringify({ nameType,userId, name, date, time }),
       }
     )
       .then((response) => response.json())
