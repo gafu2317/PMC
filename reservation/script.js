@@ -28,13 +28,14 @@ document
       .getProfile()
       .then((profile) => {
         const sendData = {
-          nameType: document.querySelector('input[name="nameType"]:checked').value,
+          nameType: document.querySelector('input[name="nameType"]:checked')
+            .value,
           userId: profile.userId,
           name: document.getElementById("name").value,
           date: document.getElementById("date").value,
           time: document.getElementById("time").value,
         };
-    
+
         //gasにデータを送信
         fetch(
           "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec",
@@ -47,13 +48,19 @@ document
             body: JSON.stringify(sendData),
           }
         )
-          .then((response) => response.json())
+          .then((response) => {
+            // レスポンスが成功した場合にのみJSONを解析
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
           .then((data) => {
             alert("予約が完了しました");
             document.getElementById("reservationForm").reset(); // フォームをリセット
           })
           .catch((error) => {
-            alert("エラーが発生しました: " + error);
+            alert("エラーが発生しました: " + error.message);
             console.error("Error:", error);
           });
       })
