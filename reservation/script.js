@@ -33,12 +33,15 @@ document
   .addEventListener("submit", function (event) {
     event.preventDefault(); // フォームのデフォルトの送信を防ぐ
 
-    const nameType = document.querySelector('input[name="nameType"]:checked') 
+    const nameType = document.querySelector('input[name="nameType"]:checked');
+
+    // ラジオボタンのvalueを取得
+    const nameTypeValue = nameType ? nameType.value : "";
     const name = document.getElementById("name").value;
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
 
-    const msg = `${nameType}\n${name}\n${date}\n${time}`;
+    const msg = `${nameTypeValue}\n${name}\n${date}\n${time}`;
     sendText(msg);
   });
 
