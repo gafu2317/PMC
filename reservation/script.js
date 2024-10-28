@@ -41,7 +41,7 @@ document
           "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec",
           {
             method: "POST",
-            // mode: "no-cors",
+            mode: "no-cors",
             headers: {
               "Content-Type": "application/json",
             },
