@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeLiff(liffId);
 });
 
+//liffの初期化
 function initializeLiff(liffId) {
   liff
     .init({
@@ -18,12 +19,7 @@ function initializeLiff(liffId) {
 
 function sendText(text) {
   liff
-    .sendMessages([
-      {
-        type: "text",
-        text: text,
-      },
-    ])
+    .sendMessages([{ type: "text", text: text }])
     .then(function () {
       liff.closeWindow();
     })
@@ -35,17 +31,16 @@ function sendText(text) {
 document
   .getElementById("reservationForm")
   .addEventListener("submit", function (event) {
-    event.preventDefault(); // デフォルトのフォーム送信を防ぐ
+    event.preventDefault(); // フォームのデフォルトの送信を防ぐ
 
-    const nameType = document.querySelector(
-      'input[name="nameType"]:checked'
-    ).value; // 選択された名前の種類を取得
+    const nameType = document.querySelector('input[name="nameType"]:checked');
+
+    // ラジオボタンのvalueを取得
+    const nameTypeValue = nameType ? nameType.value : "";
     const name = document.getElementById("name").value;
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
 
-    const msg = `${
-      nameType === "individual" ? "個人名" : "グループ名"
-    }\n${name}\n${date}\n${time}`;
+    const msg = `予約削除\n${nameTypeValue}\n${name}\n${date}\n${time}`;
     sendText(msg);
   });

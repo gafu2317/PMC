@@ -41,7 +41,7 @@ document
     const date = document.getElementById("date").value;
     const time = document.getElementById("time").value;
 
-    const msg = `${nameTypeValue}\n${name}\n${date}\n${time}`;
+    const msg = `予約\n${nameTypeValue}\n${name}\n${date}\n${time}`;
     sendText(msg);
   });
 
