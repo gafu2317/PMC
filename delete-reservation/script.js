@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
+  const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
   initializeLiff(liffId);
 });
 
