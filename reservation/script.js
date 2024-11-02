@@ -1,7 +1,31 @@
+//ページが読み込まれた時の関数
 document.addEventListener("DOMContentLoaded", function () {
+  setDateLimits(); 
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
 });
+
+// 日付を設定する関数
+function setDateLimits() {
+  const today = new Date();
+  const nextMonday = new Date(today);
+  const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜日 〜 7:日曜日(デフォルトは０だけど計算の都合上7にしている)
+  nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
+
+  // 日付をyyyy-MM-dd形式に整形(toISOString()を使うと世界標準寺になってしまうから自分で整形)
+  const formattedToday = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const formattedNextMonday = `${nextMonday.getFullYear()}-${String(
+    nextMonday.getMonth() + 1
+  ).padStart(2, "0")}-${String(nextMonday.getDate()).padStart(2, "0")}`;
+
+  // 日付入力フィールドのminとmaxを設定
+  const dateInput = document.getElementById("date");
+  dateInput.setAttribute("min", formattedToday); // 今日の日付をminに設定
+  dateInput.setAttribute("max", formattedNextMonday); // 来週の月曜日をmaxに設定
+}
+
 
 //liffの初期化
 function initializeLiff(liffId) {
