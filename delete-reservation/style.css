@@ -9,7 +9,6 @@ body {
   background-color: #f4f4f4;
 }
 
-
 #name {
   width: 70%;
 }
@@ -20,6 +19,10 @@ form {
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 300px;
+  position: fixed;
+  left: 50%; /* 中央に配置 */
+  top: 50%; /* 中央に配置 */
+  transform: translate(-50%, -50%); /* 中央に配置 */
 }
 
 .form-group {
