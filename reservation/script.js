@@ -1,6 +1,7 @@
+
 //ページが読み込まれた時の関数
 document.addEventListener("DOMContentLoaded", function () {
-  setDateLimits(); 
+  setDateLimits();
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
 });
@@ -11,6 +12,18 @@ function setDateLimits() {
   const nextMonday = new Date(today);
   const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜日 〜 7:日曜日(デフォルトは０だけど計算の都合上7にしている)
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
+
+  //月曜の場合分け
+  if (dayOfWeek === 1) {
+    // 0:00~17:59の場合はdayOfWeekを1にする
+    if (today.getHours() < 18) {
+      dayOfWeek = 8;
+    }
+    //18:00~23:59の場合はdayOfWeekを8にする
+    if (today.getHours() >= 19) {
+      dayOfWeek = 8;
+    }
+  }
 
   // 日付をyyyy-MM-dd形式に整形(toISOString()を使うと世界標準寺になってしまうから自分で整形)
   const formattedToday = `${today.getFullYear()}-${String(
@@ -25,6 +38,25 @@ function setDateLimits() {
   dateInput.setAttribute("min", formattedToday); // 今日の日付をminに設定
   dateInput.setAttribute("max", formattedNextMonday); // 来週の月曜日をmaxに設定
 }
+
+// パスワード確認ボタンのイベントリスナー
+document
+  .getElementById("confirmPassword")
+  .addEventListener("click", function () {
+    const password = document.getElementById("password").value;
+    if (password === "正しいパスワード") {
+      // 正しいパスワードをチェック
+      document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
+      submitReservation(); // 予約を送信
+    } else {
+      alert("パスワードが間違っています");
+    }
+  });
+
+  // キャンセルボタンのイベントリスナー
+document.getElementById("cancelPassword").addEventListener("click", function () {
+    document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
+});
 
 
 //liffの初期化
@@ -57,17 +89,31 @@ document
   .addEventListener("submit", function (event) {
     event.preventDefault(); // フォームのデフォルトの送信を防ぐ
 
-    const nameType = document.querySelector('input[name="nameType"]:checked');
+    const today = new Date();
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
 
-    // ラジオボタンのvalueを取得
-    const nameTypeValue = nameType ? nameType.value : "";
-    const name = document.getElementById("name").value;
-    const date = document.getElementById("date").value;
-    const time = document.getElementById("time").value;
-
-    const msg = `予約\n${nameTypeValue}\n${name}\n${date}\n${time}`;
-    sendText(msg);
+    // 18:00〜18:59の時間帯の場合、パスワードモーダルを表示
+    //テストようにtrueにしている
+    if (true) {
+      document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
+    } else {
+      // 通常通り送信
+      submitReservation();
+    }
   });
+
+// 予約を送信する関数
+function submitReservation() {
+  const nameType = document.querySelector('input[name="nameType"]:checked');
+  const nameTypeValue = nameType ? nameType.value : "";
+  const name = document.getElementById("name").value;
+  const date = document.getElementById("date").value;
+  const time = document.getElementById("time").value;
+
+  const msg = `予約\n${nameTypeValue}\n${name}\n${date}\n${time}`;
+  sendText(msg);
+}
 
 //javascriptから直接gasにデータを送信する場合
 // //データ送信

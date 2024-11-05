@@ -9,7 +9,13 @@
   <body>
     <form id="reservationForm">
       <div class="form-group">
-        <input type="radio" id="individual" name="nameType" value="individual" checked />
+        <input
+          type="radio"
+          id="individual"
+          name="nameType"
+          value="individual"
+          checked
+        />
         <label for="individual">個人</label>
         <input type="radio" id="group" name="nameType" value="group" />
         <label for="group">バンド</label>
@@ -39,9 +45,18 @@
           <option value="20:00~21:30">"20:00~21:30"</option>
         </select>
       </div>
-
       <input type="submit" value="送信" />
     </form>
+
+    <!-- パスワードモーダル -->
+    <div id="passwordModal">
+      <div id="modalContent">
+        <p>パスワードを入力</p>
+        <input type="password" id="password" placeholder="パスワードを入力" />
+        <button id="confirmPassword">確認</button>
+        <button id="cancelPassword">キャンセル</button>
+      </div>
+    </div>
 
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <script src="script.js" defer></script>

@@ -9,7 +9,6 @@ body {
   background-color: #f4f4f4;
 }
 
-
 #name {
   width: 70%;
 }
@@ -39,4 +38,23 @@ input[type="submit"] {
 
 input[type="submit"]:hover {
   background-color: #0056b3;
+}
+
+/* モーダルのスタイル */
+#passwordModal {
+  display: none; /* 初期状態は非表示 */
+  position: fixed;
+  z-index: 1;
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+}
+#modalContent {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
 }
