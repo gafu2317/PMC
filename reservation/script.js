@@ -94,8 +94,7 @@ document
     const currentMinute = today.getMinutes();
 
     // 18:00〜18:59の時間帯の場合、パスワードモーダルを表示
-    //テストようにtrueにしている
-    if (true) {
+    if ( currentHour === 18 && currentMinute >= 0) {
       document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
     } else {
       // 通常通り送信
