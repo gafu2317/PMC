@@ -1,6 +1,7 @@
 
 //ページが読み込まれた時の関数
 document.addEventListener("DOMContentLoaded", function () {
+  alart(fetchPassword());
   setDateLimits();
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
@@ -44,7 +45,8 @@ document
   .getElementById("confirmPassword")
   .addEventListener("click", function () {
     const password = document.getElementById("password").value;
-    if (password === "正しいパスワード") {
+    const correctPassword = fetchPassword(); // パスワードを取得
+    if (password === correctPassword) {
       // 正しいパスワードをチェック
       document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
       submitReservation(); // 予約を送信
@@ -113,6 +115,20 @@ function submitReservation() {
   const msg = `予約\n${nameTypeValue}\n${name}\n${date}\n${time}`;
   sendText(msg);
 }
+
+// パスワードを取得する関数
+function fetchPassword() {
+  const URL ="https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=getPassword";
+  
+  fetch(URL) // ここにApps ScriptのWebアプリURLを入力
+    .then((response) => response.text()) // パスワードがテキストとして返されることを想定
+    .then((password) => {
+      alert(password); // 取得したパスワードを表示
+      return password; // 現在のパスワードを変数に保存
+    })
+    .catch((error) => alert(error));
+}
+
 
 //javascriptから直接gasにデータを送信する場合
 // //データ送信
