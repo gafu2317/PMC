@@ -3,7 +3,8 @@
 document.addEventListener("DOMContentLoaded", function () {
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
-  alart(fetchPassword());
+  const password = fetchPassword(); // パスワードを取得
+  alart(password);
   setDateLimits();
 });
 
