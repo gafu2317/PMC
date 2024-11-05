@@ -19,6 +19,10 @@ form {
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 300px;
+  position: fixed;
+  left: 50%; /* 中央に配置 */
+  top: 50%; /* 中央に配置 */
+  transform: translate(-50%, -50%); /* 中央に配置 */
 }
 
 .form-group {
@@ -44,17 +48,36 @@ input[type="submit"]:hover {
 #passwordModal {
   display: none; /* 初期状態は非表示 */
   position: fixed;
-  z-index: 1;
+  z-index: 1; /* 他の要素の上に表示 */
+  left: 50%; /* 中央に配置 */
+  top: 50%; /* 中央に配置 */
+  transform: translate(-50%, -50%); /* 中央に配置 */
   background-color: white;
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 300px;
 }
+
 #modalContent {
   background-color: #fefefe;
-  margin: 5% auto;
+  margin: 0; /* モーダル内のマージンをゼロに */
   padding: 20px;
   border: 1px solid #888;
-  width: 80%;
+  position: relative; /* 絶対位置の要素を含むため */
+}
+
+/* ローディングメッセージのスタイル */
+#loadingMessage {
+  display: none; /* デフォルトで非表示 */
+  position: absolute; /* モーダルの中で絶対位置 */
+  top: 50%; /* モーダルの中央 */
+  left: 50%; /* モーダルの中央 */
+  transform: translate(-50%, -50%); /* 中央に配置 */
+  color: #333; /* テキストの色 */
+  font-weight: bold; /* 太字 */
+  z-index: 2; /* モーダルの上に表示 */
+  background-color: white; /* 背景色 */
+  padding: 50px; /* 余白 */
+  border :1px solid #888; /* 枠線 */
 }

@@ -41,10 +41,17 @@ function setDateLimits() {
 
 // パスワード確認ボタンのイベントリスナー
 document
-  .getElementById("confirmPassword")
-  .addEventListener("click", function () {
+  .getElementById("confirmPassword").addEventListener("click", async function () {
+    // ローディングメッセージを表示
+    const loadingMessage = document.getElementById("loadingMessage");
+    loadingMessage.style.display = "block"; // メッセージを表示
+
     const password = document.getElementById("password").value;
-    const correctPassword = fetchPassword(); // パスワードを取得
+    const correctPassword = await fetchPassword(); // パスワードを取得
+
+    // ローディングメッセージを非表示に
+    loadingMessage.style.display = "none";
+
     if (password === correctPassword) {
       // 正しいパスワードをチェック
       document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
@@ -96,7 +103,7 @@ document
 
     // 18:00〜18:59の時間帯の場合、パスワードモーダルを表示
     // if ( currentHour === 18 && currentMinute >= 0) {
-    if (true) {
+    if ( currentHour === 18 && currentMinute >= 0) {
       document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
     } else {
       // 通常通り送信
@@ -117,14 +124,15 @@ function submitReservation() {
 }
 
 // パスワードを取得する関数
-function fetchPassword() {
+async function fetchPassword() {
   const URL ="https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=getPassword";
   
-  fetch(URL) // ここにApps ScriptのWebアプリURLを入力
-    .then((response) => response.text()) // パスワードがテキストとして返されることを想定
-    .then((password) => {
-      alert(password); // 取得したパスワードを表示
-      return password; // 現在のパスワードを変数に保存
-    })
-    .catch((error) => alert(error));
+  try {
+    const response = await fetch(URL);
+    const password = await response.text();
+    return password;
+  }catch(error){
+    alert("エラーが発生しました: " + error);
+  }
 }
+
