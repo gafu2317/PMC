@@ -1,10 +1,10 @@
 
 //ページが読み込まれた時の関数
 document.addEventListener("DOMContentLoaded", function () {
-  alart(fetchPassword());
-  setDateLimits();
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
+  alart(fetchPassword());
+  setDateLimits();
 });
 
 // 日付を設定する関数
