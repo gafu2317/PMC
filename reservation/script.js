@@ -3,8 +3,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
-  const password = fetchPassword(); // パスワードを取得
-  alart(password);
   setDateLimits();
 });
 
@@ -97,7 +95,8 @@ document
     const currentMinute = today.getMinutes();
 
     // 18:00〜18:59の時間帯の場合、パスワードモーダルを表示
-    if ( currentHour === 18 && currentMinute >= 0) {
+    // if ( currentHour === 18 && currentMinute >= 0) {
+    if (true) {
       document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
     } else {
       // 通常通り送信
