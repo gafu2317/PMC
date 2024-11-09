@@ -11,7 +11,7 @@ async function test() {
   try {
     const response = await fetch(URL,{
     });
-    console.log(response);
+    console.log(response.json());
   } catch (error) {
     alert("でエラーが発生しました: " + error);
   }
