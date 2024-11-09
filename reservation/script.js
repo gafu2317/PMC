@@ -1,14 +1,14 @@
 //グローバル変数
-let data;
-let lastRow;
-let sheet;
-let calendar;
+// let data;
+// let lastRow;
+// let sheet;
+// let calendar;
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
   // const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   // initializeLiff(liffId);
   // setDateLimits();
-  await init();
+  await test();
 });
 
 // // 予約フォームの送信ボタンのイベントリスナー
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 //   }
 // }
 //テスト
-async function init() {
+async function test() {
   const URL =
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec";
   try {
