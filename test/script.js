@@ -1,6 +1,7 @@
 
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
+  console.log("test");
   await test();
 });
 //テスト
