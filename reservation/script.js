@@ -127,7 +127,26 @@ document.addEventListener("DOMContentLoaded", async function () {
 //   sendText(msg);
 // }
 
-//initデータを取得する関数
+// //initデータを取得する関数
+// async function init() {
+//   const URL =
+//     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec";
+//   try {
+//     const response = await fetch(URL, {
+//       mode: "cors",
+//     });
+//     alert(response);
+//     // const initData = await response.json();
+//     // // グローバル変数に値を代入
+//     // data = initData.data;
+//     // lastRow = initData.lastRow;
+//     // sheet = initData.sheet; 
+//     // calendar = initData.calendar; 
+//   } catch (error) {
+//     alert("初期設定でエラーが発生しました: " + error );
+//   }
+// }
+//テスト
 async function init() {
   const URL =
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec";
