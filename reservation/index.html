@@ -9,29 +9,34 @@
   <body>
     <form id="reservationForm">
       <div class="form-group">
-        <input
-          type="radio"
-          id="individual"
-          name="nameType"
-          value="individual"
-          checked
-        />
-        <label for="individual">個人</label>
-        <input type="radio" id="group" name="nameType" value="group" />
-        <label for="group">バンド</label>
-      </div>
-      <div class="form-group">
         <label for="name">名前：</label>
-        <input type="text" id="name" name="name" required />
+        <select id="name" name="name" multiple required>
+          <option value="">学スタ利用者(全員選択)</option>
+        </select>
       </div>
       <div class="form-group">
-        <label for="date">日付を選択：</label>
+        <label for="date">日付：</label>
         <input type="date" id="date" name="date" required />
       </div>
       <div class="form-group">
-        <label for="time">時間を選択：</label>
-        <select id="time" name="time">
+        <label for="starttime">開始時間：</label>
+        <select id="starttime" name="starttime">
           <option value="9:00~10:00">"9:00~10:00"</option>
+          <option value="10:00~11:00">"10:00~11:00"</option>
+          <option value="11:00~12:00">"11:00~12:00"</option>
+          <option value="12:00~13:00">"12:00~13:00"</option>
+          <option value="13:00~14:00">"13:00~14:00"</option>
+          <option value="14:00~15:00">"14:00~15:00"</option>
+          <option value="15:00~16:00">"15:00~16:00"</option>
+          <option value="16:00~17:00">"16:00~17:00"</option>
+          <option value="17:00~18:00">"17:00~18:00"</option>
+          <option value="18:00~19:00">"18:00~19:00"</option>
+          <option value="19:00~20:00">"19:00~20:00"</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="endtime">終了時間：</label>
+        <select id="endtime" name="endtime">
           <option value="10:00~11:00">"10:00~11:00"</option>
           <option value="11:00~12:00">"11:00~12:00"</option>
           <option value="12:00~13:00">"12:00~13:00"</option>
