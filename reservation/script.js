@@ -8,7 +8,12 @@ let calendar;
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
+  // ローディングメッセージを表示
+  const loadingMessage = document.getElementById("loadingMessage");
+  loadingMessage.style.display = "block"; // メッセージを表示
   await init();
+  // ローディングメッセージを非表示に
+  loadingMessage.style.display = "none";
   setDateLimits();
   getNames();
 });
@@ -84,8 +89,8 @@ function formatDate(date) {
 
   //名前を取得してリストに入れる関数
 async function getNames() {
-  // const names = data.予約データ.名前;
-  const names = ["名前を選択してください", "田中", "鈴木", "佐藤", "山田"];
+  const names = data.LINEIDデータ.名前;
+  console.log("名前", names);
   // セレクトボックスの要素を取得
   const selectElement = document.getElementById("name");
   // 配列の各名前をオプションとして追加
@@ -95,7 +100,6 @@ async function getNames() {
     option.textContent = names; // オプションの表示テキストを設定
     selectElement.appendChild(option); // セレクトボックスにオプションを追加
   });
-  return names;
 }
 
 //liffの初期化
@@ -168,6 +172,5 @@ async function fetchPassword() {
     alert("パスワード取得でエラーが発生しました: " + error);
   }
 }
-
 
 
