@@ -1,14 +1,16 @@
 //グローバル変数
-let data;
+let data;	// {予約データ={名前=[], 時間=[], LINEID=[], 日付=[], カレンダーID=[]}, LINEIDデータ={LINEID=[], 名前=[]}, 削除履歴={名前=[], 削除データ=[]}, パスワード={パスワード=[]}, 計算結果={時間数=[], 名前=[], 料金=[]}}
 let lastRow;
 let sheet;
 let calendar;
+
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
-  setDateLimits();
   await init();
+  setDateLimits();
+  getNames();
 });
 
 // 予約フォームの送信ボタンのイベントリスナー
@@ -61,18 +63,9 @@ document.getElementById("cancelPassword").addEventListener("click", function () 
 function setDateLimits() {
   const today = new Date();
   const nextMonday = new Date(today);
-  const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜 〜 7:日曜(日曜はデフォルトは0)
+  let dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜 〜 7:日曜(日曜はデフォルトは0)
+  if (dayOfWeek === 1) {dayOfWeek = today.getHours() < 18 ? 1 : 8;} //月の0:00~17:59はその日だけと18:00~23:59は１週間後まで
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
-
-  //月曜日を0:00~17:59と18:00~23:59で場合分け
-  if (dayOfWeek === 1) {
-    if (today.getHours() < 18) {
-      dayOfWeek = 8;
-    }
-    if (today.getHours() >= 19) {
-      dayOfWeek = 8;
-    }
-  }
 
   //toISOString()を使うと世界標準寺になってしまうから自分で整形する
   const formattedToday = formatDate(today);
@@ -87,6 +80,22 @@ function setDateLimits() {
 //日付をyyyy-MM-dd形式に整形成形する関数
 function formatDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+  //名前を取得してリストに入れる関数
+async function getNames() {
+  // const names = data.予約データ.名前;
+  const names = ["名前を選択してください", "田中", "鈴木", "佐藤", "山田"];
+  // セレクトボックスの要素を取得
+  const selectElement = document.getElementById("name");
+  // 配列の各名前をオプションとして追加
+  names.forEach((names) => {
+    const option = document.createElement("option");
+    option.value = names; // オプションの値を設定
+    option.textContent = names; // オプションの表示テキストを設定
+    selectElement.appendChild(option); // セレクトボックスにオプションを追加
+  });
+  return names;
 }
 
 //liffの初期化
@@ -159,4 +168,6 @@ async function fetchPassword() {
     alert("パスワード取得でエラーが発生しました: " + error);
   }
 }
+
+
 
