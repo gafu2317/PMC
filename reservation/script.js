@@ -1,9 +1,9 @@
 //グローバル変数
-let data;	// {予約データ={名前=[], 時間=[], LINEID=[], 日付=[], カレンダーID=[]}, LINEIDデータ={LINEID=[], 名前=[]}, 削除履歴={名前=[], 削除データ=[]}, パスワード={パスワード=[]}, 計算結果={時間数=[], 名前=[], 料金=[]}}
-let lastRow;
-let sheet;
-let calendar;
-
+let data;	//スプレッドシートのデータ
+let lastRow; //スプレッドシートの最終行
+let sheet; //スプレッドシート
+let calendar; //カレンダー
+let userId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
@@ -29,8 +29,7 @@ document
     const currentMinute = today.getMinutes();
 
     // 18:00〜18:59の時間帯の場合、パスワードモーダルを表示
-    // if (currentHour === 18 && currentMinute >= 0) {
-    if (true) {
+    if (currentHour === 18 && currentMinute >= 0) {
       document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
     } else {
       // 通常通り送信
@@ -88,6 +87,8 @@ function initializeLiff(liffId) {
     })
     .then(() => {
       initializeApp();
+      userId = profile.userId;
+      window.alert(userId);
     })
     .catch((err) => {
       console.log("LIFF Initialization failed ", err);
@@ -117,45 +118,6 @@ function formatDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-//LINEにメッセージを送信する関数
-function sendText(text) {
-  liff
-    .sendMessages([{ type: "text", text: text }])
-    .then(function () {
-      liff.closeWindow();
-    })
-    .catch(function (error) {
-      window.alert("Failed to send message " + error);
-    });
-}
-
-  //名前を取得してリストに入れる関数
-async function getNames() {
-  const names = data.LINEIDデータ.名前;
-  console.log("名前", names);
-  // セレクトボックスの要素を取得
-  const selectElement = document.getElementById("name");
-  // 配列の各名前をオプションとして追加
-  names.forEach((names) => {
-    const option = document.createElement("option");
-    option.value = names; // オプションの値を設定
-    option.textContent = names; // オプションの表示テキストを設定
-    selectElement.appendChild(option); // セレクトボックスにオプションを追加
-  });
-}
-
-// 予約を送信する関数
-function submitReservation() {
-  const nameType = document.querySelector('input[name="nameType"]:checked');
-  const nameTypeValue = nameType ? nameType.value : "";
-  const name = document.getElementById("name").value;
-  const date = document.getElementById("date").value;
-  const time = document.getElementById("time").value;
-
-  const msg = `予約\n${nameTypeValue}\n${name}\n${date}\n${time}`;
-  sendText(msg);
-}
-
 //initデータを取得する関数
 async function init() {
   const URL =
@@ -172,8 +134,111 @@ async function init() {
     sheet = initData.sheet;
     calendar = initData.calendar;
   } catch (error) {
-    alert("初期設定でエラーが発生しました: " + error);
+    // window.alert("初期設定でエラーが発生しました: " + error);
   }
 }
 
+  //名前を取得してリストに入れる関数
+async function getNames() {
+  const names = data.LINEIDデータ.名前;
+  // セレクトボックスの要素を取得
+  const selectElement = document.getElementById("name");
+  // 配列の各名前をオプションとして追加
+  names.forEach((names) => {
+    const option = document.createElement("option");
+    option.value = names; // オプションの値を設定
+    option.textContent = names; // オプションの表示テキストを設定
+    selectElement.appendChild(option); // セレクトボックスにオプションを追加
+  });
+}
 
+// 予約を送信する関数
+function submitReservation() {
+  const nameSelect = document.getElementById("name"); // 名前を取得（選択されたオプションを取得）
+  const selectedNames = Array.from(nameSelect.selectedOptions).map(
+    (option) => option.value
+  );
+  const date = document.getElementById("date").value; // 日付を取得
+  const startTime = document.getElementById("starttime").value; // 開始時間を取得
+  const endTime = document.getElementById("endtime").value; // 終了時間を取得
+
+  // データをオブジェクトにまとめる
+  const reservationData = {
+    names: selectedNames,
+    date: date,
+    startTime: startTime,
+    endTime: endTime,
+  };
+  //　データをLine送信用に整形
+  const msg = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
+
+  sendToLine(msg);//LINEに送信
+  sendToGas(reservationData);//gasに送信
+}
+
+//LINEにメッセージを送信する関数
+function sendToLine(text) {
+  liff
+    .sendMessages([{ type: "text", text: text }])
+    .then(function () {
+      liff.closeWindow();
+    })
+    .catch(function (error) {
+      window.alert("Failed to send message " + error);
+    });
+}
+
+//gasにデータを送信する関数
+async function sendToGas(data) {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=doPost";
+  try {
+    const response = await fetch(URL, {
+      method: "POST",
+      mode: "cors",
+      body: JSON.stringify(data),
+    });
+    console.log("gas送信成功", response);
+  } catch (error) {
+    window.alert("gas送信でエラーが発生しました: " + error);
+  }
+}
+
+//予約の重複がなく、予約可能な日であるなららtrueを返す関数
+function checkReservation(date, startTime, endTime, userId) {
+
+  // 予約開始日時を設定
+  const startDateTime = new Date(date);
+  const [startTimeHour, startTimeMinute] = startTime.trim().split(':');
+  startDateTime.setHours(startTimeHour, startTimeMinute);
+
+    // 予約終了日時を設定
+  const endDateTime = new Date(date);
+  const [endTimeHour, endTimeMinutes] = endTime.trim().split(':');  
+  endDateTime.setHours(endTimeHour, endTimeMinutes); 
+
+
+  // Google カレンダーでの予約不可のイベントをチェック
+  const events = calendar.getEvents(startDateTime, endDateTime);
+  
+  for (const event of events) {
+    if (event.getTitle() === "予約不可") {
+      sendLineMessage(userId,"その日は予約不可です");
+      return false; // 予約不可のイベントがある場合はfalseを返す
+    }
+  }
+
+  for (let i = 2; i < data.length; i++) {//三行目からがデータなのでi=２から
+    const row = data[i]; // 現在の行を取得
+
+    const valueInE = Utilities.formatDate(new Date(row[4]), Session.getScriptTimeZone(), 'yyyy-MM-dd');// E列の値を取得してフォーマット 
+    const valueInF = row[5]// F列の値を取得
+    
+    // E列とF列の両方が引数の値と一致するか確認
+    if (valueInE === date && valueInF === time) {
+      sendLineMessage(userId,"その時間はすでに予約で埋まってます")
+      return false;//重複してたらfalse
+    } 
+  }
+  return true;//重複してなかったらtrue
+}
