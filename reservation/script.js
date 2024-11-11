@@ -29,7 +29,8 @@ document
     const currentMinute = today.getMinutes();
 
     // 18:00〜18:59の時間帯の場合、パスワードモーダルを表示
-    if (currentHour === 18 && currentMinute >= 0) {
+    // if (currentHour === 18 && currentMinute >= 0) {
+    if (true) {
       document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
     } else {
       // 通常通り送信
@@ -39,21 +40,21 @@ document
 
 // パスワード確認ボタンのイベントリスナー
 document
-  .getElementById("confirmPassword").addEventListener("click", async function () {
+  .getElementById("sendPassword").addEventListener("click", function () {
     // ローディングメッセージを表示
     const loadingMessage = document.getElementById("loadingMessage");
     loadingMessage.style.display = "block"; // メッセージを表示
 
     const password = document.getElementById("password").value;
-    const correctPassword = await fetchPassword(); // パスワードを取得
+    const correctPassword = data.パスワード.パスワード; // パスワードを取得
 
     // ローディングメッセージを非表示に
     loadingMessage.style.display = "none";
 
-    if (password === correctPassword) {
+    if (password == correctPassword) {
       // 正しいパスワードをチェック
       document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
-      submitReservation(); // 予約を送信
+      // submitReservation(); // 予約を送信
     } else {
       alert("パスワードが間違っています");
     }
@@ -63,6 +64,35 @@ document
 document.getElementById("cancelPassword").addEventListener("click", function () {
     document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
 });
+
+// パスワード表示ボタンのイベントリスナー 
+document
+  .getElementById("confirmPassword").addEventListener("click", function () {
+    const passwordInput = document.getElementById("password");
+    const currentType = passwordInput.type; //今のパスワードのタイプを取得
+    // typeを切り替える
+    if (currentType === "password") {
+      passwordInput.type = "text"; // テキストとして表示
+      document.getElementById("confirmPassword").innerText = "パスワードを隠す"; // ボタンテキストを変更
+    } else {
+      passwordInput.type = "password"; // パスワードとして隠す
+      document.getElementById("confirmPassword").innerText = "パスワードを表示"; // ボタンテキストを変更
+    }
+  });
+
+//liffの初期化
+function initializeLiff(liffId) {
+  liff
+    .init({
+      liffId: liffId,
+    })
+    .then(() => {
+      initializeApp();
+    })
+    .catch((err) => {
+      console.log("LIFF Initialization failed ", err);
+    });
+}
 
 // 日付を設定する関数
 function setDateLimits() {
@@ -87,6 +117,18 @@ function formatDate(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+//LINEにメッセージを送信する関数
+function sendText(text) {
+  liff
+    .sendMessages([{ type: "text", text: text }])
+    .then(function () {
+      liff.closeWindow();
+    })
+    .catch(function (error) {
+      window.alert("Failed to send message " + error);
+    });
+}
+
   //名前を取得してリストに入れる関数
 async function getNames() {
   const names = data.LINEIDデータ.名前;
@@ -100,32 +142,6 @@ async function getNames() {
     option.textContent = names; // オプションの表示テキストを設定
     selectElement.appendChild(option); // セレクトボックスにオプションを追加
   });
-}
-
-//liffの初期化
-function initializeLiff(liffId) {
-  liff
-    .init({
-      liffId: liffId,
-    })
-    .then(() => {
-      initializeApp();
-    })
-    .catch((err) => {
-      console.log("LIFF Initialization failed ", err);
-    });
-}
-
-//LINEにメッセージを送信する関数
-function sendText(text) {
-  liff
-    .sendMessages([{ type: "text", text: text }])
-    .then(function () {
-      liff.closeWindow();
-    })
-    .catch(function (error) {
-      window.alert("Failed to send message " + error);
-    });
 }
 
 // 予約を送信する関数
@@ -157,19 +173,6 @@ async function init() {
     calendar = initData.calendar;
   } catch (error) {
     alert("初期設定でエラーが発生しました: " + error);
-  }
-}
-
-// パスワードを取得する関数
-async function fetchPassword() {
-  const URL ="https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=getPassword";
-  
-  try {
-    const response = await fetch(URL);
-    const password = await response.text();
-    return password;
-  }catch(error){
-    alert("パスワード取得でエラーが発生しました: " + error);
   }
 }
 
