@@ -1,8 +1,6 @@
 //グローバル変数
-let data;	//スプレッドシートのデータ
+let data; //スプレッドシートのデータ
 let lastRow; //スプレッドシートの最終行
-let sheet; //スプレッドシート
-let calendar; //カレンダー
 let userId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
@@ -38,35 +36,37 @@ document
   });
 
 // パスワード確認ボタンのイベントリスナー
-document
-  .getElementById("sendPassword").addEventListener("click", function () {
-    // ローディングメッセージを表示
-    const loadingMessage = document.getElementById("loadingMessage");
-    loadingMessage.style.display = "block"; // メッセージを表示
+document.getElementById("sendPassword").addEventListener("click", function () {
+  // ローディングメッセージを表示
+  const loadingMessage = document.getElementById("loadingMessage");
+  loadingMessage.style.display = "block"; // メッセージを表示
 
-    const password = document.getElementById("password").value;
-    const correctPassword = data.パスワード.パスワード; // パスワードを取得
+  const password = document.getElementById("password").value;
+  const correctPassword = data.パスワード.パスワード; // パスワードを取得
 
-    // ローディングメッセージを非表示に
-    loadingMessage.style.display = "none";
+  // ローディングメッセージを非表示に
+  loadingMessage.style.display = "none";
 
-    if (password == correctPassword) {
-      // 正しいパスワードをチェック
-      document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
-      // submitReservation(); // 予約を送信
-    } else {
-      alert("パスワードが間違っています");
-    }
-  });
-
-  // キャンセルボタンのイベントリスナー
-document.getElementById("cancelPassword").addEventListener("click", function () {
+  if (password == correctPassword) {
+    // 正しいパスワードをチェック
     document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
+    submitReservation(); // 予約を送信
+  } else {
+    alert("パスワードが間違っています");
+  }
 });
 
-// パスワード表示ボタンのイベントリスナー 
+// キャンセルボタンのイベントリスナー
 document
-  .getElementById("confirmPassword").addEventListener("click", function () {
+  .getElementById("cancelPassword")
+  .addEventListener("click", function () {
+    document.getElementById("passwordModal").style.display = "none"; // モーダルを隠す
+  });
+
+// パスワード表示ボタンのイベントリスナー
+document
+  .getElementById("confirmPassword")
+  .addEventListener("click", function () {
     const passwordInput = document.getElementById("password");
     const currentType = passwordInput.type; //今のパスワードのタイプを取得
     // typeを切り替える
@@ -100,7 +100,9 @@ function setDateLimits() {
   const today = new Date();
   const nextMonday = new Date(today);
   let dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜 〜 7:日曜(日曜はデフォルトは0)
-  if (dayOfWeek === 1) {dayOfWeek = today.getHours() < 18 ? 1 : 8;} //月の0:00~17:59はその日だけと18:00~23:59は１週間後まで
+  if (dayOfWeek === 1) {
+    dayOfWeek = today.getHours() < 18 ? 1 : 8;
+  } //月の0:00~17:59はその日だけと18:00~23:59は１週間後まで
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
 
   //toISOString()を使うと世界標準寺になってしまうから自分で整形する
@@ -115,7 +117,10 @@ function setDateLimits() {
 
 //日付をyyyy-MM-dd形式に整形成形する関数
 function formatDate(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 //initデータを取得する関数
@@ -131,14 +136,12 @@ async function init() {
     // グローバル変数に値を代入
     data = initData.data;
     lastRow = initData.lastRow;
-    sheet = initData.sheet;
-    calendar = initData.calendar;
   } catch (error) {
     // window.alert("初期設定でエラーが発生しました: " + error);
   }
 }
 
-  //名前を取得してリストに入れる関数
+//名前を取得してリストに入れる関数
 async function getNames() {
   const names = data.LINEIDデータ.名前;
   // セレクトボックスの要素を取得
@@ -172,8 +175,11 @@ function submitReservation() {
   //　データをLine送信用に整形
   const msg = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
-  sendToLine(msg);//LINEに送信
-  sendToGas(reservationData);//gasに送信
+  if (!isReservationOverlapping(date, startTime, endTime)||!isEventExist(date, startTime, endTime, "予約不可")) {
+    sendToLine(msg); //LINEに送信
+    sendToGas(reservationData); //gasに送信
+  }
+
 }
 
 //LINEにメッセージを送信する関数
@@ -191,7 +197,7 @@ function sendToLine(text) {
 //gasにデータを送信する関数
 async function sendToGas(data) {
   const URL =
-    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=doPost";
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=addReservationToSheet";
   try {
     const response = await fetch(URL, {
       method: "POST",
@@ -204,41 +210,51 @@ async function sendToGas(data) {
   }
 }
 
-//予約の重複がなく、予約可能な日であるなららtrueを返す関数
-function checkReservation(date, startTime, endTime, userId) {
+//予約の重複を確認する関数
+function isReservationOverlapping(date, startTime, endTime) {
+  // 予約データの例
+  const reservationDates = data.予約データ.日付;
+  const reservationStartTimes = data.予約データ.開始時間;
+  const reservationEndTimes = data.予約データ.終了時間;
 
-  // 予約開始日時を設定
-  const startDateTime = new Date(date);
-  const [startTimeHour, startTimeMinute] = startTime.trim().split(':');
-  startDateTime.setHours(startTimeHour, startTimeMinute);
-
-    // 予約終了日時を設定
-  const endDateTime = new Date(date);
-  const [endTimeHour, endTimeMinutes] = endTime.trim().split(':');  
-  endDateTime.setHours(endTimeHour, endTimeMinutes); 
-
-
-  // Google カレンダーでの予約不可のイベントをチェック
-  const events = calendar.getEvents(startDateTime, endDateTime);
-  
-  for (const event of events) {
-    if (event.getTitle() === "予約不可") {
-      sendLineMessage(userId,"その日は予約不可です");
-      return false; // 予約不可のイベントがある場合はfalseを返す
+  for (let i = 0; i < reservationDates.length; i++) {
+    // 予約の日付が一致する場合
+    if (reservationDates[i] === date) {
+      // 時間の重複をチェック
+      if (
+        (startTime >= reservationStartTimes[i] &&
+          startTime < reservationEndTimes[i]) || // 新しい開始時間が既存の予約の範囲内
+        (endTime > reservationStartTimes[i] &&
+          endTime <= reservationEndTimes[i]) || // 新しい終了時間が既存の予約の範囲内
+        (startTime <= reservationStartTimes[i] &&
+          endTime >= reservationEndTimes[i]) // 新しい予約が既存の予約を完全に包含
+      ) {
+        const names = data.予約データ.名前[i];
+        window.alert(`${names}と予約が重複しています`);
+        return true; // 重複している場合
+      }
     }
   }
+  return false; // 重複していない場合
+}
 
-  for (let i = 2; i < data.length; i++) {//三行目からがデータなのでi=２から
-    const row = data[i]; // 現在の行を取得
 
-    const valueInE = Utilities.formatDate(new Date(row[4]), Session.getScriptTimeZone(), 'yyyy-MM-dd');// E列の値を取得してフォーマット 
-    const valueInF = row[5]// F列の値を取得
-    
-    // E列とF列の両方が引数の値と一致するか確認
-    if (valueInE === date && valueInF === time) {
-      sendLineMessage(userId,"その時間はすでに予約で埋まってます")
-      return false;//重複してたらfalse
-    } 
+// カレンダーの予約を確認する関数
+async function isEventExist(date, startTime, endTime, eventName) {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist";
+  const options = `&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}`;
+  try {
+    const response = await fetch(`${URL}${options}`, {
+      mode: "cors",
+    });
+    const isEvent = await response.json(); //イベントがあるならtrue
+    console.log(isEvent);
+    if (isEvent) {
+      window.alert(eventName + "の日です");
+    }
+    return isEvent;
+  } catch (error) {
+    window.alert("予約確認でエラーが発生しました: " + error);
   }
-  return true;//重複してなかったらtrue
 }
