@@ -99,11 +99,17 @@ function initializeLiff(liffId) {
 function setDateLimits() {
   const today = new Date();
   const nextMonday = new Date(today);
+
   let dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜 〜 7:日曜(日曜はデフォルトは0)
   if (dayOfWeek === 1) {
-    dayOfWeek = today.getHours() < 18 ? 1 : 8;
-  } //月の0:00~17:59はその日だけと18:00~23:59は１週間後まで
+    dayOfWeek = today.getHours() < 18 ? 1 : 8; //月の0:00~17:59はその日だけど18:00~23:59は１週間後まで
+  } 
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
+  
+  //来週の月曜日が部会なしの場合、２週間後まで予約可能
+  if (isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会なし"||"部会無し")) {
+    nextMonday.setDate(today.getDate() + (15 - dayOfWeek)); 
+  } 
 
   //toISOString()を使うと世界標準寺になってしまうから自分で整形する
   const formattedToday = formatDate(today);
