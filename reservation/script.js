@@ -96,7 +96,7 @@ function initializeLiff(liffId) {
 }
 
 // 日付を設定する関数
-function setDateLimits() {
+async function setDateLimits() {
   const today = new Date();
   const nextMonday = new Date(today);
 
@@ -106,9 +106,13 @@ function setDateLimits() {
   } 
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
   
-  //来週の月曜日が部会なしの場合、２週間後まで予約可能
-  if (isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会なし"||"部会無し")) {
+  // 来週の月曜日が部会なしの場合、２週間後まで予約可能
+  const isBukaiNashi =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会なし");
+  const isBukaiNashi2 =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会無し");
+  
+  if (isBukaiNashi || isBukaiNashi2) {
     nextMonday.setDate(today.getDate() + (15 - dayOfWeek)); 
+    console.log("部会なし");
   } 
 
   //toISOString()を使うと世界標準寺になってしまうから自分で整形する
@@ -173,6 +177,7 @@ function submitReservation() {
 
   // データをオブジェクトにまとめる
   const reservationData = {
+    userId: userId,
     names: selectedNames,
     date: date,
     startTime: startTime,
@@ -181,7 +186,8 @@ function submitReservation() {
   //　データをLine送信用に整形
   const msg = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
-  if (!isReservationOverlapping(date, startTime, endTime)||!isEventExist(date, startTime, endTime, "予約不可")) {
+  if (!isReservationOverlapping(date, startTime, endTime)&&!isEventExist(date, startTime, endTime, "予約不可")) {
+    console.log("予約可能");
     sendToLine(msg); //LINEに送信
     sendToGas(reservationData); //gasに送信
   }
@@ -206,9 +212,8 @@ async function sendToGas(data) {
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=addReservationToSheet";
   try {
     const response = await fetch(URL, {
-      method: "POST",
       mode: "cors",
-      body: JSON.stringify(data),
+      // body: JSON.stringify(data),
     });
     console.log("gas送信成功", response);
   } catch (error) {
@@ -247,20 +252,16 @@ function isReservationOverlapping(date, startTime, endTime) {
 
 // カレンダーの予約を確認する関数
 async function isEventExist(date, startTime, endTime, eventName) {
-  const URL =
-    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist";
-  const options = `&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}`;
+  const URL = `https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}`;
   try {
-    const response = await fetch(`${URL}${options}`, {
+    const response = await fetch(URL, {
       mode: "cors",
     });
     const isEvent = await response.json(); //イベントがあるならtrue
-    console.log(isEvent);
-    if (isEvent) {
-      window.alert(eventName + "の日です");
-    }
     return isEvent;
   } catch (error) {
     window.alert("予約確認でエラーが発生しました: " + error);
   }
 }
+
+// カレンダーに予約を追加する関数
