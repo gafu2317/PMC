@@ -10,10 +10,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
+  await setDateLimits();
+  await getNames();
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
-  setDateLimits();
-  getNames();
 });
 
 // 予約フォームの送信ボタンのイベントリスナー
@@ -174,22 +174,18 @@ function submitReservation() {
   const date = document.getElementById("date").value; // 日付を取得
   const startTime = document.getElementById("starttime").value; // 開始時間を取得
   const endTime = document.getElementById("endtime").value; // 終了時間を取得
+  const [startTimeHour, startTimeMinutes] = startTime.trim().split(':');
+  const [endTimeHour, endTimeMinutes] = endTime.trim().split(':');  
 
   // データをオブジェクトにまとめる
-  const reservationData = {
-    userId: userId,
-    names: selectedNames,
-    date: date,
-    startTime: startTime,
-    endTime: endTime,
-  };
+  const reservationData = [selectedNames,date,startTime,endTime,`${endTimeHour - startTimeHour}`];
   //　データをLine送信用に整形
   const msg = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
   if (!isReservationOverlapping(date, startTime, endTime)&&!isEventExist(date, startTime, endTime, "予約不可")) {
     console.log("予約可能");
     sendToLine(msg); //LINEに送信
-    sendToGas(reservationData); //gasに送信
+    sendToGas(reservationData, 2, data.予約データ.名前.length); //gasに送信
   }
 
 }
@@ -206,20 +202,36 @@ function sendToLine(text) {
     });
 }
 
-//gasにデータを送信する関数
-async function sendToGas(data) {
+// GASにデータを送信する関数
+async function sendToGas(arrayData, column, lastRow) {
   const URL =
-    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=addReservationToSheet";
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec";
+  const sendData = {
+    data: arrayData,
+    column: column,
+    lastRow: lastRow,
+  };
   try {
     const response = await fetch(URL, {
+      method: "POST", // POSTメソッドを使用
       mode: "cors",
-      // body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json' // JSON形式でデータを送信
+      },
+      body: JSON.stringify(sendData), // ボディにデータを含める
     });
-    console.log("gas送信成功", response);
+    
+    if (!response.ok) {
+      throw new Error("HTTPエラー " + response.status);
+    }
+
+    const result = await response.json(); // レスポンスをJSONとして取得
+    console.log("gas送信成功", result); // レスポンスを表示
   } catch (error) {
     window.alert("gas送信でエラーが発生しました: " + error);
   }
 }
+
 
 //予約の重複を確認する関数
 function isReservationOverlapping(date, startTime, endTime) {
@@ -252,12 +264,19 @@ function isReservationOverlapping(date, startTime, endTime) {
 
 // カレンダーの予約を確認する関数
 async function isEventExist(date, startTime, endTime, eventName) {
-  const URL = `https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}`;
+  const eventData = {
+    date: date,
+    startTime: startTime,
+    endTime: endTime,
+    eventName: eventName,
+  }
+  const URL = `https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}&eventData=${eventData}`;
   try {
     const response = await fetch(URL, {
       mode: "cors",
     });
     const isEvent = await response.json(); //イベントがあるならtrue
+    console.log(eventName +":"+isEvent);
     return isEvent;
   } catch (error) {
     window.alert("予約確認でエラーが発生しました: " + error);
