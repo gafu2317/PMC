@@ -26,8 +26,8 @@ document
     const currentHour = today.getHours();
     const currentMinute = today.getMinutes();
 
-    // 18:00〜18:59の時間帯の場合、パスワードモーダルを表示
-    if (currentHour === 18 && currentMinute >= 0) {
+    // 月曜の18:00〜18:59の時間帯の場合、パスワードモーダルを表示
+    if (today.getDay() === 1 && currentHour === 18 && currentMinute >= 0) {
       document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
     } else {
       // 通常通り送信
@@ -166,7 +166,7 @@ async function getNames() {
 }
 
 // 予約を送信する関数
-function submitReservation() {
+async function submitReservation() {
   const nameSelect = document.getElementById("name"); // 名前を取得（選択されたオプションを取得）
   const selectedNames = Array.from(nameSelect.selectedOptions).map(
     (option) => option.value
@@ -182,7 +182,7 @@ function submitReservation() {
   //　データをLine送信用に整形
   const msg = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
-  if (!isReservationOverlapping(date, startTime, endTime)&&!isEventExist(date, startTime, endTime, "予約不可")) {
+  if (!isReservationOverlapping(date, startTime, endTime)&&!await isEventExist(date, startTime, endTime, "予約不可")) {
     console.log("予約可能");
     sendToLine(msg); //LINEに送信
     sendToGas(reservationData, 2, data.予約データ.名前.length); //gasに送信
@@ -195,6 +195,7 @@ function sendToLine(text) {
   liff
     .sendMessages([{ type: "text", text: text }])
     .then(function () {
+      console.log("Lineに送信成功");
       liff.closeWindow();
     })
     .catch(function (error) {
@@ -213,20 +214,16 @@ async function sendToGas(arrayData, column, lastRow) {
   };
   try {
     const response = await fetch(URL, {
-      method: "POST", // POSTメソッドを使用
-      mode: "cors",
-      headers: {
-        'Content-Type': 'application/json' // JSON形式でデータを送信
-      },
-      body: JSON.stringify(sendData), // ボディにデータを含める
+      method: "POST",
     });
+    console.log("gasに送信成功", response);
     
     if (!response.ok) {
       throw new Error("HTTPエラー " + response.status);
     }
 
     const result = await response.json(); // レスポンスをJSONとして取得
-    console.log("gas送信成功", result); // レスポンスを表示
+    console.log("gasに送信成功", result); // レスポンスを表示
   } catch (error) {
     window.alert("gas送信でエラーが発生しました: " + error);
   }
