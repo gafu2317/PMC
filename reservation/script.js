@@ -105,16 +105,11 @@ async function setDateLimits() {
     dayOfWeek = today.getHours() < 18 ? 1 : 8; //月の0:00~17:59はその日だけど18:00~23:59は１週間後まで
   } 
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 次の月曜日を計算
-  console.log("今日"+formatDate(today));
-  console.log("次の月曜日"+formatDate(nextMonday));
   
   // 次の月曜日が部会なしの場合、次の次の月曜日まで予約可能
   const isBukaiNashi =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会無し");
-  const isBukaiNashi2 =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会なし");
-  
-  if (isBukaiNashi || isBukaiNashi2) {
+  if (isBukaiNashi) {
     nextMonday.setDate(nextMonday.getDate() + 7); 
-    console.log("部会無しの場合の次の月曜日"+formatDate(nextMonday));
   } 
 
   //toISOString()を使うと世界標準寺になってしまうから自分で整形する
@@ -172,7 +167,8 @@ async function submitReservation() {
   const nameSelect = document.getElementById("name"); // 名前を取得（選択されたオプションを取得）
   const selectedNames = Array.from(nameSelect.selectedOptions).map(
     (option) => option.value
-  );
+  ); 
+
   const date = document.getElementById("date").value; // 日付を取得
   const startTime = document.getElementById("starttime").value; // 開始時間を取得
   const endTime = document.getElementById("endtime").value; // 終了時間を取得
@@ -180,14 +176,24 @@ async function submitReservation() {
   const [endTimeHour, endTimeMinutes] = endTime.trim().split(':');  
 
   // データをオブジェクトにまとめる
-  const reservationData = [selectedNames,date,startTime,endTime,`${endTimeHour - startTimeHour}`];
+  const reservationData = [
+    selectedNames.join(','),
+    date,
+    startTime,
+    endTime,
+    `${endTimeHour - startTimeHour}`,
+  ];
   //　データをLine送信用に整形
   const message = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
-  if (!isReservationOverlapping(date, startTime, endTime)&&!await isEventExist(date, startTime, endTime, "予約不可")) {
-    console.log("予約可能");
-    // sendToLine(message); //LINEに送信
-    sendToGas(reservationData, 1, (data.予約データ.名前.length+3)); //gasに送信
+  if (!isReservationOverlapping(date, startTime, endTime)) {
+    if(!await isEventExist(date, startTime, endTime, "予約不可")){
+      console.log("予約可能");
+      // sendToLine(message); //LINEに送信
+      sendToGas(reservationData, 1, (data.予約データ.名前.length+3)); //gasに送信
+    } else {
+      window.alert("予約不可の日です");
+    }
   }
 }
 
@@ -209,9 +215,8 @@ async function sendToGas(arrayData, column, lastRow) {
     if (!response.ok) {
       throw new Error("HTTPエラー " + response.status);
     }
-    console.log("gasに送信成功", response); // レスポンスを表示
     const result = await response.json(); // レスポンスをJSONとして取得
-    console.log("ガスに送信成功", result); // レスポンスを表示
+    console.log("gasに送信成功", result); // レスポンスを表示
   } catch (error) {
     window.alert("gas送信でエラーが発生しました: " + error);
   }
@@ -257,6 +262,7 @@ function isReservationOverlapping(date, startTime, endTime) {
       }
     }
   }
+  console.log("予約は重複していません");
   return false; // 重複していない場合
 }
 
