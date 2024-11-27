@@ -199,7 +199,7 @@ async function submitReservation() {
   }
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
-  
+  liff.closeWindow(); // LIFFウィンドウを閉じる
 }
 
 // GASにデータを送信する関数
