@@ -188,7 +188,6 @@ async function submitReservation() {
 
   if (!isReservationOverlapping(date, startTime, endTime)) {
     if(!await isEventExist(date, startTime, endTime, "予約不可")){
-      console.log("予約可能");
       // sendToLine(message); //LINEに送信
       sendToGas(reservationData, 1, (data.予約データ.名前.length+3)); //gasに送信
     } else {
@@ -206,7 +205,6 @@ async function sendToGas(arrayData, column, lastRow) {
     column: column,
     lastRow: lastRow,
   };
-  console.log("送信データ："+JSON.stringify(sendData));
   try {
     const response = await fetch(URL, {
       method: "POST",
@@ -237,24 +235,38 @@ function sendToLine(text) {
 
 
 
-//予約の重複を確認する関数
+// 予約の重複を確認する関数
 function isReservationOverlapping(date, startTime, endTime) {
   // 予約データの例
   const reservationDates = data.予約データ.日付;
   const reservationStartTimes = data.予約データ.開始時間;
   const reservationEndTimes = data.予約データ.終了時間;
+  console.log(reservationDates);
+  console.log(reservationStartTimes);
+  console.log(reservationEndTimes);
+  console.log(date);
+  console.log(startTime);
+  console.log(endTime);
 
   for (let i = 0; i < reservationDates.length; i++) {
     // 予約の日付が一致する場合
-    if (reservationDates[i] === date) {
+    if (reservationDates[i].split("T")[0] === date) {
+      console.log("日付が一致しました");
       // 時間の重複をチェック
+      const existingStartTime = reservationStartTimes[i];
+      const existingEndTime = reservationEndTimes[i];
+
+      // 時間を数値に変換
+      const start = convertToMinutes(startTime);
+      const end = convertToMinutes(endTime);
+      const existingStart = convertToMinutes(existingStartTime);
+      const existingEnd = convertToMinutes(existingEndTime);
+
+      // 時間の重複判定
       if (
-        (startTime >= reservationStartTimes[i] &&
-          startTime < reservationEndTimes[i]) || // 新しい開始時間が既存の予約の範囲内
-        (endTime > reservationStartTimes[i] &&
-          endTime <= reservationEndTimes[i]) || // 新しい終了時間が既存の予約の範囲内
-        (startTime <= reservationStartTimes[i] &&
-          endTime >= reservationEndTimes[i]) // 新しい予約が既存の予約を完全に包含
+        (start >= existingStart && start < existingEnd) || // 新しい開始時間が既存の予約の範囲内
+        (end > existingStart && end <= existingEnd) || // 新しい終了時間が既存の予約の範囲内
+        (start <= existingStart && end >= existingEnd) // 新しい予約が既存の予約を完全に包含
       ) {
         const names = data.予約データ.名前[i];
         window.alert(`${names}と予約が重複しています`);
@@ -265,6 +277,20 @@ function isReservationOverlapping(date, startTime, endTime) {
   console.log("予約は重複していません");
   return false; // 重複していない場合
 }
+
+// 時間を分に変換するヘルパー関数
+function convertToMinutes(time) {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes; // 総分数を返す
+}
+
+
+// 時間を分に変換するヘルパー関数
+function convertToMinutes(time) {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes; // 総分数を返す
+}
+
 
 
 // カレンダーの予約を確認する関数
@@ -283,7 +309,7 @@ async function isEventExist(date, startTime, endTime, eventName) {
         endTime +
         "まで" +
         eventName +
-        "という予定は" +
+        "という予定" +
         (isEvent ? "あり" : "なし")
     );
     return isEvent;
