@@ -167,17 +167,17 @@ async function submitReservation() {
   const nameSelect = document.getElementById("name"); // 名前を取得（選択されたオプションを取得）
   const selectedNames = Array.from(nameSelect.selectedOptions).map(
     (option) => option.value
-  ); 
+  );
 
   const date = document.getElementById("date").value; // 日付を取得
   const startTime = document.getElementById("starttime").value; // 開始時間を取得
   const endTime = document.getElementById("endtime").value; // 終了時間を取得
-  const [startTimeHour, startTimeMinutes] = startTime.trim().split(':');
-  const [endTimeHour, endTimeMinutes] = endTime.trim().split(':');  
+  const [startTimeHour, startTimeMinutes] = startTime.trim().split(":");
+  const [endTimeHour, endTimeMinutes] = endTime.trim().split(":");
 
   // データをオブジェクトにまとめる
   const reservationData = [
-    selectedNames.join(','),
+    selectedNames.join(","),
     date,
     startTime,
     endTime,
@@ -186,14 +186,20 @@ async function submitReservation() {
   //　データをLine送信用に整形
   const message = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
+  // ローディングメッセージを表示
+  const loadingMessage = document.getElementById("loadingMessage");
+  loadingMessage.style.display = "block"; // メッセージを表示
   if (!isReservationOverlapping(date, startTime, endTime)) {
-    if(!await isEventExist(date, startTime, endTime, "予約不可")){
+    if (!(await isEventExist(date, startTime, endTime, "予約不可"))) {
       // sendToLine(message); //LINEに送信
-      sendToGas(reservationData, 1, (data.予約データ.名前.length+3)); //gasに送信
+      sendToGas(reservationData, 1, data.予約データ.名前.length + 3); //gasに送信
     } else {
       window.alert("予約不可の日です");
     }
   }
+  // ローディングメッセージを非表示に
+  loadingMessage.style.display = "none";
+  
 }
 
 // GASにデータを送信する関数
