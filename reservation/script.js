@@ -180,14 +180,39 @@ async function submitReservation() {
   // データをオブジェクトにまとめる
   const reservationData = [selectedNames,date,startTime,endTime,`${endTimeHour - startTimeHour}`];
   //　データをLine送信用に整形
-  const msg = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
+  const message = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
   if (!isReservationOverlapping(date, startTime, endTime)&&!await isEventExist(date, startTime, endTime, "予約不可")) {
     console.log("予約可能");
-    sendToLine(msg); //LINEに送信
-    sendToGas(reservationData, 2, data.予約データ.名前.length); //gasに送信
+    // sendToLine(message); //LINEに送信
+    sendToGas(reservationData, 1, (data.予約データ.名前.length+3)); //gasに送信
   }
+}
 
+// GASにデータを送信する関数
+async function sendToGas(arrayData, column, lastRow) {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=addReservationToSheet";
+  const sendData = {
+    arrayData: arrayData,
+    column: column,
+    lastRow: lastRow,
+  };
+  console.log("送信データ："+JSON.stringify(sendData));
+  try {
+    const response = await fetch(URL, {
+      method: "POST",
+      body: JSON.stringify(sendData),
+    });
+    if (!response.ok) {
+      throw new Error("HTTPエラー " + response.status);
+    }
+    console.log("gasに送信成功", response); // レスポンスを表示
+    const result = await response.json(); // レスポンスをJSONとして取得
+    console.log("ガスに送信成功", result); // レスポンスを表示
+  } catch (error) {
+    window.alert("gas送信でエラーが発生しました: " + error);
+  }
 }
 
 //LINEにメッセージを送信する関数
@@ -203,31 +228,6 @@ function sendToLine(text) {
     });
 }
 
-// GASにデータを送信する関数
-async function sendToGas(arrayData, column, lastRow) {
-  const URL =
-    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec";
-  const sendData = {
-    data: arrayData,
-    column: column,
-    lastRow: lastRow,
-  };
-  try {
-    const response = await fetch(URL, {
-      method: "POST",
-    });
-    console.log("gasに送信成功", response);
-    
-    if (!response.ok) {
-      throw new Error("HTTPエラー " + response.status);
-    }
-
-    const result = await response.json(); // レスポンスをJSONとして取得
-    console.log("gasに送信成功", result); // レスポンスを表示
-  } catch (error) {
-    window.alert("gas送信でエラーが発生しました: " + error);
-  }
-}
 
 
 //予約の重複を確認する関数
@@ -261,19 +261,23 @@ function isReservationOverlapping(date, startTime, endTime) {
 
 // カレンダーの予約を確認する関数
 async function isEventExist(date, startTime, endTime, eventName) {
-  const eventData = {
-    date: date,
-    startTime: startTime,
-    endTime: endTime,
-    eventName: eventName,
-  }
-  const URL = `https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}&eventData=${eventData}`;
+  const URL = `https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}`;
   try {
     const response = await fetch(URL, {
       mode: "cors",
     });
     const isEvent = await response.json(); //イベントがあるならtrue
-    console.log(eventName +":"+isEvent);
+    console.log(
+      date +
+        "の" +
+        startTime +
+        "から" +
+        endTime +
+        "まで" +
+        eventName +
+        "という予定は" +
+        (isEvent ? "あり" : "なし")
+    );
     return isEvent;
   } catch (error) {
     window.alert("予約確認でエラーが発生しました: " + error);
