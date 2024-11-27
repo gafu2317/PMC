@@ -104,15 +104,17 @@ async function setDateLimits() {
   if (dayOfWeek === 1) {
     dayOfWeek = today.getHours() < 18 ? 1 : 8; //月の0:00~17:59はその日だけど18:00~23:59は１週間後まで
   } 
-  nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
+  nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 次の月曜日を計算
+  console.log("今日"+formatDate(today));
+  console.log("次の月曜日"+formatDate(nextMonday));
   
-  // 来週の月曜日が部会なしの場合、２週間後まで予約可能
-  const isBukaiNashi =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会なし");
-  const isBukaiNashi2 =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会無し");
+  // 次の月曜日が部会なしの場合、次の次の月曜日まで予約可能
+  const isBukaiNashi =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会無し");
+  const isBukaiNashi2 =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会なし");
   
   if (isBukaiNashi || isBukaiNashi2) {
-    nextMonday.setDate(today.getDate() + (15 - dayOfWeek)); 
-    console.log("部会なし");
+    nextMonday.setDate(nextMonday.getDate() + 7); 
+    console.log("部会無しの場合の次の月曜日"+formatDate(nextMonday));
   } 
 
   //toISOString()を使うと世界標準寺になってしまうから自分で整形する
