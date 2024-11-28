@@ -65,7 +65,7 @@ async function getReservations() {
   const date = data.予約データ.日付;
   const startTime = data.予約データ.開始時間;
   const endTime = data.予約データ.終了時間;
-  
+
   // セレクトボックスの要素を取得
   const selectElement = document.getElementById("reservations");
   // データの長さを取得し、すべてのデータをループ
@@ -74,7 +74,7 @@ async function getReservations() {
 
     // オプションのテキストを設定（例: 名前 + 日付 + 時間）
     option.textContent = `${name[i]} - ${date[i]} (${startTime[i]} - ${endTime[i]})`;
-    option.value = name[i]; // オプションの値を設定（必要に応じて変更）
+    option.value = i; // オプションの値を設定（必要に応じて変更）
 
     selectElement.appendChild(option); // セレクトボックスにオプションを追加
   }
@@ -82,17 +82,21 @@ async function getReservations() {
 
 // 予約を送信する関数
 async function submitReservation() {
+  const index = document.getElementById("reservations").value;
 
-  const data = "テスト"
+  const name = data.予約データ.名前;
+  const date = data.予約データ.日付;
+  const startTime = data.予約データ.開始時間;
+  const endTime = data.予約データ.終了時間;
 
   //　データをLine送信用に整形
-  const message = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
+  const message = `予約削除\n${name[index]}\n${date[index]}\n${startTime[index]}\n${endTime[index]}`;
 
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   // sendToLine(message); //LINEに送信
-  sendToGas(data); //gasに送信
+  sendToGas(index,1,5); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
   liff.closeWindow(); // LIFFウィンドウを閉じる
@@ -111,9 +115,28 @@ function sendToLine(text) {
     });
 }
 
-//gasにデータを送信する関数
-function sendToGas(data) {
-  console.log("sendToGasは未実装です"+data);
+//gasに削除データを送る関数
+async function sendToGas(index, startColumn, columns) {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=deleteReservationFromSheet";
+  const sendData = {
+    index: index,
+    startColumn: startColumn,
+    columns: columns,
+  };
+  try {
+    const response = await fetch(URL, {
+      method: "POST",
+      body: JSON.stringify(sendData),
+    });
+    if (!response.ok) {
+      throw new Error("HTTPエラー " + response.status);
+    }
+    const result = await response.json(); // レスポンスをJSONとして取得
+    console.log("gasに送信成功", result); // レスポンスを表示
+  } catch (error) {
+    window.alert("gas送信でエラーが発生しました: " + error);
+  }
 }
 
 // カレンダーの予約を削除する関数
