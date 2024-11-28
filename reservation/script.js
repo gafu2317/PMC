@@ -180,8 +180,7 @@ async function submitReservation() {
     selectedNames.join(","),
     date,
     startTime,
-    endTime,
-    `${endTimeHour - startTimeHour}`,
+    endTime
   ];
   //　データをLine送信用に整形
   const message = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;

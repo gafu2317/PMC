@@ -1,41 +1,29 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
+//グローバル変数
+let data; //スプレッドシートのデータ
+let lastRow; //スプレッドシートの最終行
+let userId; //LineId
+//ページが読み込まれたときのイベントリスナー
+document.addEventListener("DOMContentLoaded", async function () {
+  const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
   initializeLiff(liffId);
-  setDateLimits();
+  // ローディングメッセージを表示
+  const loadingMessage = document.getElementById("loadingMessage");
+  loadingMessage.style.display = "block"; // メッセージを表示
+  await init();
+  await getReservations();
+  // ローディングメッセージを非表示に
+  loadingMessage.style.display = "none";
 });
 
-// 日付を設定する関数
-function setDateLimits() {
-  const today = new Date();
-  const nextMonday = new Date(today);
-  const dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜日 〜 7:日曜日(デフォルトは０だけど計算の都合上7にしている)
-  nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 来週の月曜日を計算
+// 予約フォームの送信ボタンのイベントリスナー
+document
+  .getElementById("deleteReservationForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault(); // フォームのデフォルトの送信を防ぐ
 
-  //月曜の場合分け
-  if (dayOfWeek === 1) {
-    // 0:00~17:59の場合はdayOfWeekを1にする
-    if (today.getHours() < 18) {
-      dayOfWeek = 8;
-    }
-    //18:00~23:59の場合はdayOfWeekを8にする
-    if (today.getHours() >= 19) {
-      dayOfWeek = 8;
-    }
-  }
-
-  // 日付をyyyy-MM-dd形式に整形(toISOString()を使うと世界標準寺になってしまうから自分で整形)
-  const formattedToday = `${today.getFullYear()}-${String(
-    today.getMonth() + 1
-  ).padStart(2, "0")}-${String(today.getDate()+1).padStart(2, "0")}`;
-  const formattedNextMonday = `${nextMonday.getFullYear()}-${String(
-    nextMonday.getMonth() + 1
-  ).padStart(2, "0")}-${String(nextMonday.getDate()).padStart(2, "0")}`;
-
-  // 日付入力フィールドのminとmaxを設定
-  const dateInput = document.getElementById("date");
-  dateInput.setAttribute("min", formattedToday); // 今日の日付をminに設定
-  dateInput.setAttribute("max", formattedNextMonday); // 来週の月曜日をmaxに設定
-}
+    // 通常通り送信
+    submitReservation();
+  });
 
 //liffの初期化
 function initializeLiff(liffId) {
@@ -45,16 +33,77 @@ function initializeLiff(liffId) {
     })
     .then(() => {
       initializeApp();
+      userId = profile.userId;
+      window.alert(userId);
     })
     .catch((err) => {
       console.log("LIFF Initialization failed ", err);
     });
 }
 
-function sendText(text) {
+//initデータを取得する関数
+async function init() {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=init";
+  try {
+    const response = await fetch(URL, {
+      mode: "cors",
+    });
+    const initData = await response.json();
+    console.log("init成功", initData);
+    // グローバル変数に値を代入
+    data = initData.data;
+    lastRow = initData.lastRow;
+  } catch (error) {
+    // window.alert("初期設定でエラーが発生しました: " + error);
+  }
+}
+
+//予約データを取得してリストに入れる関数
+async function getReservations() {
+  const name = data.予約データ.名前;
+  const date = data.予約データ.日付;
+  const startTime = data.予約データ.開始時間;
+  const endTime = data.予約データ.終了時間;
+  
+  // セレクトボックスの要素を取得
+  const selectElement = document.getElementById("reservations");
+  // データの長さを取得し、すべてのデータをループ
+  for (let i = 0; i < name.length; i++) {
+    const option = document.createElement("option");
+
+    // オプションのテキストを設定（例: 名前 + 日付 + 時間）
+    option.textContent = `${name[i]} - ${date[i]} (${startTime[i]} - ${endTime[i]})`;
+    option.value = name[i]; // オプションの値を設定（必要に応じて変更）
+
+    selectElement.appendChild(option); // セレクトボックスにオプションを追加
+  }
+}
+
+// 予約を送信する関数
+async function submitReservation() {
+
+  const data = "テスト"
+
+  //　データをLine送信用に整形
+  const message = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
+
+  // ローディングメッセージを表示
+  const loadingMessage = document.getElementById("loadingMessage");
+  loadingMessage.style.display = "block"; // メッセージを表示
+  // sendToLine(message); //LINEに送信
+  sendToGas(data); //gasに送信
+  // ローディングメッセージを非表示に
+  loadingMessage.style.display = "none";
+  liff.closeWindow(); // LIFFウィンドウを閉じる
+}
+
+//LINEにメッセージを送信する関数
+function sendToLine(text) {
   liff
     .sendMessages([{ type: "text", text: text }])
     .then(function () {
+      console.log("Lineに送信成功");
       liff.closeWindow();
     })
     .catch(function (error) {
@@ -62,19 +111,9 @@ function sendText(text) {
     });
 }
 
-document
-  .getElementById("reservationForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault(); // フォームのデフォルトの送信を防ぐ
+//gasにデータを送信する関数
+function sendToGas(data) {
+  console.log("sendToGasは未実装です"+data);
+}
 
-    const nameType = document.querySelector('input[name="nameType"]:checked');
-
-    // ラジオボタンのvalueを取得
-    const nameTypeValue = nameType ? nameType.value : "";
-    const name = document.getElementById("name").value;
-    const date = document.getElementById("date").value;
-    const time = document.getElementById("time").value;
-
-    const msg = `予約削除\n${nameTypeValue}\n${name}\n${date}\n${time}`;
-    sendText(msg);
-  });
+// カレンダーの予約を削除する関数
