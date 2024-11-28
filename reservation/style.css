@@ -78,6 +78,6 @@ input[type="submit"]:hover {
   font-weight: bold; /* 太字 */
   z-index: 2; /* モーダルの上に表示 */
   background-color: white; /* 背景色 */
-  padding: 150px; /* 余白 */
+  padding: 120px; /* 余白 */
   border :1px solid #888; /* 枠線 */
 }
