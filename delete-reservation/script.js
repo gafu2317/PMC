@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
-  userId = "Uaad36f829cb1c10a72df296f112a16dd";
+  userId = "test1";
   await getReservations();
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
@@ -41,11 +41,11 @@ function initializeLiff(liffId) {
     });
 }
 
-
 // ユーザーのプロフィールを取得する関数
 function getUserProfile() {
-  liff.getProfile()
-    .then(profile => {
+  liff
+    .getProfile()
+    .then((profile) => {
       userId = profile.userId; // userIdを取得
       window.alert("User ID: " + userId);
     })
@@ -53,7 +53,6 @@ function getUserProfile() {
       window.alert("Error getting profile: " + err);
     });
 }
-
 
 //initデータを取得する関数
 async function init() {
@@ -81,27 +80,43 @@ async function getReservations() {
   const endTimes = data.予約データ.終了時間;
   const userIds = data.LINEIDデータ.LINEID;
   const usernames = data.LINEIDデータ.名前;
+  let loginUserName;
+  const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
 
-  // セレクトボックスの要素を取得
-  const selectElement = document.getElementById("reservations");
-  // データの長さを取得し、すべてのデータをループ
+  // ログインユーザーの名前を取得
   for (let i = 0; i < userIds.length; i++) {
-    // ログインユーザーの名前を取得
     if (userIds[i] === userId) {
-      const loginUserName = usernames[i];
-      for (let j = 0; j < names.length; j++) {
-        // ログインユーザーの予約のみ表示
-        const namesArray = names[j].split(",");
-        if (namesArray.includes(loginUserName)) {
-          const option = document.createElement("option");
-          // オプションのテキストを設定（例: 名前 + 日付 + 時間）
-          option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
-          option.value = j; // オプションの値を設定（必要に応じて変更）
-          selectElement.appendChild(option); // セレクトボックスにオプションを追加
-        }
+      loginUserName = usernames[i];
+    }
+  }
+  // 現在の日時を取得
+  const now = new Date();
+
+  for (let j = 0; j < names.length; j++) {
+    // ログインユーザーの予約のみ表示
+    const namesArray = names[j].split(",");
+    if (namesArray.includes(loginUserName)) {
+      // 予約日時をDateオブジェクトに変換
+      const formattedStartTime = formatTime(startTimes[j]);
+      const reservationDateTime = new Date(`${dates[j]}T${formattedStartTime}:00`); // ISOフォーマットに変換
+      // 現在の日時が予約日時よりも前であれば表示しない
+      if (reservationDateTime > now) {
+        const option = document.createElement("option");
+        // オプションのテキストを設定（例: 名前 + 日付 + 時間）
+        option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
+        option.value = j; // オプションの値を設定（必要に応じて変更）
+        selectElement.appendChild(option); // セレクトボックスにオプションを追加
       }
     }
   }
+}
+
+// 時間をHH:mm形式にフォーマットする関数
+function formatTime(time) {
+  const parts = time.split(":");
+  const hour = parts[0].padStart(2, "0"); // 2桁に満たない場合は先頭に0を追加
+  const minute = parts[1] ? parts[1] : "00"; // 分がない場合は'00'を設定
+  return `${hour}:${minute}`;
 }
 
 // 予約を送信する関数
