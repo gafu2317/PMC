@@ -190,7 +190,7 @@ async function submitReservation() {
   loadingMessage.style.display = "block"; // メッセージを表示
   if (!isReservationOverlapping(date, startTime, endTime)) {
     if (!(await isEventExist(date, startTime, endTime, "予約不可"))) {
-      // sendToLine(message); //LINEに送信
+      sendToLine(message); //LINEに送信
       sendToGas(reservationData, 1, data.予約データ.名前.length + 3); //gasに送信
     } else {
       window.alert("予約不可の日です");

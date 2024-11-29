@@ -34,7 +34,7 @@ function initializeLiff(liffId) {
     .then(() => {
       initializeApp();
       userId = profile.userId;
-      window.alert(userId);
+      console.log(userId);
     })
     .catch((err) => {
       console.log("LIFF Initialization failed ", err);
@@ -61,22 +61,32 @@ async function init() {
 
 //予約データを取得してリストに入れる関数
 async function getReservations() {
-  const name = data.予約データ.名前;
-  const date = data.予約データ.日付;
-  const startTime = data.予約データ.開始時間;
-  const endTime = data.予約データ.終了時間;
+  const names = data.予約データ.名前;
+  const dates = data.予約データ.日付;
+  const startTimes = data.予約データ.開始時間;
+  const endTimes = data.予約データ.終了時間;
+  const userIds = data.LINEIDデータ.LINEID;
+  const usernames = data.LINEIDデータ.名前;
 
   // セレクトボックスの要素を取得
   const selectElement = document.getElementById("reservations");
   // データの長さを取得し、すべてのデータをループ
-  for (let i = 0; i < name.length; i++) {
-    const option = document.createElement("option");
-
-    // オプションのテキストを設定（例: 名前 + 日付 + 時間）
-    option.textContent = `${name[i]} - ${date[i]} (${startTime[i]} - ${endTime[i]})`;
-    option.value = i; // オプションの値を設定（必要に応じて変更）
-
-    selectElement.appendChild(option); // セレクトボックスにオプションを追加
+  for (let i = 0; i < userIds.length; i++) {
+    // ログインユーザーの名前を取得
+    if (userIds[i] === userId) {
+      const loginUserName = usernames[i];
+      for (let j = 0; j < names.length; j++) {
+        // ログインユーザーの予約のみ表示
+        const namesArray = names[j].split(",");
+        if (namesArray.includes(loginUserName)) {
+          const option = document.createElement("option");
+          // オプションのテキストを設定（例: 名前 + 日付 + 時間）
+          option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
+          option.value = j; // オプションの値を設定（必要に応じて変更）
+          selectElement.appendChild(option); // セレクトボックスにオプションを追加
+        }
+      }
+    }
   }
 }
 
@@ -95,8 +105,8 @@ async function submitReservation() {
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
-  // sendToLine(message); //LINEに送信
-  sendToGas(index,1,5); //gasに送信
+  sendToLine(message); //LINEに送信
+  sendToGas(index, 1, 5); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
   liff.closeWindow(); // LIFFウィンドウを閉じる
