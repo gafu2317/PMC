@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
+  userId = "test1"
   await getReservations();
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
@@ -22,7 +23,7 @@ document
     event.preventDefault(); // フォームのデフォルトの送信を防ぐ
 
     // 通常通り送信
-    submitReservation();
+    submitDeleteReservation();
   });
 
 //liffの初期化
@@ -118,14 +119,24 @@ function formatTime(time) {
   return `${hour}:${minute}`;
 }
 
-// 予約を送信する関数
-async function submitReservation() {
+// 削除する予約を送信する関数
+async function submitDeleteReservation() {
   const index = document.getElementById("reservations").value;
 
   const name = data.予約データ.名前;
   const date = data.予約データ.日付;
   const startTime = data.予約データ.開始時間;
   const endTime = data.予約データ.終了時間;
+  const eventId = data.予約データ.カレンダーID;
+  const userIds = data.LINEIDデータ.LINEID;
+  const usernames = data.LINEIDデータ.名前;
+  let deletedBy;
+  // ログインユーザーの名前を取得
+  for (let i = 0; i < userIds.length; i++) {
+    if (userIds[i] === userId) {
+      deletedBy = usernames[i];
+    }
+  }
 
   //　データをLine送信用に整形
   const message = `予約削除\n${name[index]}\n${date[index]}\n${startTime[index]}\n${endTime[index]}`;
@@ -133,8 +144,8 @@ async function submitReservation() {
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
-  sendToLine(message); //LINEに送信
-  sendToGas(index, 1, 5); //gasに送信
+  // sendToLine(message); //LINEに送信
+  sendToGas(index, eventId[index],deletedBy); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
   liff.closeWindow(); // LIFFウィンドウを閉じる
@@ -154,13 +165,13 @@ function sendToLine(text) {
 }
 
 //gasに削除データを送る関数
-async function sendToGas(index, startColumn, columns) {
+async function sendToGas(index, eventId, deletedBy) {
   const URL =
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=deleteReservationFromSheet";
   const sendData = {
     index: index,
-    startColumn: startColumn,
-    columns: columns,
+    eventId: eventId,
+    deletedBy: [deletedBy]
   };
   try {
     const response = await fetch(URL, {

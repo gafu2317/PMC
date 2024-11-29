@@ -175,6 +175,12 @@ async function submitReservation() {
   const [startTimeHour, startTimeMinutes] = startTime.trim().split(":");
   const [endTimeHour, endTimeMinutes] = endTime.trim().split(":");
 
+  // 開始時間が終了時間よりも後の場合、エラーメッセージを表示
+  if (endTimeHour - startTimeHour <= 0) {
+    window.alert("終了時間が開始時間よりも前です");
+    return;
+  }
+
   // データをオブジェクトにまとめる
   const reservationData = [
     selectedNames.join(","),
