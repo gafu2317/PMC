@@ -33,13 +33,26 @@ function initializeLiff(liffId) {
     })
     .then(() => {
       initializeApp();
-      userId = profile.userId;
-      window.alert(userId);
+      getUserProfile();
     })
     .catch((err) => {
       console.log("LIFF Initialization failed ", err);
     });
 }
+
+
+// ユーザーのプロフィールを取得する関数
+function getUserProfile() {
+  liff.getProfile()
+    .then(profile => {
+      userId = profile.userId; // userIdを取得
+      window.alert("User ID: " + userId);
+    })
+    .catch((err) => {
+      window.alert("Error getting profile: " + err);
+    });
+}
+
 
 //initデータを取得する関数
 async function init() {
