@@ -81,6 +81,12 @@ async function getReservations() {
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
 
+  const option = document.createElement("option");
+  // オプションのテキストを設定（例: 名前 + 日付 + 時間）
+  option.textContent = userId;
+  option.value = userId; // オプションの値を設定（必要に応じて変更）
+  selectElement.appendChild(option); // セレクトボックスにオプションを追加
+
   // ログインユーザーの名前を取得
   for (let i = 0; i < userIds.length; i++) {
     if (userIds[i] === userId) {
@@ -96,7 +102,9 @@ async function getReservations() {
     if (namesArray.includes(loginUserName)) {
       // 予約日時をDateオブジェクトに変換
       const formattedStartTime = formatTime(startTimes[j]);
-      const reservationDateTime = new Date(`${dates[j]}T${formattedStartTime}:00`); // ISOフォーマットに変換
+      const reservationDateTime = new Date(
+        `${dates[j]}T${formattedStartTime}:00`
+      ); // ISOフォーマットに変換
       // 現在の日時が予約日時よりも前であれば表示しない
       if (reservationDateTime > now) {
         const option = document.createElement("option");
