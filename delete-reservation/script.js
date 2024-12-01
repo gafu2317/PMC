@@ -4,7 +4,7 @@ let lastRow; //スプレッドシートの最終行
 let userId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
-  const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
+  const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
   initializeLiff(liffId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
