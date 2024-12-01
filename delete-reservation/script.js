@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
-  userId = "test1"
   await getReservations();
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
@@ -47,7 +46,6 @@ function getUserProfile() {
     .getProfile()
     .then((profile) => {
       userId = profile.userId; // userIdを取得
-      window.alert("User ID: " + userId);
     })
     .catch((err) => {
       window.alert("Error getting profile: " + err);

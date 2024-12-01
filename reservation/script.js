@@ -88,7 +88,6 @@ function initializeLiff(liffId) {
     .then(() => {
       initializeApp();
       userId = profile.userId;
-      window.alert(userId);
     })
     .catch((err) => {
       console.log("LIFF Initialization failed ", err);
