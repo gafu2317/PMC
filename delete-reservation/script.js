@@ -37,8 +37,8 @@ function initializeLiff(liffId) {
       liffId: liffId,
     })
     .then(() => {
-      initializeApp();
       getUserProfile();
+      initializeApp();
     })
     .catch((err) => {
       console.log("LIFF Initialization failed ", err);
@@ -47,8 +47,8 @@ function initializeLiff(liffId) {
 
 // ユーザーのプロフィールを取得する関数
 function getUserProfile() {
-  liff
-    .getProfile()
+  liff.getProfile();
+  liff.ready
     .then((profile) => {
       window.alert(profile);
       LineId = profile.userId; // LineIdを取得
