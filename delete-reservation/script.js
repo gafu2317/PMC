@@ -78,8 +78,8 @@ async function getReservations() {
   const dates = data.予約データ.日付;
   const startTimes = data.予約データ.開始時間;
   const endTimes = data.予約データ.終了時間;
-  const userIds = data.LINEIDデータ.LINEID;
-  const usernames = data.LINEIDデータ.名前;
+  const userIds = data.個人データ.LINEID;
+  const usernames = data.個人データ.名前;
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
 
@@ -128,8 +128,8 @@ async function submitDeleteReservation() {
   const startTime = data.予約データ.開始時間;
   const endTime = data.予約データ.終了時間;
   const eventId = data.予約データ.カレンダーID;
-  const userIds = data.LINEIDデータ.LINEID;
-  const usernames = data.LINEIDデータ.名前;
+  const userIds = data.個人データ.LINEID;
+  const usernames = data.個人データ.名前;
   let deletedBy;
   // ログインユーザーの名前を取得
   for (let i = 0; i < userIds.length; i++) {

@@ -10,7 +10,13 @@ body {
 }
 
 #name {
+  width: 100%;
+}
+
+#searchInput {
+  margin-bottom: 10px;
   width: 70%;
+  padding: 8px;
 }
 
 form {
@@ -79,5 +85,7 @@ input[type="submit"]:hover {
   z-index: 2; /* モーダルの上に表示 */
   background-color: white; /* 背景色 */
   padding: 100px; /* 余白 */
-  border :1px solid #888; /* 枠線 */
+  border: 1px solid #888; /* 枠線 */
 }
+
+

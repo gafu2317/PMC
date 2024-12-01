@@ -103,14 +103,19 @@ async function setDateLimits() {
   let dayOfWeek = today.getDay() === 0 ? 7 : today.getDay(); //曜日を数字として取得 1:月曜 〜 7:日曜(日曜はデフォルトは0)
   if (dayOfWeek === 1) {
     dayOfWeek = today.getHours() < 18 ? 1 : 8; //月の0:00~17:59はその日だけど18:00~23:59は１週間後まで
-  } 
+  }
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 次の月曜日を計算
-  
+
   // 次の月曜日が部会なしの場合、次の次の月曜日まで予約可能
-  const isBukaiNashi =await isEventExist(formatDate(nextMonday), "00:00", "23:59", "部会無し");
+  const isBukaiNashi = await isEventExist(
+    formatDate(nextMonday),
+    "00:00",
+    "23:59",
+    "部会無し"
+  );
   if (isBukaiNashi) {
-    nextMonday.setDate(nextMonday.getDate() + 7); 
-  } 
+    nextMonday.setDate(nextMonday.getDate() + 7);
+  }
 
   //toISOString()を使うと世界標準寺になってしまうから自分で整形する
   const formattedToday = formatDate(today);
@@ -150,7 +155,7 @@ async function init() {
 
 //名前を取得してリストに入れる関数
 async function getNames() {
-  const names = data.LINEIDデータ.名前;
+  const names = data.個人データ.名前;
   // セレクトボックスの要素を取得
   const selectElement = document.getElementById("name");
   // 配列の各名前をオプションとして追加
@@ -182,12 +187,7 @@ async function submitReservation() {
   }
 
   // データをオブジェクトにまとめる
-  const reservationData = [
-    selectedNames.join(","),
-    date,
-    startTime,
-    endTime
-  ];
+  const reservationData = [selectedNames.join(","), date, startTime, endTime];
   //　データをLine送信用に整形
   const message = `予約\n${selectedNames}\n${date}\n${startTime}\n${endTime}`;
 
@@ -244,44 +244,38 @@ function sendToLine(text) {
     });
 }
 
-
-
 // 予約の重複を確認する関数
 function isReservationOverlapping(date, startTime, endTime) {
   // 予約データの例
   const reservationDates = data.予約データ.日付;
   const reservationStartTimes = data.予約データ.開始時間;
   const reservationEndTimes = data.予約データ.終了時間;
-  console.log(reservationDates);
-  console.log(reservationStartTimes);
-  console.log(reservationEndTimes);
-  console.log(date);
-  console.log(startTime);
-  console.log(endTime);
+  const deletedBy = data.予約データ.削除者;
 
   for (let i = 0; i < reservationDates.length; i++) {
-    // 予約の日付が一致する場合
-    if (reservationDates[i].split("T")[0] === date) {
-      console.log("日付が一致しました");
-      // 時間の重複をチェック
-      const existingStartTime = reservationStartTimes[i];
-      const existingEndTime = reservationEndTimes[i];
+    if (!deletedBy[i]) {
+      // 予約の日付が一致する場合
+      if (reservationDates[i].split("T")[0] === date) {
+        // 時間の重複をチェック
+        const existingStartTime = reservationStartTimes[i];
+        const existingEndTime = reservationEndTimes[i];
 
-      // 時間を数値に変換
-      const start = convertToMinutes(startTime);
-      const end = convertToMinutes(endTime);
-      const existingStart = convertToMinutes(existingStartTime);
-      const existingEnd = convertToMinutes(existingEndTime);
+        // 時間を数値に変換
+        const start = convertToMinutes(startTime);
+        const end = convertToMinutes(endTime);
+        const existingStart = convertToMinutes(existingStartTime);
+        const existingEnd = convertToMinutes(existingEndTime);
 
-      // 時間の重複判定
-      if (
-        (start >= existingStart && start < existingEnd) || // 新しい開始時間が既存の予約の範囲内
-        (end > existingStart && end <= existingEnd) || // 新しい終了時間が既存の予約の範囲内
-        (start <= existingStart && end >= existingEnd) // 新しい予約が既存の予約を完全に包含
-      ) {
-        const names = data.予約データ.名前[i];
-        window.alert(`${names}と予約が重複しています`);
-        return true; // 重複している場合
+        // 時間の重複判定
+        if (
+          (start >= existingStart && start < existingEnd) || // 新しい開始時間が既存の予約の範囲内
+          (end > existingStart && end <= existingEnd) || // 新しい終了時間が既存の予約の範囲内
+          (start <= existingStart && end >= existingEnd) // 新しい予約が既存の予約を完全に包含
+        ) {
+          const names = data.予約データ.名前[i];
+          window.alert(`${names}と予約が重複しています`);
+          return true; // 重複している場合
+        }
       }
     }
   }
@@ -291,18 +285,15 @@ function isReservationOverlapping(date, startTime, endTime) {
 
 // 時間を分に変換するヘルパー関数
 function convertToMinutes(time) {
-  const [hours, minutes] = time.split(':').map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes; // 総分数を返す
 }
-
 
 // 時間を分に変換するヘルパー関数
 function convertToMinutes(time) {
-  const [hours, minutes] = time.split(':').map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes; // 総分数を返す
 }
-
-
 
 // カレンダーの予約を確認する関数
 async function isEventExist(date, startTime, endTime, eventName) {
@@ -328,5 +319,23 @@ async function isEventExist(date, startTime, endTime, eventName) {
     window.alert("予約確認でエラーが発生しました: " + error);
   }
 }
+
+// 検索機能
+const searchInput = document.getElementById("searchInput");
+const select = document.getElementById("name");
+
+searchInput.addEventListener("input", function () {
+  const filter = searchInput.value.toLowerCase(); // 検索文字列を小文字に変換
+  const options = select.options; // オプションを取得
+
+  // オプションをループして表示/非表示を設定
+  for (let i = 0; i < options.length; i++) {
+    const option = options[i];
+    const text = option.text.toLowerCase(); // オプションのテキストを小文字に変換
+
+    // 検索文字列に一致する場合は表示、そうでない場合は非表示
+    option.style.display = text.includes(filter) ? "" : "none";
+  }
+});
 
 // カレンダーに予約を追加する関数
