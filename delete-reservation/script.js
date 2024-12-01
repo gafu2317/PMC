@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   await init();
   await getReservations();
   if (LineId === undefined) {
-    window.alert("ログインしてください");
+    window.alert("LineIDが取得できませんでした");
   } else {
     window.alert(LineId);
   }
