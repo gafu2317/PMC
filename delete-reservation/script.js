@@ -30,7 +30,7 @@ function initializeLiff(liffId) {
   liff
     .init({ liffId })
     .then(() => {
-      alert("LIFF初期化成功");
+      window.alert("LIFF初期化成功");
       getProfile(); // プロフィールを取得
     })
     .catch((error) => {
