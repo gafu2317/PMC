@@ -11,11 +11,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
   await getReservations();
-  if (LineId === undefined) {
-    window.alert("LineIDが取得できませんでした");
-  } else {
-    window.alert(LineId);
-  }
+  // if (LineId === undefined) {
+  //   window.alert("LineIDが取得できませんでした");
+  // } else {
+  //   window.alert(LineId);
+  // }
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
 });
