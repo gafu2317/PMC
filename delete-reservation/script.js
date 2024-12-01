@@ -26,7 +26,7 @@ document
   });
 
 //liffの初期化
-function initializeLiff() {
+function initializeLiff(liffId) {
   liff
     .init({ liffId })
     .then(() => {
@@ -34,7 +34,7 @@ function initializeLiff() {
       getProfile(); // プロフィールを取得
     })
     .catch((error) => {
-      console.log("LIFF初期化失敗:", error);
+      window.alert("LIFF初期化失敗:", error);
     });
 }
 
@@ -43,15 +43,11 @@ function getProfile() {
   liff
     .getProfile()
     .then((profile) => {
-      console.log("User ID:", profile.userId); // LINE IDをコンソールに表示
-      console.log("Display Name:", profile.displayName);
-      console.log("Profile Picture:", profile.pictureUrl);
-      if (profile.statusMessage) {
-        console.log("Status Message:", profile.statusMessage);
-      }
+      LineId = profile.userId;
+      window.alert("lineid取得成功", LineId);
     })
     .catch((error) => {
-      console.log("プロフィール取得失敗:", error);
+      window.alert("lineid取得失敗:", error);
     });
 }
 
