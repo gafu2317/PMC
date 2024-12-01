@@ -6,16 +6,16 @@ let LineId; //LineId
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
   initializeLiff(liffId);
+  if (LineId === undefined) {
+    window.alert("LineIDが取得できませんでした");
+  } else {
+    window.alert(LineId);
+  }
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
   await getReservations();
-  // if (LineId === undefined) {
-  //   window.alert("LineIDが取得できませんでした");
-  // } else {
-  //   window.alert(LineId);
-  // }
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
 });
@@ -84,6 +84,7 @@ async function getReservations() {
   const endTimes = data.予約データ.終了時間;
   const LineIds = data.個人データ.LINEID;
   const usernames = data.個人データ.名前;
+  const deletedBy = data.予約データ.削除者;
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
 
@@ -97,21 +98,24 @@ async function getReservations() {
   const now = new Date();
 
   for (let j = 0; j < names.length; j++) {
-    // ログインユーザーの予約のみ表示
-    const namesArray = names[j].split(",");
-    if (namesArray.includes(loginUserName)) {
-      // 予約日時をDateオブジェクトに変換
-      const formattedStartTime = formatTime(startTimes[j]);
-      const reservationDateTime = new Date(
-        `${dates[j]}T${formattedStartTime}:00`
-      ); // ISOフォーマットに変換
-      // 現在の日時が予約日時よりも前であれば表示しない
-      if (reservationDateTime > now) {
-        const option = document.createElement("option");
-        // オプションのテキストを設定（例: 名前 + 日付 + 時間）
-        option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
-        option.value = j; // オプションの値を設定（必要に応じて変更）
-        selectElement.appendChild(option); // セレクトボックスにオプションを追加
+    // 削除者がいない場合のみ表示
+    if (deletedBy[j] === null) {
+      // ログインユーザーの予約のみ表示
+      const namesArray = names[j].split(",");
+      if (namesArray.includes(loginUserName)) {
+        // 予約日時をDateオブジェクトに変換
+        const formattedStartTime = formatTime(startTimes[j]);
+        const reservationDateTime = new Date(
+          `${dates[j]}T${formattedStartTime}:00`
+        ); // ISOフォーマットに変換
+        // 現在の日時が予約日時よりも前であれば表示しない
+        if (reservationDateTime > now) {
+          const option = document.createElement("option");
+          // オプションのテキストを設定（例: 名前 + 日付 + 時間）
+          option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
+          option.value = j; // オプションの値を設定（必要に応じて変更）
+          selectElement.appendChild(option); // セレクトボックスにオプションを追加
+        }
       }
     }
   }
@@ -150,7 +154,7 @@ async function submitDeleteReservation() {
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
-  // sendToLine(message); //LINEに送信
+  sendToLine(message); //LINEに送信
   sendToGas(index, eventId[index], deletedBy); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
@@ -177,7 +181,7 @@ async function sendToGas(index, eventId, deletedBy) {
   const sendData = {
     index: index,
     eventId: eventId,
-    deletedBy: [deletedBy],
+    deletedBy: deletedBy,
   };
   try {
     const response = await fetch(URL, {
