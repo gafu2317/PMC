@@ -328,6 +328,11 @@ searchInput.addEventListener("input", function () {
   const filter = searchInput.value.toLowerCase(); // 検索文字列を小文字に変換
   const options = select.options; // オプションを取得
 
+  // 現在選択されているオプションを取得
+  const selectedValues = Array.from(select.selectedOptions).map(
+    (option) => option.value
+  );
+
   // オプションをループして表示/非表示を設定
   for (let i = 0; i < options.length; i++) {
     const option = options[i];
@@ -335,6 +340,13 @@ searchInput.addEventListener("input", function () {
 
     // 検索文字列に一致する場合は表示、そうでない場合は非表示
     option.style.display = text.includes(filter) ? "" : "none";
+  }
+
+  // 再度選択状態を設定
+  for (let i = 0; i < options.length; i++) {
+    if (selectedValues.includes(options[i].value)) {
+      options[i].selected = true; // 選択状態を維持
+    }
   }
 });
 
