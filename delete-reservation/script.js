@@ -5,7 +5,7 @@ let LineId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
-  initializeLiff(liffId);
+  await initializeLiff(liffId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
@@ -26,7 +26,7 @@ document
   });
 
 //liffの初期化
-function initializeLiff(liffId) {
+async function initializeLiff(liffId) {
   window.alert("LIFF初期化開始");
   liff
     .init({ liffId })
@@ -41,6 +41,7 @@ function initializeLiff(liffId) {
 
 // ユーザーのプロフィールを取得する関数
 function getProfile() {
+  window.alert("getProfile実行中", LineId);
   liff
     .getProfile()
     .then((profile) => {
