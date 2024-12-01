@@ -8,9 +8,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   initializeLiff(liffId);
   if (LineId === undefined) {
     window.alert("LineIDが取得できませんでした");
-  } else {
-    window.alert(LineId);
   }
+  window.alert(LineId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
