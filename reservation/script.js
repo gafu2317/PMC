@@ -1,7 +1,7 @@
 //グローバル変数
 let data; //スプレッドシートのデータ
 let lastRow; //スプレッドシートの最終行
-let userId; //LineId
+let LineId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
@@ -87,7 +87,7 @@ function initializeLiff(liffId) {
     })
     .then(() => {
       initializeApp();
-      userId = profile.userId;
+      LineId = profile.userId;
     })
     .catch((err) => {
       console.log("LIFF Initialization failed ", err);

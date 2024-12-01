@@ -1,7 +1,7 @@
 //グローバル変数
 let data; //スプレッドシートのデータ
 let lastRow; //スプレッドシートの最終行
-let userId; //LineId
+let LineId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
@@ -11,10 +11,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
   await getReservations();
-  if(userId === undefined){
+  if (LineId === undefined) {
     window.alert("ログインしてください");
   } else {
-    window.alert(userId);
+    window.alert(LineId);
   }
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
@@ -50,7 +50,7 @@ function getUserProfile() {
   liff
     .getProfile()
     .then((profile) => {
-      userId = profile.userId; // userIdを取得
+      LineId = profile.userId; // LineIdを取得
     })
     .catch((err) => {
       window.alert("Error getting profile: " + err);
@@ -81,14 +81,14 @@ async function getReservations() {
   const dates = data.予約データ.日付;
   const startTimes = data.予約データ.開始時間;
   const endTimes = data.予約データ.終了時間;
-  const userIds = data.個人データ.LINEID;
+  const LineIds = data.個人データ.LINEID;
   const usernames = data.個人データ.名前;
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
 
   // ログインユーザーの名前を取得
-  for (let i = 0; i < userIds.length; i++) {
-    if (userIds[i] === userId) {
+  for (let i = 0; i < LineIds.length; i++) {
+    if (LineIds[i] === LineId) {
       loginUserName = usernames[i];
     }
   }
@@ -133,12 +133,12 @@ async function submitDeleteReservation() {
   const startTime = data.予約データ.開始時間;
   const endTime = data.予約データ.終了時間;
   const eventId = data.予約データ.カレンダーID;
-  const userIds = data.個人データ.LINEID;
+  const LineIds = data.個人データ.LINEID;
   const usernames = data.個人データ.名前;
   let deletedBy;
   // ログインユーザーの名前を取得
-  for (let i = 0; i < userIds.length; i++) {
-    if (userIds[i] === userId) {
+  for (let i = 0; i < LineIds.length; i++) {
+    if (LineIds[i] === LineId) {
       deletedBy = usernames[i];
     }
   }
@@ -150,7 +150,7 @@ async function submitDeleteReservation() {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   // sendToLine(message); //LINEに送信
-  sendToGas(index, eventId[index],deletedBy); //gasに送信
+  sendToGas(index, eventId[index], deletedBy); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
   liff.closeWindow(); // LIFFウィンドウを閉じる
@@ -176,7 +176,7 @@ async function sendToGas(index, eventId, deletedBy) {
   const sendData = {
     index: index,
     eventId: eventId,
-    deletedBy: [deletedBy]
+    deletedBy: [deletedBy],
   };
   try {
     const response = await fetch(URL, {
