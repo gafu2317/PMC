@@ -50,6 +50,7 @@ function getUserProfile() {
   liff
     .getProfile()
     .then((profile) => {
+      window.alert(profile);
       LineId = profile.userId; // LineIdを取得
     })
     .catch((err) => {
