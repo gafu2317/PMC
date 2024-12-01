@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
-  await initializeLiff(liffId);
+  initializeLiff(liffId);
   await init();
   await getReservations();
   // ローディングメッセージを非表示に
@@ -26,11 +26,11 @@ document
   });
 
 //liffの初期化
-async function initializeLiff(liffId) {
+function initializeLiff(liffId) {
   window.alert("LIFF初期化開始");
   liff
     .init({ liffId })
-    .ready.then(() => {
+    .then(() => {
       window.alert("LIFF初期化成功");
       getProfile(); // プロフィールを取得
     })
@@ -45,6 +45,9 @@ function getProfile() {
   liff
     .getProfile()
     .then((profile) => {
+      document.getElementById(
+        "userId"
+      ).textContent = `ユーザーID: ${profile.userId}`;
       LineId = profile.userId;
       window.alert("lineid取得成功", LineId);
     })
@@ -165,7 +168,7 @@ async function submitDeleteReservation() {
   }
 
   //　データをLine送信用に整形
-  const message = `予約削除\n${name[index]}\n${date[index]}\n${startTime[index]}\n${endTime[index]}`;
+  const message = `予約削除\n${name[index]}\n${date[index]}\n${startTime[index]}\n${endTime[index]}\n${index}`;
 
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
