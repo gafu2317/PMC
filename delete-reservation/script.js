@@ -27,6 +27,7 @@ document
 
 //liffの初期化
 function initializeLiff(liffId) {
+  window.alert("LIFF初期化開始");
   liff
     .init({ liffId })
     .then(() => {
