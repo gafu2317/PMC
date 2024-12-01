@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
   await getReservations();
+  if(userId === undefined){
+    window.alert("ログインしてください");
+  } else {
+    window.alert(userId);
+  }
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
 });
@@ -80,12 +85,6 @@ async function getReservations() {
   const usernames = data.個人データ.名前;
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
-
-  const option = document.createElement("option");
-  // オプションのテキストを設定（例: 名前 + 日付 + 時間）
-  option.textContent = userId;
-  option.value = userId; // オプションの値を設定（必要に応じて変更）
-  selectElement.appendChild(option); // セレクトボックスにオプションを追加
 
   // ログインユーザーの名前を取得
   for (let i = 0; i < userIds.length; i++) {
