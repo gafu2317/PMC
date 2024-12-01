@@ -83,21 +83,10 @@ async function getReservations() {
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
 
-  // ログインユーザーの名前を取得
-  for (let i = 0; i < LineIds.length; i++) {
-    if (LineIds[i] === LineId) {
-      loginUserName = usernames[i];
-    }
-  }
-  // 現在の日時を取得
-  const now = new Date();
-
-  for (let j = 0; j < names.length; j++) {
-    // 削除者がいない場合のみ表示
-    if (deletedBy[j] === null) {
-      // ログインユーザーの予約のみ表示
-      const namesArray = names[j].split(",");
-      if (namesArray.includes(loginUserName)) {
+  if (LineId === undefined) {
+    for (let j = 0; j < names.length; j++) {
+      // 削除者がいない場合のみ表示
+      if (deletedBy[j] === null) {
         // 予約日時をDateオブジェクトに変換
         const formattedStartTime = formatTime(startTimes[j]);
         const reservationDateTime = new Date(
@@ -110,6 +99,38 @@ async function getReservations() {
           option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
           option.value = j; // オプションの値を設定（必要に応じて変更）
           selectElement.appendChild(option); // セレクトボックスにオプションを追加
+        }
+      }
+    }
+  } else {
+    // ログインユーザーの名前を取得
+    for (let i = 0; i < LineIds.length; i++) {
+      if (LineIds[i] === LineId) {
+        loginUserName = usernames[i];
+      }
+    }
+    // 現在の日時を取得
+    const now = new Date();
+
+    for (let j = 0; j < names.length; j++) {
+      // ログインユーザーの予約のみ表示
+      const namesArray = names[j].split(",");
+      if (namesArray.includes(loginUserName)) {
+        // 削除者がいない場合のみ表示
+        if (deletedBy[j] === null) {
+          // 予約日時をDateオブジェクトに変換
+          const formattedStartTime = formatTime(startTimes[j]);
+          const reservationDateTime = new Date(
+            `${dates[j]}T${formattedStartTime}:00`
+          ); // ISOフォーマットに変換
+          // 現在の日時が予約日時よりも前であれば表示しない
+          if (reservationDateTime > now) {
+            const option = document.createElement("option");
+            // オプションのテキストを設定（例: 名前 + 日付 + 時間）
+            option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
+            option.value = j; // オプションの値を設定（必要に応じて変更）
+            selectElement.appendChild(option); // セレクトボックスにオプションを追加
+          }
         }
       }
     }
