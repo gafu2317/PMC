@@ -30,7 +30,7 @@ async function initializeLiff(liffId) {
   window.alert("LIFF初期化開始");
   liff
     .init({ liffId })
-    .then(() => {
+    .ready.then(() => {
       window.alert("LIFF初期化成功");
       getProfile(); // プロフィールを取得
     })
