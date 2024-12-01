@@ -26,29 +26,32 @@ document
   });
 
 //liffの初期化
-function initializeLiff(liffId) {
+function initializeLiff() {
   liff
-    .init({
-      liffId: liffId,
-    })
+    .init({ liffId })
     .then(() => {
-      getUserProfile();
+      alert("LIFF初期化成功");
+      getProfile(); // プロフィールを取得
     })
-    .catch((err) => {
-      console.log("LIFF Initialization failed ", err);
+    .catch((error) => {
+      console.log("LIFF初期化失敗:", error);
     });
 }
 
 // ユーザーのプロフィールを取得する関数
-function getUserProfile() {
-  liff.getProfile();
-  liff.ready
+function getProfile() {
+  liff
+    .getProfile()
     .then((profile) => {
-      window.alert(profile);
-      LineId = profile.userId; // LineIdを取得
+      console.log("User ID:", profile.userId); // LINE IDをコンソールに表示
+      console.log("Display Name:", profile.displayName);
+      console.log("Profile Picture:", profile.pictureUrl);
+      if (profile.statusMessage) {
+        console.log("Status Message:", profile.statusMessage);
+      }
     })
-    .catch((err) => {
-      window.alert("Error getting profile: " + err);
+    .catch((error) => {
+      console.log("プロフィール取得失敗:", error);
     });
 }
 
