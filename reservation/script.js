@@ -254,7 +254,7 @@ function isReservationOverlapping(date, startTime, endTime) {
   const reservationDates = data.予約データ.日付;
   const reservationStartTimes = data.予約データ.開始時間;
   const reservationEndTimes = data.予約データ.終了時間;
-  const deletedBy = data.予約データ.削除者; //liffでLINEIDが取得できない場合、削除者ではなく削除済みとなっている
+  const deletedBy = data.予約データ.削除; //liffでLINEIDが取得できない場合、削除者ではなく削除済みとなっている
 
   for (let i = 0; i < reservationDates.length; i++) {
     if (!deletedBy[i]) {

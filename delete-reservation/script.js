@@ -82,7 +82,7 @@ async function getReservations() {
   const endTimes = data.予約データ.終了時間;
   const LineIds = data.個人データ.LINEID;
   const usernames = data.個人データ.名前;
-  const deletedBy = data.予約データ.削除者;//liffでLINEIDが取得できない場合、削除者ではなく削除済みとなっている
+  const deletedBy = data.予約データ.削除;//liffでLINEIDが取得できない場合、削除者ではなく削除済みとなっている
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
   const now = new Date();
