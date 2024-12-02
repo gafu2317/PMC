@@ -172,7 +172,7 @@ async function submitDeleteReservation() {
     if (LineIds[i] === LineId) {
       deletedBy = usernames[i];
     } else {
-      deletedBy = "ゲスト";
+      deletedBy = "削除済み";
     }
   }
 
