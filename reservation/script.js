@@ -155,14 +155,19 @@ async function init() {
 //名前を取得してリストに入れる関数
 async function getNames() {
   const names = data.個人データ.名前;
+
   // セレクトボックスの要素を取得
   const selectElement = document.getElementById("name");
+
   // 配列の各名前をオプションとして追加
-  names.forEach((names) => {
-    const option = document.createElement("option");
-    option.value = names; // オプションの値を設定
-    option.textContent = names; // オプションの表示テキストを設定
-    selectElement.appendChild(option); // セレクトボックスにオプションを追加
+  names.forEach((name) => {
+    if (name !== null && name !== undefined && name !== "") {
+      // nameがnullまたはundefinedでないことを確認
+      const option = document.createElement("option");
+      option.value = name; // オプションの値を設定
+      option.textContent = name; // オプションの表示テキストを設定
+      selectElement.appendChild(option); // セレクトボックスにオプションを追加
+    }
   });
 }
 
