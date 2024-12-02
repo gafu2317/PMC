@@ -4,11 +4,11 @@ let lastRow; //スプレッドシートの最終行
 let LineId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
+  // const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
+  // initializeLiff(liffId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
-  const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
-  initializeLiff(liffId);
   await init();
   await getReservations();
   // ローディングメッセージを非表示に
@@ -58,11 +58,11 @@ function getProfile() {
 
 //initデータを取得する関数
 async function init() {
+  console.log("init開始");
   const URL =
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=init";
   try {
     const response = await fetch(URL, {
-      mode: "cors",
     });
     const initData = await response.json();
     console.log("init成功", initData);
@@ -70,7 +70,7 @@ async function init() {
     data = initData.data;
     lastRow = initData.lastRow;
   } catch (error) {
-    // window.alert("初期設定でエラーが発生しました: " + error);
+    window.alert("初期設定でエラーが発生しました: " + error);
   }
 }
 
@@ -85,11 +85,16 @@ async function getReservations() {
   const deletedBy = data.予約データ.削除者;
   let loginUserName;
   const selectElement = document.getElementById("reservations"); // セレクトボックスの要素を取得
+  const now = new Date();
 
   if (LineId === undefined) {
     for (let j = 0; j < names.length; j++) {
       // 削除者がいない場合のみ表示
-      if (deletedBy[j] === null) {
+      if (
+        deletedBy[j] === null ||
+        deletedBy[j] === "" ||
+        deletedBy[j] === undefined
+      ) {
         // 予約日時をDateオブジェクトに変換
         const formattedStartTime = formatTime(startTimes[j]);
         const reservationDateTime = new Date(
@@ -112,15 +117,17 @@ async function getReservations() {
         loginUserName = usernames[i];
       }
     }
-    // 現在の日時を取得
-    const now = new Date();
 
     for (let j = 0; j < names.length; j++) {
       // ログインユーザーの予約のみ表示
       const namesArray = names[j].split(",");
       if (namesArray.includes(loginUserName)) {
         // 削除者がいない場合のみ表示
-        if (deletedBy[j] === null) {
+        if (
+          deletedBy[j] === null ||
+          deletedBy[j] === "" ||
+          deletedBy[j] === undefined
+        ) {
           // 予約日時をDateオブジェクトに変換
           const formattedStartTime = formatTime(startTimes[j]);
           const reservationDateTime = new Date(
@@ -131,7 +138,7 @@ async function getReservations() {
             const option = document.createElement("option");
             // オプションのテキストを設定（例: 名前 + 日付 + 時間）
             option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
-            option.value = j; // オプションの値を設定（必要に応じて変更）
+            option.value = j + 1; // オプションの値を設定（必要に応じて変更）
             selectElement.appendChild(option); // セレクトボックスにオプションを追加
           }
         }
@@ -164,6 +171,8 @@ async function submitDeleteReservation() {
   for (let i = 0; i < LineIds.length; i++) {
     if (LineIds[i] === LineId) {
       deletedBy = usernames[i];
+    } else {
+      deletedBy = "ゲスト";
     }
   }
 
@@ -173,7 +182,7 @@ async function submitDeleteReservation() {
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
-  sendToLine(message); //LINEに送信
+  // sendToLine(message); //LINEに送信
   sendToGas(index, eventId[index], deletedBy); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
