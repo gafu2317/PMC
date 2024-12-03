@@ -84,6 +84,7 @@ async function unlockAfterTimeout() {
     const response = await fetch(URL, {
       mode: "cors",
     });
+    console.log("自動ロック解除");
   } catch (error) {
     window.alert("自動ロック解除でエラーが発生しました: " + error);
   }
