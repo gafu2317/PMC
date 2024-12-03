@@ -11,8 +11,7 @@
       <div class="form-group">
         <input type="text" id="searchInput" placeholder="名前を検索..." />
         <label for="name">名前：</label>
-        <select id="name" name="name" multiple required>
-        </select>
+        <select id="name" name="name" multiple required></select>
       </div>
       <div class="form-group">
         <label for="date">日付：</label>
@@ -32,6 +31,7 @@
           <option value="17:00">"17:00"</option>
           <option value="18:00">"18:00"</option>
           <option value="19:00">"19:00"</option>
+          <option value="19:00">"20:00"</option>
         </select>
       </div>
       <div class="form-group">
@@ -65,7 +65,7 @@
       </div>
     </div>
 
-    <div id="loadingMessage" style="display: none;">通信中...</div>
+    <div id="loadingMessage" style="display: none">通信中...</div>
 
     <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
     <script src="script.js" defer></script>

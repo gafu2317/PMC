@@ -4,8 +4,8 @@ let lastRow; //スプレッドシートの最終行
 let LineId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
-  // const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
-  // initializeLiff(liffId);
+  const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
+  initializeLiff(liffId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
@@ -226,4 +226,3 @@ async function sendToGas(index, eventId, deletedBy) {
   }
 }
 
-// カレンダーの予約を削除する関数

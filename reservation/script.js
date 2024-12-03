@@ -2,6 +2,9 @@
 let data; //スプレッドシートのデータ
 let lastRow; //スプレッドシートの最終行
 let LineId; //LineId
+let noReservations; //部会なしの日
+let noCommitteeDays; //部会の日
+
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
   const liffId = "2006484950-WLVJM5vB"; // LIFF IDをここに入力
@@ -9,9 +12,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
+  // handleClientLoad();
   await init();
   await setDateLimits();
-  await getNames();
+  getNames();
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
 });
@@ -26,12 +30,14 @@ document
     const currentHour = today.getHours();
     const currentMinute = today.getMinutes();
 
-    // 月曜の18:00〜18:59の時間帯の場合、パスワードモーダルを表示
-    if (today.getDay() === 1 && currentHour === 18 && currentMinute >= 0) {
-      document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
-    } else {
-      // 通常通り送信
-      submitReservation();
+    // 部会があって、月曜の18:00〜18:59の時間帯の場合、パスワードモーダルを表示
+    if (!noCommitteeDays.includes(formatDate(today))) {
+      if (today.getDay() === 1 && currentHour === 18 && currentMinute >= 0) {
+        document.getElementById("passwordModal").style.display = "block"; // モーダルを表示
+      } else {
+        // 通常通り送信
+        submitReservation();
+      }
     }
   });
 
@@ -106,17 +112,11 @@ async function setDateLimits() {
   nextMonday.setDate(today.getDate() + (8 - dayOfWeek)); // 次の月曜日を計算
 
   // 次の月曜日が部会なしの場合、次の次の月曜日まで予約可能
-  const isBukaiNashi = await isEventExist(
-    formatDate(nextMonday),
-    "00:00",
-    "23:59",
-    "部会無し"
-  );
-  if (isBukaiNashi) {
+  if (noCommitteeDays.includes(formatDate(nextMonday))) {
     nextMonday.setDate(nextMonday.getDate() + 7);
   }
 
-  //toISOString()を使うと世界標準寺になってしまうから自分で整形する
+  //toISOString()を使うと世界標準寺になってしまったから自分で整形する
   const formattedToday = formatDate(today);
   const formattedNextMonday = formatDate(nextMonday);
 
@@ -147,13 +147,15 @@ async function init() {
     // グローバル変数に値を代入
     data = initData.data;
     lastRow = initData.lastRow;
+    noCommitteeDays = initData.noCommitteeDays;
+    noReservations = initData.noReservations;
   } catch (error) {
     // window.alert("初期設定でエラーが発生しました: " + error);
   }
 }
 
 //名前を取得してリストに入れる関数
-async function getNames() {
+function getNames() {
   const names = data.個人データ.名前;
 
   // セレクトボックスの要素を取得
@@ -199,11 +201,11 @@ async function submitReservation() {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   if (!isReservationOverlapping(date, startTime, endTime)) {
-    if (!(await isEventExist(date, startTime, endTime, "予約不可"))) {
+    if (noReservations.includes(date)) {
+      window.alert("予約不可の日です");
+    } else {
       sendToLine(message); //LINEに送信
       sendToGas(reservationData, 1, data.予約データ.名前.length + 3); //gasに送信
-    } else {
-      window.alert("予約不可の日です");
     }
   }
   // ローディングメッセージを非表示に
@@ -299,31 +301,6 @@ function convertToMinutes(time) {
   return hours * 60 + minutes; // 総分数を返す
 }
 
-// カレンダーの予約を確認する関数
-async function isEventExist(date, startTime, endTime, eventName) {
-  const URL = `https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=isEventExist&date=${date}&startTime=${startTime}&endTime=${endTime}&eventName=${eventName}`;
-  try {
-    const response = await fetch(URL, {
-      mode: "cors",
-    });
-    const isEvent = await response.json(); //イベントがあるならtrue
-    console.log(
-      date +
-        "の" +
-        startTime +
-        "から" +
-        endTime +
-        "まで" +
-        eventName +
-        "という予定" +
-        (isEvent ? "あり" : "なし")
-    );
-    return isEvent;
-  } catch (error) {
-    window.alert("予約確認でエラーが発生しました: " + error);
-  }
-}
-
 // 検索機能
 const searchInput = document.getElementById("searchInput");
 const select = document.getElementById("name");
@@ -353,5 +330,3 @@ searchInput.addEventListener("input", function () {
     }
   }
 });
-
-// カレンダーに予約を追加する関数
