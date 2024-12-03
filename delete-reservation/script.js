@@ -4,12 +4,13 @@ let lastRow; //スプレッドシートの最終行
 let LineId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
-  const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
-  initializeLiff(liffId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
+  const liffId = "2006484950-vkz1MmLe"; // LIFF IDをここに入力
+  // initializeLiff(liffId);
+  LineId = "Uaad36f829cb1c10a72df296f112a16dd";
   await getReservations();
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
@@ -27,7 +28,6 @@ document
 
 //liffの初期化
 function initializeLiff(liffId) {
-  window.alert("LIFF初期化開始");
   liff
     .init({ liffId })
     .then(() => {
@@ -58,17 +58,21 @@ function getProfile() {
 
 //initデータを取得する関数
 async function init() {
-  console.log("init開始");
   const URL =
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=init";
   try {
     const response = await fetch(URL, {
     });
     const initData = await response.json();
-    console.log("init成功", initData);
-    // グローバル変数に値を代入
-    data = initData.data;
-    lastRow = initData.lastRow;
+    if (initData.isOk) {
+      console.log("init成功", initData);
+      // グローバル変数に値を代入
+      data = initData.data;
+      lastRow = initData.lastRow;
+    } else {
+      window.alert("他の人が予約中です。時間を置いてから試してみてください");
+      liff.closeWindow();
+    }
   } catch (error) {
     window.alert("初期設定でエラーが発生しました: " + error);
   }

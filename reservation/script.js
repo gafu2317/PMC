@@ -143,12 +143,17 @@ async function init() {
       mode: "cors",
     });
     const initData = await response.json();
-    console.log("init成功", initData);
-    // グローバル変数に値を代入
-    data = initData.data;
-    lastRow = initData.lastRow;
-    noCommitteeDays = initData.noCommitteeDays;
-    noReservations = initData.noReservations;
+    if(initData.isOk){
+      console.log("init成功", initData);
+      // グローバル変数に値を代入
+      data = initData.data;
+      lastRow = initData.lastRow;
+      noCommitteeDays = initData.noCommitteeDays;
+      noReservations = initData.noReservations;
+    } else{
+      window.alert("他の人が予約中です。時間を置いてから試してみてください");
+      liff.closeWindow();
+    }
   } catch (error) {
     // window.alert("初期設定でエラーが発生しました: " + error);
   }
