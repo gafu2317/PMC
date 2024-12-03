@@ -1,6 +1,5 @@
 //グローバル変数
 let data; //スプレッドシートのデータ
-let lastRow; //スプレッドシートの最終行
 let LineId; //LineId
 //ページが読み込まれたときのイベントリスナー
 document.addEventListener("DOMContentLoaded", async function () {
@@ -68,13 +67,25 @@ async function init() {
       console.log("init成功", initData);
       // グローバル変数に値を代入
       data = initData.data;
-      lastRow = initData.lastRow;
+      unlockAfterTimeout();
     } else {
       window.alert("他の人が予約中です。時間を置いてから試してみてください");
       liff.closeWindow();
     }
   } catch (error) {
     window.alert("初期設定でエラーが発生しました: " + error);
+  }
+}
+//自動でgasロックを解除する関数
+async function unlockAfterTimeout() {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=unlockAfterTimeout";
+  try {
+    const response = await fetch(URL, {
+      mode: "cors",
+    });
+  } catch (error) {
+    window.alert("自動ロック解除でエラーが発生しました: " + error);
   }
 }
 
