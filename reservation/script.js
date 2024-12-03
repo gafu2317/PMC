@@ -150,7 +150,9 @@ async function init() {
       noReservations = initData.noReservations;
       unlockAfterTimeout();
     } else{
-      window.alert("他の人が予約中です。時間を置いてから試してみてください");
+      window.alert(
+        "他の人が予約中です。時間を置いてから試してみてください。\n もしずっと発生する場合は管理者に連絡してください。"
+      );
       liff.closeWindow();
     }
   } catch (error) {
