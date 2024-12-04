@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
   await init();
-  LineId = "Uaad36f829cb1c10a72df296f112a16dd";
   await getReservations();
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
