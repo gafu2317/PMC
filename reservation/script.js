@@ -244,7 +244,6 @@ async function submitReservation() {
   }
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
-  unlockFunction();
   liff.closeWindow(); // LIFFウィンドウを閉じる
 }
 

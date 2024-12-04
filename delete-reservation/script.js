@@ -90,6 +90,19 @@ async function unlockAfterTimeout() {
     window.alert("自動ロック解除でエラーが発生しました: " + error);
   }
 }
+//gasロックを解除する関数
+async function unlockFunction() {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=unlockFunction";
+  try {
+    const response = await fetch(URL, {
+      mode: "cors",
+    });
+    console.log("ロック解除");
+  } catch (error) {
+    window.alert("ロック解除でエラーが発生しました: " + error);
+  }
+}
 
 //予約データを取得してリストに入れる関数
 async function getReservations() {
@@ -203,7 +216,6 @@ async function submitDeleteReservation() {
   sendToGas(index, eventId[index], deletedBy); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
-  unlockFunction();
   liff.closeWindow(); // LIFFウィンドウを閉じる
 }
 
