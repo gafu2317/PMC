@@ -134,7 +134,7 @@ async function getReservations() {
           const option = document.createElement("option");
           // オプションのテキストを設定（例: 名前 + 日付 + 時間）
           option.textContent = `${names[j]} - ${dates[j]} (${startTimes[j]} - ${endTimes[j]})`;
-          option.value = j; // オプションの値を設定（必要に応じて変更）
+          option.value = j+1; // オプションの値を設定（必要に応じて変更）
           selectElement.appendChild(option); // セレクトボックスにオプションを追加
         }
       }
