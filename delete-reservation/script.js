@@ -198,8 +198,8 @@ async function submitDeleteReservation() {
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
   loadingMessage.style.display = "block"; // メッセージを表示
-  // sendToLine(message); //LINEに送信
-  await sendToGas(index, eventId[index], deletedBy); //gasに送信
+  sendToLine(message); //LINEに送信
+  sendToGas(index, eventId[index], deletedBy); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
   liff.closeWindow(); // LIFFウィンドウを閉じる
