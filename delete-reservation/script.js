@@ -29,7 +29,6 @@ function initializeLiff(liffId) {
   liff
     .init({ liffId })
     .then(() => {
-      window.alert("LIFF初期化成功");
       getProfile(); // プロフィールを取得
     })
     .catch((error) => {
@@ -39,7 +38,6 @@ function initializeLiff(liffId) {
 
 // ユーザーのプロフィールを取得する関数
 function getProfile() {
-  window.alert("getProfile実行中", LineId);
   liff
     .getProfile()
     .then((profile) => {
@@ -47,7 +45,6 @@ function getProfile() {
         "userId"
       ).textContent = `ユーザーID: ${profile.userId}`;
       LineId = profile.userId;
-      window.alert("lineid取得成功", LineId);
     })
     .catch((error) => {
       window.alert("lineid取得失敗:", error);
