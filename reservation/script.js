@@ -153,13 +153,14 @@ async function init() {
       window.alert(
         "他の人が予約中です。時間を置いてから試してみてください。\n もしずっと発生する場合は管理者に連絡してください。"
       );
+      unlockFunction();
       liff.closeWindow();
     }
   } catch (error) {
     window.alert("初期設定でエラーが発生しました: " + error);
   }
 }
-//自動でgasロックを解除する関数
+//5分後にgasロックを解除する関数
 async function unlockAfterTimeout() {
   const URL =
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=unlockAfterTimeout";
@@ -170,6 +171,19 @@ async function unlockAfterTimeout() {
     console.log("自動ロック解除");
   } catch (error) {
     window.alert("自動ロック解除でエラーが発生しました: " + error);
+  }
+}
+//gasロックを解除する関数
+async function unlockFunction() {
+  const URL =
+    "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=unlockFunction";
+  try {
+    const response = await fetch(URL, {
+      mode: "cors",
+    });
+    console.log("ロック解除");
+  } catch (error) {
+    window.alert("ロック解除でエラーが発生しました: " + error);
   }
 }
 
@@ -225,10 +239,12 @@ async function submitReservation() {
     } else {
       sendToLine(message); //LINEに送信
       sendToGas(reservationData, 1, data.予約データ.名前.length + 3); //gasに送信
+      unlockFunction();
     }
   }
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
+  unlockFunction();
   liff.closeWindow(); // LIFFウィンドウを閉じる
 }
 
@@ -262,7 +278,6 @@ function sendToLine(text) {
     .sendMessages([{ type: "text", text: text }])
     .then(function () {
       console.log("Lineに送信成功");
-      liff.closeWindow();
     })
     .catch(function (error) {
       window.alert("Failed to send message " + error);

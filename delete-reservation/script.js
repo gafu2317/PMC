@@ -70,6 +70,7 @@ async function init() {
       unlockAfterTimeout();
     } else {
       window.alert("他の人が予約中です。時間を置いてから試してみてください。\n もしずっと発生する場合は管理者に連絡してください。");
+      unlockFunction();
       liff.closeWindow();
     }
   } catch (error) {
@@ -202,6 +203,7 @@ async function submitDeleteReservation() {
   sendToGas(index, eventId[index], deletedBy); //gasに送信
   // ローディングメッセージを非表示に
   loadingMessage.style.display = "none";
+  unlockFunction();
   liff.closeWindow(); // LIFFウィンドウを閉じる
 }
 
@@ -211,7 +213,6 @@ function sendToLine(text) {
     .sendMessages([{ type: "text", text: text }])
     .then(function () {
       console.log("Lineに送信成功");
-      liff.closeWindow();
     })
     .catch(function (error) {
       window.alert("Failed to send message " + error);
