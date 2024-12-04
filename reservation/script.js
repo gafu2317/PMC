@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   initializeLiff(liffId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
-  loadingMessage.style.display = "block"; // メッセージを表示
+  loadingMessage.style.display = "flex"; // メッセージを表示
   // handleClientLoad();
   await init();
   await setDateLimits();
@@ -44,7 +44,7 @@ document
 document.getElementById("sendPassword").addEventListener("click", function () {
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
-  loadingMessage.style.display = "block"; // メッセージを表示
+  loadingMessage.style.display = "flex"; // メッセージを表示
 
   const password = document.getElementById("password").value;
   const correctPassword = data.パスワード.パスワード; // パスワードを取得
@@ -232,7 +232,7 @@ async function submitReservation() {
 
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
-  loadingMessage.style.display = "block"; // メッセージを表示
+  loadingMessage.style.display = "flex"; // メッセージを表示
   if (!isReservationOverlapping(date, startTime, endTime)) {
     if (noReservations.includes(date)) {
       window.alert("予約不可の日です");

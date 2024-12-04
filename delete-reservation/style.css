@@ -55,17 +55,24 @@ input[type="submit"]:hover {
 /* ローディングメッセージのスタイル */
 #loadingMessage {
   display: none; /* デフォルトで非表示 */
-  position: absolute; /* モーダルの中で絶対位置 */
-  top: 50%; /* モーダルの中央 */
-  left: 50%; /* モーダルの中央 */
+  position: fixed; /* ビューポートに対して固定 */
+  top: 50%; /* ビューポートの中央 */
+  left: 50%; /* ビューポートの中央 */
   transform: translate(-50%, -50%); /* 中央に配置 */
   color: #333; /* テキストの色 */
   font-weight: bold; /* 太字 */
   z-index: 2; /* モーダルの上に表示 */
   background-color: white; /* 背景色 */
-  padding: 100px; /* 余白 */
+  padding: 10px; /* 余白 */
   border: 1px solid #888; /* 枠線 */
-}
+  width: 200px;
+  height: 200px;
 
+  /* 中央揃えのためのスタイル */
+  display: flex; /* フレックスボックスを使用 */
+  align-items: center; /* 垂直方向の中央揃え */
+  justify-content: center; /* 水平方向の中央揃え */
+  text-align: center; /* テキストの中央揃え */
+}
 
 

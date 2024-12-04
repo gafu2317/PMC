@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   initializeLiff(liffId);
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
-  loadingMessage.style.display = "block"; // メッセージを表示
+  loadingMessage.style.display = "flex"; // メッセージを表示
   await init();
   await getReservations();
   // ローディングメッセージを非表示に
@@ -210,7 +210,7 @@ async function submitDeleteReservation() {
 
   // ローディングメッセージを表示
   const loadingMessage = document.getElementById("loadingMessage");
-  loadingMessage.style.display = "block"; // メッセージを表示
+  loadingMessage.style.display = "flex"; // メッセージを表示
   sendToLine(message); //LINEに送信
   sendToGas(index, eventId[index], deletedBy); //gasに送信
   // ローディングメッセージを非表示に
