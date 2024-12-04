@@ -135,6 +135,7 @@ function formatDate(date) {
 
 //initデータを取得する関数
 async function init() {
+  console.log("init開始");
   const URL =
     "https://script.google.com/macros/s/AKfycbzCKMUEE71UKxhZs2S_5_JbqxjbYAbvOIt3AxgVCsbpjahY3W8wPgdoPezP1vfx4vh17Q/exec?function=init";
   try {
@@ -142,6 +143,7 @@ async function init() {
       mode: "cors",
     });
     const initData = await response.json();
+    console.log("isOk:"+initData.isOk);
     if(initData.isOk){
       console.log("init成功", initData);
       // グローバル変数に値を代入
@@ -150,6 +152,7 @@ async function init() {
       noReservations = initData.noReservations;
       unlockAfterTimeout();
     } else{
+      console.log("init失敗");
       window.alert(
         "他の人が予約中です。時間を置いてから試してみてください。\n もしずっと発生する場合は管理者に連絡してください。"
       );
