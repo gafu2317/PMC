@@ -41,9 +41,6 @@ function getProfile() {
   liff
     .getProfile()
     .then((profile) => {
-      document.getElementById(
-        "userId"
-      ).textContent = `ユーザーID: ${profile.userId}`;
       LineId = profile.userId;
     })
     .catch((error) => {
