@@ -40,9 +40,9 @@ function App() {
     )
   );
   // 予約された時間の状態を管理
-  const [reservedHours, setReservedHours] = useState<boolean[][]>(
+  const [reservedNames, setReservedNames] = useState<string[][]>(
     Array.from({ length: timeSlots.length }, () =>
-      Array(daysOfWeek.length).fill(false)
+      Array(daysOfWeek.length).fill("")
     )
   );
   // ポップアップの表示状態を管理
@@ -56,24 +56,31 @@ function App() {
   };
 
   const handleReserve = () => {
-    const newReservedHours = [...reservedHours];
-    const newSelectedHours = [...selectedHours];
+    if(selectedHours){
+      setIsPopupVisible(true); // ポップアップを表示
+    }
+  };
 
-    for (let i = 0; i < timeSlots.length; i++) {
-      for (let j = 0; j < daysOfWeek.length; j++) {
-        if (newSelectedHours[i][j]) {
-          newReservedHours[i][j] = true; // 選択された時間を予約
+  const handleNameSubmit = (name: string) => {
+    if(selectedHours){
+      const newReservedNames = [...reservedNames];
+      const newSelectedHours = [...selectedHours];
+  
+      for (let i = 0; i < timeSlots.length; i++) {
+        for (let j = 0; j < daysOfWeek.length; j++) {
+          if (newSelectedHours[i][j]) {
+            newReservedNames[i][j] = name; // 予約者名を登録
+          }
         }
       }
+  
+      setReservedNames(newReservedNames); // 予約者名を更新
+      setSelectedHours(
+        Array.from({ length: timeSlots.length }, () =>
+          Array(daysOfWeek.length).fill(false)
+        )
+      ); // 選択状態をリセット
     }
-
-    setReservedHours(newReservedHours); // 予約状態を更新
-    setSelectedHours(
-      Array.from({ length: timeSlots.length }, () =>
-        Array(daysOfWeek.length).fill(false)
-      )
-    ); // 選択状態をリセット
-    setIsPopupVisible(true); // ポップアップを表示
   };
 
   const closePopup = () => {
@@ -101,7 +108,7 @@ function App() {
               <Hour
                 key={colIndex}
                 isSelected={selectedHours[rowIndex][colIndex]} // クリックフラグを渡す
-                isReserved={reservedHours[rowIndex][colIndex]} // 予約状態を渡す
+                name={reservedNames[rowIndex][colIndex]} // 予約状態を渡す
                 onClick={() => handleHourClick(rowIndex, colIndex)} // クリックハンドラを渡す
               />
             ))}
@@ -115,10 +122,10 @@ function App() {
         >
           予約
         </button>
-        <button className="p-2 bg-green-500 text-white rounded">🖊️</button>
+        <button className="p-2 bg-green-500 text-white rounded">予約の編集</button>
       </div>
       {isPopupVisible && (
-        <Popup message="予約が完了しました！" onClose={closePopup} /> // ポップアップを表示
+        <Popup onSubmit={handleNameSubmit} onClose={closePopup} /> // ポップアップを表示
       )}
     </div>
   );
