@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Hour from "./hour"; // Hourコンポーネントをインポート
+import Popup from "./Popup"; // Popupコンポーネントをインポート
 
 function App() {
   // 今日の日付を取得
@@ -38,11 +39,14 @@ function App() {
       Array(daysOfWeek.length).fill(false)
     )
   );
+  // 予約された時間の状態を管理
   const [reservedHours, setReservedHours] = useState<boolean[][]>(
     Array.from({ length: timeSlots.length }, () =>
       Array(daysOfWeek.length).fill(false)
     )
   );
+  // ポップアップの表示状態を管理
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const handleHourClick = (rowIndex: number, colIndex: number) => {
     const newSelectedHours = [...selectedHours];
@@ -69,6 +73,11 @@ function App() {
         Array(daysOfWeek.length).fill(false)
       )
     ); // 選択状態をリセット
+    setIsPopupVisible(true); // ポップアップを表示
+  };
+
+  const closePopup = () => {
+    setIsPopupVisible(false); // ポップアップを非表示
   };
 
   return (
@@ -108,6 +117,9 @@ function App() {
         </button>
         <button className="p-2 bg-green-500 text-white rounded">🖊️</button>
       </div>
+      {isPopupVisible && (
+        <Popup message="予約が完了しました！" onClose={closePopup} /> // ポップアップを表示
+      )}
     </div>
   );
 }
