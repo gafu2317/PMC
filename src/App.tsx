@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import Hour from "./hour"; // Hourコンポーネントをインポート
-import Popup from "./Popup"; // Popupコンポーネントをインポート
+import Hour from "./Hour";
+import ReservationPopup from "./ReservationPopup";
+import ReservationDisplay from "./ReservationDisplay";
 
 function App() {
   // 今日の日付を取得
@@ -40,13 +41,14 @@ function App() {
     )
   );
   // 予約された時間の状態を管理
-  const [reservedNames, setReservedNames] = useState<string[][]>(
+  const [reservedNames, setReservedNames] = useState<string[][][][]>(
     Array.from({ length: timeSlots.length }, () =>
-      Array(daysOfWeek.length).fill("")
+      Array.from({ length: daysOfWeek.length }, () => [])
     )
   );
   // ポップアップの表示状態を管理
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isReservationPopupVisible, setIsReservationPopupVisible] =
+    useState(false);
 
   const handleHourClick = (rowIndex: number, colIndex: number) => {
     const newSelectedHours = [...selectedHours];
@@ -56,24 +58,25 @@ function App() {
   };
 
   const handleReserve = () => {
-    if(selectedHours){
-      setIsPopupVisible(true); // ポップアップを表示
+    if (selectedHours) {
+      setIsReservationPopupVisible(true); // ポップアップを表示
     }
   };
 
-  const handleNameSubmit = (name: string) => {
-    if(selectedHours){
+  const handleNameSubmit = (names: string[]) => {
+    if (selectedHours) {
       const newReservedNames = [...reservedNames];
       const newSelectedHours = [...selectedHours];
-  
+
       for (let i = 0; i < timeSlots.length; i++) {
         for (let j = 0; j < daysOfWeek.length; j++) {
           if (newSelectedHours[i][j]) {
-            newReservedNames[i][j] = name; // 予約者名を登録
+            // メンバーを追加
+            newReservedNames[i][j].push(names); // namesを展開して追加
           }
         }
       }
-  
+
       setReservedNames(newReservedNames); // 予約者名を更新
       setSelectedHours(
         Array.from({ length: timeSlots.length }, () =>
@@ -84,17 +87,20 @@ function App() {
   };
 
   const closePopup = () => {
-    setIsPopupVisible(false); // ポップアップを非表示
+    setIsReservationPopupVisible(false); // ポップアップを非表示
   };
 
   return (
-    <div className="p-12">
+    <div className="p-5">
       <div className="grid grid-cols-9 gap-2 mb-4">
         {/* 空白のセル */}
         <div className="bg-transparent"></div>
         {/* 曜日と日付を表示 */}
         {weekDays.map((item, index) => (
-          <div key={index} className="text-center bg-gray-200 p-1 text-xs">
+          <div
+            key={index}
+            className="text-center bg-gray-200 p-1 text-xs rounded"
+          >
             {daysOfWeek[index]}
             <br />
             {item.date} {/* 曜日と日付を改行で表示 */}
@@ -103,29 +109,35 @@ function App() {
         {/* 時間帯と空白のセルを表示 */}
         {timeSlots.map((time, rowIndex) => (
           <React.Fragment key={rowIndex}>
-            <div className="bg-gray-100 p-2 text-xs">{time}</div>
+            <div className="bg-gray-200 p-2 text-xs rounded">{time}</div>
             {Array.from({ length: daysOfWeek.length }).map((_, colIndex) => (
               <Hour
                 key={colIndex}
                 isSelected={selectedHours[rowIndex][colIndex]} // クリックフラグを渡す
-                name={reservedNames[rowIndex][colIndex]} // 予約状態を渡す
+                teams={reservedNames[rowIndex][colIndex]} // 予約状態を渡す
                 onClick={() => handleHourClick(rowIndex, colIndex)} // クリックハンドラを渡す
               />
             ))}
           </React.Fragment>
         ))}
       </div>
-      <div className="flex justify-center space-x-2 mt-4">
-        <button
-          className="p-2 bg-blue-500 text-white rounded"
-          onClick={handleReserve}
-        >
-          予約
-        </button>
-        <button className="p-2 bg-green-500 text-white rounded">予約の編集</button>
-      </div>
-      {isPopupVisible && (
-        <Popup onSubmit={handleNameSubmit} onClose={closePopup} /> // ポップアップを表示
+      {selectedHours.length > 0 && (
+        <ReservationDisplay
+          weekDays={weekDays}
+          reservedNames={reservedNames} // 予約情報を渡す
+          selectedHours={selectedHours} // 選択された時間帯の情報を渡す
+          timeSlots={timeSlots}
+        />
+      )}
+
+      <button
+        className="fixed bottom-8 right-8 p-2 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
+        onClick={handleReserve}
+      >
+        予約
+      </button>
+      {isReservationPopupVisible && (
+        <ReservationPopup onSubmit={handleNameSubmit} onClose={closePopup} /> // ポップアップを表示
       )}
     </div>
   );
