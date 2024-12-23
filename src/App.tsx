@@ -31,28 +31,33 @@ function App() {
     "21:30",
   ];
 
+  //　選択している時間帯を管理
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
     Array.from({ length: timeSlots.length }, () =>
       Array(daysOfWeek.length).fill(false)
     )
   );
 
+  // 予約者名を管理
   const [reservedNames, setReservedNames] = useState<string[][][][]>(
     Array.from({ length: timeSlots.length }, () =>
       Array.from({ length: daysOfWeek.length }, () => [])
     )
   );
 
+  // 予約ポップアップの表示状態を管理
   const [isReservationPopupVisible, setIsReservationPopupVisible] =
     useState(false);
 
-  // 修正: selectedReservationsの型を変更
+  // 選択された予約を管理
   const [selectedReservations, setSelectedReservations] = useState<
     { dayIndex: number; timeIndex: number; teamIndex: number }[]
   >([]);
 
+  // 編集ポップアップの表示状態を管理
   const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
 
+  // 時間帯をクリックしたときのハンドラ
   const handleHourClick = (rowIndex: number, colIndex: number) => {
     const newSelectedHours = [...selectedHours];
     newSelectedHours[rowIndex][colIndex] =
@@ -60,10 +65,12 @@ function App() {
     setSelectedHours(newSelectedHours);
   };
 
+  // 予約ボタンをクリックしたときのハンドラ
   const handleReserve = () => {
     setIsReservationPopupVisible(true);
   };
 
+  // 名前を追加するするハンドラー
   const handleNameSubmit = (names: string[]) => {
     const newReservedNames = [...reservedNames];
     const newSelectedHours = [...selectedHours];
@@ -127,6 +134,24 @@ function App() {
     setReservedNames(newReservedNames);
   };
 
+  // 予約を削除するハンドラ
+  const handleReservationRemove = (
+    dayIndex: number,
+    timeIndex: number,
+    teamIndex: number,
+  ) => {
+    // 選択された予約をクリア
+    setSelectedReservations([]);
+    const newReservedNames = [...reservedNames];
+
+    // 指定されたインデックスの要素を削除する
+    newReservedNames[timeIndex][dayIndex].splice(teamIndex, 1);
+
+    // 状態を更新
+    setReservedNames(newReservedNames);
+  };
+
+  // 予約を選択するハンドラ
   const handleReservationSelect = (reservation: {
     dayIndex: number;
     timeIndex: number;
@@ -153,6 +178,7 @@ function App() {
     });
   };
 
+  // 編集ボタンをクリックしたときのハンドラ
   const handleEditPopup = () => {
     if (selectedReservations.length > 0) {
       setIsEditPopupVisible(true);
@@ -229,6 +255,7 @@ function App() {
           onClose={() => setIsEditPopupVisible(false)}
           onNameAdd={handleNameAdd}
           onNameRemove={handleNameRemove}
+          onDelete={handleReservationRemove}
         />
       )}
     </div>

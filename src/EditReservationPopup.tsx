@@ -23,6 +23,11 @@ interface ReservationPopupProps {
     teamIndex: number,
     namesToRemove: string[]
   ) => void;
+  onDelete: (
+    dayIndex: number, 
+    timeIndex: number, 
+    teamIndex: number,
+  ) => void;
 }
 
 const EditReservationPopup: React.FC<ReservationPopupProps> = ({
@@ -33,6 +38,7 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
   onClose,
   onNameAdd,
   onNameRemove,
+  onDelete,
 }) => {
   // 名前の入力値を管理
   const [names, setNames] = useState<string[]>([""]);
@@ -72,6 +78,14 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
     });
   };
 
+  //　予約自体を削除するハンドラ
+  const handleDelete = () => {
+    onClose();
+    selectedReservations.forEach((reservation) => {
+      const { dayIndex, timeIndex, teamIndex } = reservation;
+      onDelete(dayIndex, timeIndex, teamIndex);
+    });
+  };
 
   return (
     <div>
@@ -117,17 +131,24 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
           >
             -
           </button>
-          <button className="mt-2 mr-2 p-2 bg-gradient-to-b from-green-400 to-green-500 text-white rounded-full"
-          onClick={handleAdd}>
+          <button
+            className="mt-2 mr-2 p-2 bg-gradient-to-b from-green-400 to-green-500 text-white rounded-full"
+            onClick={handleAdd}
+          >
             追加
           </button>
-          <button className="mt-2 mr-2 p-2 bg-gradient-to-b from-red-400 to-red-500 text-white rounded-full"
-          onClick={handleRemove}>
+          <button
+            className="mt-2 mr-2 p-2 bg-gradient-to-b from-red-400 to-red-500 text-white rounded-full"
+            onClick={handleRemove}
+          >
             削除
           </button>
           <div className="mt-4 flex justify-between">
             <div className="flex">
-              <button className="mt-2 p-2 bg-gradient-to-b from-red-600 to-red-700 text-white rounded-full">
+              <button
+                className="mt-2 p-2 bg-gradient-to-b from-red-600 to-red-700 text-white rounded-full"
+                onClick={handleDelete}
+              >
                 予約自体を削除
               </button>
             </div>
