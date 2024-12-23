@@ -19,22 +19,30 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     setNames(newNames);
   };
 
-  const handleSubmit = () => {
-    if (names.every((name) => name)) {
-      // すべての名前が入力されているか確認
-      onSubmit(names); // 親コンポーネントに名前を送信
-      onClose(); // ポップアップを閉じる
-    }
-  };
-
-  // ボタンがクリックされたときのハンドラ
+  // +ボタンがクリックされたときのハンドラ
   const handleAddInput = () => {
     setNames([...names, ""]); // 新しい空の文字列を追加
   };
+  // -ボタンがクリックされたときのハンドラ
+  const handleSubInput = () => {
+    if (names.length > 1) {
+      setNames(names.slice(0, -1)); // 最後の要素を削除
+    }
+  };
+
+const handleSubmit = () => {
+  // 空でない名前だけをフィルタリング
+  const filteredNames = names.filter((name) => name);
+
+  // フィルタリングされた名前を親コンポーネントに送信
+  onSubmit(filteredNames);
+  onClose(); // ポップアップを閉じる
+};
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-4 rounded shadow-md">
+      <div className="bg-white p-6 rounded shadow-md">
         <h2 className="text-lg font-bold">
           使用する人の名前を入力してください
         </h2>
@@ -44,25 +52,31 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             type="text"
             value={name}
             onChange={(e) => handleNameChange(index, e.target.value)} // 入力値の更新
-            className="border p-2 mt-2 block"
+            className="border p-2 mt-2 block rounded-lg"
             placeholder="名前を入力"
           />
         ))}
         <button
-          className="mt-2 p-2 bg-blue-500 text-white rounded"
+          className="mt-2 p-2 mr-2 bg-gradient-to-b from-sky-400 to-blue-500 text-white rounded-full w-10"
           onClick={handleAddInput}
         >
-          使用者を追加
+          +
+        </button>
+        <button
+          className="mt-2 p-2 bg-gradient-to-b from-sky-400 to-blue-500 text-white rounded-full w-10"
+          onClick={handleSubInput}
+        >
+          -
         </button>
         <div className="flex justify-between mt-4">
           <button
-            className="p-2 bg-blue-500 text-white rounded"
+            className="p-2 bg-gradient-to-b from-sky-600 to-blue-700  text-white rounded-full w-20"
             onClick={handleSubmit}
           >
             決定
           </button>
           <button
-            className="p-2 bg-gray-300 text-black rounded"
+            className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-gray-300 to-gray-400"
             onClick={onClose}
           >
             閉じる
