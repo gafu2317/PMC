@@ -3,6 +3,7 @@ import Hour from "./Hour";
 import ReservationPopup from "./ReservationPopup";
 import ReservationDisplay from "./ReservationDisplay";
 import EditReservationPopup from "./EditReservationPopup";
+import UserManagement from "./UserManagement";
 
 function App() {
   const today = new Date();
@@ -258,6 +259,7 @@ function App() {
           onDelete={handleReservationRemove}
         />
       )}
+      <UserManagement />
     </div>
   );
 }
