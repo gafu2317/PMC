@@ -1,40 +1,43 @@
-// src/userService.ts
+// userService.ts
 import { db } from "./firebase";
-import { UserData } from "./types"; // UserDataインターフェースをインポート
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc,
-} from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, setDoc } from "firebase/firestore";
 
 // ユーザーを追加する関数
-export const addUser = async (user: UserData) => {
-  const docRef = await addDoc(collection(db, "users"), user);
-  return docRef.id;
+const addUser = async (
+  name: string,
+  lineId: string,
+  reservations: Array<{ startTime: Date, EndTime: Date, fee: number }>
+): Promise<void> => {
+  try {
+    const userDocRef = doc(db, "users", lineId);
+
+    // 新しいユーザーの情報を設定
+    await setDoc(userDocRef, {
+      name: name,
+      reservations: reservations,
+    });
+
+    console.log(`ユーザーが追加されました。`);
+  } catch (error) {
+    console.error("ユーザーの追加に失敗しました:", error);
+  }
 };
 
-// ユーザーを取得する関数
-export const getUsers = async (): Promise<UserData[]> => {
-  const querySnapshot = await getDocs(collection(db, "users"));
-  return querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as UserData[];
-};
+//予約を追加する関数
+const addReservation = async (
+  lineId: string,
+  reservations: Array<{ startTime: Date, EndTime:Date, fee: number}>
+): Promise<void> => {
+  try {
+    //usersコレクション内の特定のユーザーの参照を取得
+    const userCocRef = doc(db, "users", lineId);
 
-// ユーザーを更新する関数
-export const updateUser = async (
-  id: string,
-  updatedData: Partial<UserData>
-) => {
-  const userRef = doc(db, "users", id);
-  await updateDoc(userRef, updatedData);
-};
+    //予約情報を追加
+    await setDoc(userCocRef, { reservations: reservations }, { merge: true });
+    console.log("予約が追加されました。");
+  } catch (error) {
+    console.error("予約の追加に失敗しました:", error);
+  }
+}
 
-// ユーザーを削除する関数
-export const deleteUser = async (id: string) => {
-  await deleteDoc(doc(db, "users", id));
-};
+export { addUser , addReservation };

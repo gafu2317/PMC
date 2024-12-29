@@ -3,7 +3,7 @@ import Hour from "./Hour";
 import ReservationPopup from "./ReservationPopup";
 import ReservationDisplay from "./ReservationDisplay";
 import EditReservationPopup from "./EditReservationPopup";
-import UserManagement from "./UserManagement";
+// import UserManagement from "./UserManagement";
 
 function App() {
   const today = new Date();
@@ -95,21 +95,8 @@ function App() {
     namesToAdd: string[]
   ) => {
     const newReservedNames = [...reservedNames];
-    console.log("namesToAdd", namesToAdd);
     namesToAdd.forEach((name) => {
-      console.log("timeIndex", timeIndex);
-      console.log("dayIndex", dayIndex);
-      console.log("teamIndex", teamIndex);
-      console.log(
-        "reservedNames",
-        newReservedNames[timeIndex][dayIndex][teamIndex]
-      );
-      console.log("name", name);
       newReservedNames[timeIndex][dayIndex][teamIndex].push(name);
-      console.log(
-        "newreservedNames",
-        newReservedNames[timeIndex][dayIndex][teamIndex]
-      );
     });
     setReservedNames(newReservedNames);
   };
@@ -188,31 +175,43 @@ function App() {
 
   return (
     <div className="p-5">
-      <div className="grid grid-cols-9 gap-2 mb-4">
-        <div className="bg-transparent"></div>
-        {weekDays.map((item, index) => (
-          <div
-            key={index}
-            className="text-center bg-gray-200 p-1 text-xs rounded"
-          >
-            {daysOfWeek[index]}
-            <br />
-            {item.date}
-          </div>
-        ))}
-        {timeSlots.map((time, rowIndex) => (
-          <React.Fragment key={rowIndex}>
-            <div className="bg-gray-200 p-2 text-xs rounded">{time}</div>
-            {Array.from({ length: daysOfWeek.length }).map((_, colIndex) => (
-              <Hour
-                key={colIndex}
-                isSelected={selectedHours[rowIndex][colIndex]}
-                teams={reservedNames[rowIndex][colIndex]}
-                onClick={() => handleHourClick(rowIndex, colIndex)}
-              />
-            ))}
-          </React.Fragment>
-        ))}
+      <div className="flex space-x-4">
+        <div className="flex-col space-y-5">
+          <div className="bg-blue-200 h-5"></div>
+          {Array.from({ length: timeSlots.length }).map((_, index) => (
+            <div
+              key={index}
+              className="text-center bg-gray-200 p-1 text-xs rounded"
+            >
+              {timeSlots[index]}
+              <br />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-8 gap-2 mb-4">
+          {weekDays.map((item, index) => (
+            <div
+              key={index}
+              className="text-center bg-gray-200 p-1 text-xs rounded"
+            >
+              {daysOfWeek[index]}
+              <br />
+              {item.date}
+            </div>
+          ))}
+          {Array.from({ length: timeSlots.length -1 }).map((_, rowIndex) => (
+            <React.Fragment key={rowIndex}>
+              {Array.from({ length: daysOfWeek.length }).map((_, colIndex) => (
+                <Hour
+                  key={colIndex}
+                  isSelected={selectedHours[rowIndex][colIndex]}
+                  teams={reservedNames[rowIndex][colIndex]}
+                  onClick={() => handleHourClick(rowIndex, colIndex)}
+                />
+              ))}
+            </React.Fragment>
+          ))}
+        </div>
       </div>
 
       {selectedHours.length > 0 && (
@@ -259,7 +258,7 @@ function App() {
           onDelete={handleReservationRemove}
         />
       )}
-      <UserManagement />
+      {/* <UserManagement /> */}
     </div>
   );
 }
