@@ -49,7 +49,9 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                 if (teams.length > 0) {
                   return (
                     <div key={rowIndex}>
-                      <div className="bg-gray-100 rounded-sm">{time}</div>
+                      <div className="bg-gray-100 rounded-sm">
+                        {time}~{timeSlots[rowIndex + 1]}
+                      </div>
                       {teams.map((team, teamIndex) => {
                         const isSelected = selectedReservations.some(
                           (reservation) =>

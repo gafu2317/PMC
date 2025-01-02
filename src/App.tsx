@@ -175,13 +175,13 @@ function App() {
 
   return (
     <div className="p-5">
-      <div className="flex space-x-4">
-        <div className="flex-col space-y-5">
-          <div className="bg-blue-200 h-5"></div>
+      <div className="flex space-x-1">
+        <div className="flex flex-col justify-between">
+          <div className="h-5"></div>
           {Array.from({ length: timeSlots.length }).map((_, index) => (
             <div
               key={index}
-              className="text-center bg-gray-200 p-1 text-xs rounded"
+              className="text-center p-1 text-xs rounded"
             >
               {timeSlots[index]}
               <br />
@@ -199,7 +199,7 @@ function App() {
               {item.date}
             </div>
           ))}
-          {Array.from({ length: timeSlots.length -1 }).map((_, rowIndex) => (
+          {Array.from({ length: timeSlots.length - 1 }).map((_, rowIndex) => (
             <React.Fragment key={rowIndex}>
               {Array.from({ length: daysOfWeek.length }).map((_, colIndex) => (
                 <Hour
