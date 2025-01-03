@@ -1,4 +1,4 @@
-import { DataType } from "csstype";
+
 
 const today = new Date();
 const currentDay = today.getDay();

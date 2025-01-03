@@ -1,5 +1,4 @@
 // 加工済みのデータの型
-// 加工済みのデータの型
 export interface Reservation {
   id: string;//ドキュメントIDを使用
   names : string[];//使用者の名前

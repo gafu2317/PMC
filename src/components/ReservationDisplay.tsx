@@ -1,66 +1,70 @@
 import React from "react";
+import { weekDays, timeSlots } from "../utils/utils";
+import { Reservation } from "../types/type";
 
 interface ReservationDisplayProps {
-  weekDays: { date: string }[];
-  reservedNames: string[][][][];
-  selectedHours: boolean[][]; // 選択された時間帯の情報
-  timeSlots: string[];
-  selectedReservations: {
-    dayIndex: number;
-    timeIndex: number;
-    teamIndex: number;
-  }[]; // 選択された予約情報
-  onReservationSelect: (reservation: {
-    dayIndex: number;
-    timeIndex: number;
-    teamIndex: number;
-  }) => void; // チーム選択のハンドラ
+  reservations: Reservation[]; // 予約情報
+  selectedHours: boolean[][]; // 選択された時間帯
+  selectedReservations: string[][][]; // 選択された予約
+  onReservationClick: (
+    dayIndex: number,
+    timeIndex: number,
+    id: string
+  ) => void; // 予約を選択したときのハンドラ
 }
 
 const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
-  weekDays,
-  reservedNames,
+  reservations,
   selectedHours,
-  timeSlots,
   selectedReservations,
-  onReservationSelect,
+  onReservationClick,
 }) => {
   return (
     <div>
-      {weekDays.map((day, colIndex) => {
-        const hasReservations = timeSlots.some((_, rowIndex) => {
-          // 選択された時間帯で予約があるか確認
+      {weekDays.map((day, dayIndex) => {
+        // 時間が選択されているかつ予約があるかどうか
+        const hasReservations = timeSlots.some((_, timeIndex) => {
           return (
-            selectedHours[rowIndex][colIndex] &&
-            reservedNames[rowIndex][colIndex].length > 0
+            selectedHours[dayIndex][timeIndex] &&
+            reservations.some(
+              (reservation) =>
+                reservation.dayIndex === dayIndex &&
+                reservation.timeIndex === timeIndex
+            )
           );
         });
-
         // 予約がない場合は何も表示しない
         if (!hasReservations) return null;
 
         return (
           <div key={day.date} className="mt-1">
+            {/* 日付を表示 */}
             <h3 className="font-bold">{day.date}</h3>
-            {timeSlots.map((time, rowIndex) => {
+            {timeSlots.map((time, timeIndex) => {
               // 選択された時間帯のみを考慮
-              if (selectedHours[rowIndex][colIndex]) {
-                const teams = reservedNames[rowIndex][colIndex];
-                if (teams.length > 0) {
+              if (selectedHours[dayIndex][timeIndex]) {
+                // 選択されている時間の予約のみを残す
+                const selectedHourReservations = reservations.filter(
+                  (reservation) =>
+                    reservation.dayIndex === dayIndex &&
+                    reservation.timeIndex === timeIndex
+                );
+
+                if (selectedHourReservations.length > 0) {
                   return (
-                    <div key={rowIndex}>
+                    <div key={timeIndex}>
+                      {/* 時間を表示 */}
                       <div className="bg-gray-100 rounded-sm">
-                        {time}~{timeSlots[rowIndex + 1]}
+                        {time}~{timeSlots[timeIndex + 1]}
                       </div>
-                      {teams.map((team, teamIndex) => {
-                        const isSelected = selectedReservations.some(
-                          (reservation) =>
-                            reservation.dayIndex === colIndex &&
-                            reservation.timeIndex === rowIndex &&
-                            reservation.teamIndex === teamIndex
-                        );
+                      {selectedHourReservations.map((team, teamIndex) => {
+                        // 予約が選択されているかどうか
+                        const isSelected = selectedReservations[dayIndex][
+                          timeIndex
+                        ].includes(team.id);
 
                         return (
+                          // チームを表示
                           <li
                             key={teamIndex}
                             className={
@@ -69,16 +73,11 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                                 : "border border-white"
                             }
                             onClick={() => {
-                              const reservationInfo = {
-                                dayIndex: colIndex,
-                                timeIndex: rowIndex,
-                                teamIndex: teamIndex,
-                              };
-                              onReservationSelect(reservationInfo);
+                              onReservationClick(dayIndex, timeIndex, team.id);
                             }}
                             style={{ cursor: "pointer" }}
                           >
-                            {team.join(", ")} {/* チームメンバーを表示 */}
+                            {team.names.join(", ")}
                           </li>
                         );
                       })}

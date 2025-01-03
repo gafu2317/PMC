@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReservationPopup from "./components/ReservationPopup";
-import ReservationDisplay from "./components/ReservationDisplay";
 import EditReservationPopup from "./components/EditReservationPopup";
+import ReservationDisplay from "./components/ReservationDisplay";
 import { Reservation } from "./types/type";
 import { getAllReservations } from "./firebase/userService";
 import { db } from "./firebase/firebase";
@@ -10,16 +10,15 @@ import { daysOfWeek, timeSlots } from "./utils/utils";
 import Calendar from "./components/Calendar";
 
 function App() {
+  // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
-
+  // Firestoreから予約情報を取得
   useEffect(() => {
-    // Firestoreのコレクションを参照
     const collectionRef = collection(db, "reservations");
-
     // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
-        const newReservations = await getAllReservations(); // 戻り値はReservation[] | undefined
+        const newReservations = await getAllReservations();
         if (newReservations) {
           setReservations(newReservations); // 状態を更新
         } else {
@@ -33,17 +32,42 @@ function App() {
     return () => unsubscribe();
   }, []); // マウント時にのみ実行
 
-  //　選択している時間帯を管理
+  //　選択している時間帯を管理(Hourに渡しやすい二次元配列)
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
     Array.from({ length: daysOfWeek.length }, () => Array(timeSlots.length))
   );
-
   // Hourをクリックしたときのハンドラ
   const handleHourClick = (dayIndex: number, timeIndex: number) => {
     const newSelectedHours = [...selectedHours];
     newSelectedHours[dayIndex][timeIndex] =
       !newSelectedHours[dayIndex][timeIndex];
     setSelectedHours(newSelectedHours);
+  };
+
+  // 選択している予約を管理(EditReservationPopupに渡しやすい型)
+  const [selectedReservations, setSelectedReservations] = useState<
+    string[][][]
+  >(
+    Array.from({ length: daysOfWeek.length }, () =>
+      Array.from({ length: timeSlots.length }, () => [])
+    )
+  );
+  //予約をクリックした時のハンドラ
+  const handleReservationClic = (
+    dayIndex: number,
+    timeIndex: number,
+    id: string
+  ) => {
+    setSelectedReservations((prev) => {
+      const newSelectedReservations = [...prev];
+      const index = newSelectedReservations[dayIndex][timeIndex].indexOf(id);
+      if (index > -1) {
+        newSelectedReservations[dayIndex][timeIndex].splice(index, 1);
+      } else {
+        newSelectedReservations[dayIndex][timeIndex].push(id);
+      }
+      return newSelectedReservations;
+    });
   };
 
   // // 予約者名を管理
@@ -56,11 +80,6 @@ function App() {
   // // 予約ポップアップの表示状態を管理
   // const [isReservationPopupVisible, setIsReservationPopupVisible] =
   //   useState(false);
-
-  // // 選択された予約を管理
-  // const [selectedReservations, setSelectedReservations] = useState<
-  //   { dayIndex: number; timeIndex: number; teamIndex: number }[]
-  // >([]);
 
   // // 編集ポップアップの表示状態を管理
   // const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
@@ -138,33 +157,6 @@ function App() {
   //   setReservedNames(newReservedNames);
   // };
 
-  // // 予約を選択するハンドラ
-  // const handleReservationSelect = (reservation: {
-  //   dayIndex: number;
-  //   timeIndex: number;
-  //   teamIndex: number;
-  // }) => {
-  //   setSelectedReservations((prev) => {
-  //     const exists = prev.some(
-  //       (r) =>
-  //         r.dayIndex === reservation.dayIndex &&
-  //         r.timeIndex === reservation.timeIndex &&
-  //         r.teamIndex === reservation.teamIndex
-  //     );
-
-  //     return exists
-  //       ? prev.filter(
-  //           (r) =>
-  //             !(
-  //               r.dayIndex === reservation.dayIndex &&
-  //               r.timeIndex === reservation.timeIndex &&
-  //               r.teamIndex === reservation.teamIndex
-  //             )
-  //         )
-  //       : [...prev, reservation];
-  //   });
-  // };
-
   // // 編集ボタンをクリックしたときのハンドラ
   // const handleEditPopup = () => {
   //   if (selectedReservations.length > 0) {
@@ -179,39 +171,35 @@ function App() {
         selectedHours={selectedHours}
         onHourClick={handleHourClick}
       />
-      {/* {selectedHours.length > 0 && (
-        <ReservationDisplay
-          weekDays={weekDays}
-          reservedNames={reservedNames}
-          selectedHours={selectedHours}
-          timeSlots={timeSlots}
-          selectedReservations={selectedReservations} // 型が一致
-          onReservationSelect={handleReservationSelect}
-        />
-      )}
+      <ReservationDisplay
+        reservations={reservations}
+        selectedHours={selectedHours}
+        selectedReservations={selectedReservations}
+        onReservationClick={handleReservationClic}
+      />
 
-      <button
+      {/* <button
         className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
         onClick={handleReserve}
       >
         予約
-      </button>
+      </button> */}
 
-      <button
+      {/* <button
         className="fixed bottom-8 right-8 p-2 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
         onClick={handleEditPopup}
       >
         編集
-      </button>
+      </button> */}
 
-      {isReservationPopupVisible && (
+      {/* {isReservationPopupVisible && (
         <ReservationPopup
           onSubmit={handleNameSubmit}
           onClose={() => setIsReservationPopupVisible(false)}
         />
-      )}
+      )} */}
 
-      {isEditPopupVisible && (
+      {/* {isEditPopupVisible && (
         <EditReservationPopup
           daysOfWeek={daysOfWeek}
           timeSlots={timeSlots}
