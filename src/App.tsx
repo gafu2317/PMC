@@ -12,8 +12,6 @@ import Calendar from "./components/Calendar";
 function App() {
   //部員を管理
   const [members, setMembers] = useState<Members[]>([]);
-  console.log("members");
-  console.log(members);
   // Firestoreから部員情報を取得
   useEffect(() => {
     const collectionRef = collection(db, "members");
@@ -36,8 +34,6 @@ function App() {
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  console.log("reservations");
-  console.log(reservations);
   // Firestoreから予約情報を取得
   useEffect(() => {
     const collectionRef = collection(db, "reservations");
@@ -47,8 +43,6 @@ function App() {
         const newReservations = await getAllReservations();
         if (newReservations) {
           setReservations(newReservations); // 状態を更新
-          console.log("reservations");
-          console.log(reservations);
         } else {
           console.warn("予約情報が取得できませんでした。");
         }
@@ -66,7 +60,9 @@ function App() {
 
   //　選択している時間帯を管理(Hourに渡しやすい型)
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
-    Array.from({ length: daysOfWeek.length }, () => Array(timeSlots.length).fill(false))
+    Array.from({ length: daysOfWeek.length }, () =>
+      Array(timeSlots.length).fill(false)
+    )
   );
   // Hourをクリックしたときのハンドラ
   const handleHourClick = (dayIndex: number, timeIndex: number) => {
@@ -105,14 +101,18 @@ function App() {
   // 予約ポップアップの表示状態を管理
   const [isReservationPopupVisible, setIsReservationPopupVisible] =
     useState(false);
-    // 予約ボタンをクリックしたときのハンドラ
-    const handleReserve = () => {
+  // 予約ボタンをクリックしたときのハンドラ
+  const handleReserve = () => {
+    //Hourが選択されているときのみポップアップを表示
+    if (selectedHours.some((hours) => hours.includes(true))){
       setIsReservationPopupVisible(true);
-    };
+    } else{
+      alert("予約する日時を選択してください");
+    }
+  };
 
   // // 編集ポップアップの表示状態を管理
   // const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
-
 
   // // 名前を追加するするハンドラー
   // const handleNameSubmit = (names: string[]) => {
