@@ -2,16 +2,42 @@ import React, { useState, useEffect } from "react";
 import ReservationPopup from "./components/ReservationPopup";
 import EditReservationPopup from "./components/EditReservationPopup";
 import ReservationDisplay from "./components/ReservationDisplay";
-import { Reservation } from "./types/type";
-import { getAllReservations } from "./firebase/userService";
+import { Reservation, Members } from "./types/type";
+import { getAllReservations, getAllUser } from "./firebase/userService";
 import { db } from "./firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlots } from "./utils/utils";
 import Calendar from "./components/Calendar";
 
 function App() {
+  //部員を管理
+  const [members, setMembers] = useState<Members[]>([]);
+  console.log("members");
+  console.log(members);
+  // Firestoreから部員情報を取得
+  useEffect(() => {
+    const collectionRef = collection(db, "members");
+    // リアルタイムリスナーを設定
+    const unsubscribe = onSnapshot(collectionRef, async () => {
+      try {
+        const newMembers = await getAllUser();
+        if (newMembers) {
+          setMembers(newMembers); // 状態を更新
+        } else {
+          console.warn("部員情報が取得できませんでした。");
+        }
+      } catch (error) {
+        console.error("部員情報の取得に失敗しました:", error);
+      }
+    });
+    // クリーンアップ関数を返すことで、コンポーネントがアンマウントされるときにリスナーを解除
+    return () => unsubscribe();
+  }, []); // マウント時にのみ実行
+
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  console.log("reservations");
+  console.log(reservations);
   // Firestoreから予約情報を取得
   useEffect(() => {
     const collectionRef = collection(db, "reservations");
@@ -21,6 +47,8 @@ function App() {
         const newReservations = await getAllReservations();
         if (newReservations) {
           setReservations(newReservations); // 状態を更新
+          console.log("reservations");
+          console.log(reservations);
         } else {
           console.warn("予約情報が取得できませんでした。");
         }
@@ -31,10 +59,14 @@ function App() {
     // クリーンアップ関数を返すことで、コンポーネントがアンマウントされるときにリスナーを解除
     return () => unsubscribe();
   }, []); // マウント時にのみ実行
+  // 予約情報を追加する関数
+  const handleReservationAdd = (newReservations: Reservation[]) => {
+    setReservations((prev) => [...prev, ...newReservations]);
+  };
 
-  //　選択している時間帯を管理(Hourに渡しやすい二次元配列)
+  //　選択している時間帯を管理(Hourに渡しやすい型)
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
-    Array.from({ length: daysOfWeek.length }, () => Array(timeSlots.length))
+    Array.from({ length: daysOfWeek.length }, () => Array(timeSlots.length).fill(false))
   );
   // Hourをクリックしたときのハンドラ
   const handleHourClick = (dayIndex: number, timeIndex: number) => {
@@ -70,24 +102,17 @@ function App() {
     });
   };
 
-  // // 予約者名を管理
-  // const [reservedNames, setReservedNames] = useState<string[][][][]>(
-  //   Array.from({ length: timeSlots.length }, () =>
-  //     Array.from({ length: daysOfWeek.length }, () => [])
-  //   )
-  // );
-
-  // // 予約ポップアップの表示状態を管理
-  // const [isReservationPopupVisible, setIsReservationPopupVisible] =
-  //   useState(false);
+  // 予約ポップアップの表示状態を管理
+  const [isReservationPopupVisible, setIsReservationPopupVisible] =
+    useState(false);
+    // 予約ボタンをクリックしたときのハンドラ
+    const handleReserve = () => {
+      setIsReservationPopupVisible(true);
+    };
 
   // // 編集ポップアップの表示状態を管理
   // const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
 
-  // // 予約ボタンをクリックしたときのハンドラ
-  // const handleReserve = () => {
-  //   setIsReservationPopupVisible(true);
-  // };
 
   // // 名前を追加するするハンドラー
   // const handleNameSubmit = (names: string[]) => {
@@ -178,12 +203,21 @@ function App() {
         onReservationClick={handleReservationClic}
       />
 
-      {/* <button
+      <button
         className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
         onClick={handleReserve}
       >
         予約
-      </button> */}
+      </button>
+
+      {isReservationPopupVisible && (
+        <ReservationPopup
+          members={members}
+          selectedHours={selectedHours}
+          onSubmit={handleReservationAdd}
+          onClose={() => setIsReservationPopupVisible(false)}
+        />
+      )}
 
       {/* <button
         className="fixed bottom-8 right-8 p-2 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
@@ -191,13 +225,6 @@ function App() {
       >
         編集
       </button> */}
-
-      {/* {isReservationPopupVisible && (
-        <ReservationPopup
-          onSubmit={handleNameSubmit}
-          onClose={() => setIsReservationPopupVisible(false)}
-        />
-      )} */}
 
       {/* {isEditPopupVisible && (
         <EditReservationPopup

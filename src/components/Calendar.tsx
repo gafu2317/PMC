@@ -57,11 +57,13 @@ const Calendar: React.FC<CalendarProps> = ({
               {item.date}
             </div>
           ))}
-          {Array.from({ length: daysOfWeek.length }).map((_, dayIndex) => (
-            <React.Fragment key={dayIndex}>
-              {Array.from({ length: timeSlots.length -1 }).map((_, timeIndex) => (
+          {Array.from({ length: timeSlots.length - 1 }).map((_, timeIndex) => (
+            <React.Fragment key={timeIndex}>
+              {Array.from({ length: daysOfWeek.length }).map((_, dayIndex) => (
                 <Hour
-                  key={timeIndex}
+                  dayIndex={dayIndex}
+                  timeIndex={timeIndex}
+                  key={`hour-${dayIndex}-${timeIndex}`}
                   isSelected={selectedHours[dayIndex][timeIndex]}
                   isReserved={reservedHours[dayIndex][timeIndex]}
                   onClick={() => onHourClick(dayIndex, timeIndex)}

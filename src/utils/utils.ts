@@ -13,6 +13,8 @@ export const weekDays = Array.from({ length: 8 }, (_, index) => {
   return {
     date: `${date.getMonth() + 1}/${date.getDate()}`,
     day: date.getDate(),
+    month: date.getMonth() + 1,
+    year: date.getFullYear(),
   };
 });
 
@@ -42,15 +44,18 @@ export function getDayIndex(date: Date): number {
       return dayIndex;
     }
   }
+  console.log("dayIndex not found");
   return -1;
 }
 
 export function getTimeIndex(date: Date): number {
   for (let i = 0; i < timeSlots.length; i++) {
-    if (timeSlots[i] === (date.getHours() + ":" + date.getMinutes())) {
+    const hour = parseInt(timeSlots[i].split(":")[0], 10); // 文字列を数値に変換
+    if (hour === date.getHours()) {
       const timeIndex = i;
       return timeIndex;
     }
   }
+  console.log("timeIndex not found");
   return -1;
 }

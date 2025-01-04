@@ -1,54 +1,92 @@
 // userService.ts
 import { db } from "./firebase";
-import { collection, addDoc, getDocs, doc, setDoc, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  setDoc,
+  deleteDoc,
+  Timestamp,
+} from "firebase/firestore";
 import { getDayIndex, getTimeIndex } from "../utils/utils";
-import { Reservation } from "../types/type";
+import { Members, Reservation } from "../types/type";
 
+// ユーザーを追加する関数
+export const addUser = async (
+  name: string,
+  lineId: string,
+  studentId: string
+): Promise<void> => {
+  try {
+    // usersドキュメントの参照を取得
+    const docRef = doc(db, "users", studentId);
 
-// // ユーザーを追加する関数
-// export const addUser = async (
-//   name: string,
-//   lineId: string,
-//   reservations: Array<{ startTime: Date, EndTime: Date, fee: number }>
-// ): Promise<void> => {
-//   try {
-//     const userDocRef = doc(db, "users", lineId);
+    // ユーザー情報を追加
+    await setDoc(docRef, {
+      name: name,
+      lineId: lineId,
+    });
+    console.log(`ユーザーが追加されました。`);
+  } catch (error) {
+    console.error("ユーザーの追加に失敗しました:", error);
+  }
+};
 
-//     // 新しいユーザーの情報を設定
-//     await setDoc(userDocRef, {
-//       name: name,
-//       reservations: reservations,
-//     });
+// ユーザーを削除する関数
+export const deleteUser = async (studentId: string): Promise<void> => {
+  try {
+    // usersのドキュメントの参照を取得
+    const docRef = doc(db, "users", studentId);
 
-//     console.log(`ユーザーが追加されました。`);
-//   } catch (error) {
-//     console.error("ユーザーの追加に失敗しました:", error);
-//   }
-// };
+    // ドキュメントを削除
+    await deleteDoc(docRef);
+
+    console.log("ユーザーが削除されました。");
+  } catch (error) {
+    console.error("ユーザーの削除に失敗しました:", error);
+  }
+};
+
+// ユーザーの情報を取得する関数
+export const getAllUser = async (): Promise<Members[] | undefined> => {
+  try {
+    const userColRef = collection(db, "users"); //usersコレクションの参照を取得
+    const userDocs = await getDocs(userColRef); //コレクション内の全てのドキュメントを取得
+    const users = userDocs.docs.map((doc) => ({
+      studentId: doc.id,
+      name: doc.data().name,
+      lineId: doc.data().lineId,
+    }));
+    return users;
+  } catch (error) {
+    console.error("ユーザーの取得に失敗しました:", error);
+  }
+};
 
 //予約を追加する関数
 export const addReservation = async (
   reservation: Reservation
 ): Promise<void> => {
   try {
-    //usersコレクションの参照を取得
+    //reservationsドキュメントの参照を取得
     const docRef = doc(db, "reservations", reservation.id);
 
     //予約情報を追加
     await setDoc(docRef, {
       names: reservation.names,
-      date: reservation.date,
+      date: Timestamp.fromDate(reservation.date),
     });
     console.log("予約が追加されました。");
   } catch (error) {
     console.error("予約の追加に失敗しました:", error);
   }
-}
+};
 
 // 予約を削除する関数
 export const deleteReservation = async (id: string): Promise<void> => {
   try {
-    // ユーザーのドキュメントの参照を取得
+    // reservationsのドキュメントの参照を取得
     const docRef = doc(db, "reservations", id);
 
     // ドキュメントを削除
@@ -58,38 +96,22 @@ export const deleteReservation = async (id: string): Promise<void> => {
   } catch (error) {
     console.error("予約の削除に失敗しました:", error);
   }
-}
-
-// // ユーザーの情報を取得する関数
-// export const getUser = async (lineId: string) => {
-//   try {
-//     const userDocRef = doc(db, "users", lineId);
-//     const userDoc = await getDocs(collection(db, "users"));
-//     console.log(userDoc);
-//   } catch (error) {
-//     console.error("ユーザーの取得に失敗しました:", error);
-//   }
-// }
+};
 
 // 予約情報を取得する関数
-export const getAllReservations = async (): Promise<Reservation[] | undefined> => {
+export const getAllReservations = async (): Promise<
+  Reservation[] | undefined
+> => {
   try {
-    const userCollectionRef = collection(db, "users"); // usersコレクションの参照を取得
-    const userDocs = await getDocs(userCollectionRef); // コレクション内の全てのドキュメントを取得
+    const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
+    const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
-    const isReserved = Array.from({ length: 8 }, () =>
-      Array.from({ length: 12 }, () => 0)
-    );
-
-    const reservations = userDocs.docs.map((doc) => ({
+    const reservations = reservationsDocs.docs.map((doc) => ({
       id: doc.id,
       names: doc.data().names,
       date: doc.data().date.toDate(),
-      dayIndex: getDayIndex(doc.data().date),
-      timeIndex: getTimeIndex(doc.data().date),
-      teamIndex: isReserved[getDayIndex(doc.data().date)][
-        getTimeIndex(doc.data().date)
-      ]++, // 格納した後にインクリメント
+      dayIndex: getDayIndex(doc.data().date.toDate()),
+      timeIndex: getTimeIndex(doc.data().date.toDate()),
     }));
 
     return reservations;

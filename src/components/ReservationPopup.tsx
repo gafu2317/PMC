@@ -1,52 +1,78 @@
 import React from "react";
 import { useState } from "react";
+import { Members, Reservation } from "../types/type";
+import { v4 as uuidv4 } from "uuid";
+import { daysOfWeek, weekDays, timeSlots } from "../utils/utils";
 
 interface ReservationPopupProps {
-  onSubmit: (names: string[]) => void; // 送信ハンドラ
+  members: Members[]; // 部員の名前
+  selectedHours: boolean[][]; // 選択された時間帯
+  onSubmit: (reservations: Reservation[]) => void; // 送信ハンドラ
   onClose: () => void; // 閉じるハンドラ
 }
 
 const ReservationPopup: React.FC<ReservationPopupProps> = ({
+  members,
+  selectedHours,
   onSubmit,
   onClose,
 }) => {
   const [names, setNames] = useState<string[]>([""]); // 名前の入力値を管理
 
   // 名前の入力フィールドの値を更新
-  const handleNameChange = (index: number, value: string) => {
-    const newNames = [...names];
-    newNames[index] = value; // 指定したインデックスの値を更新
-    setNames(newNames);
-  };
-
-  // +ボタンがクリックされたときのハンドラ
-  const handleAddInput = () => {
-    setNames([...names, ""]); // 新しい空の文字列を追加
-  };
-  // -ボタンがクリックされたときのハンドラ
-  const handleSubInput = () => {
-    if (names.length > 1) {
-      setNames(names.slice(0, -1)); // 最後の要素を削除
+  const handleNameChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    if (value && !names.includes(value)) {
+      setNames([...names, value]);
     }
   };
 
-const handleSubmit = () => {
-  // 空でない名前だけをフィルタリング
-  const filteredNames = names.filter((name) => name);
-
-  // フィルタリングされた名前を親コンポーネントに送信
-  onSubmit(filteredNames);
-  onClose(); // ポップアップを閉じる
-};
-
+  const handleSubmit = () => {
+    // 空でない名前だけをフィルタリング
+    const filteredNames = names.filter((name) => name);
+    const reservations: Reservation[] = [];
+    // 予約情報を生成
+    for (let dayIndex = 0; dayIndex < selectedHours.length; dayIndex++) {
+      for (
+        let timeIndex = 0;
+        timeIndex < selectedHours[dayIndex].length;
+        timeIndex++
+      ) {
+        if (selectedHours[dayIndex][timeIndex]) {
+          const year = weekDays[dayIndex].year;
+          const month = weekDays[dayIndex].month;
+          const day = weekDays[dayIndex].day;
+          const time = timeSlots[timeIndex];
+          const [hour, minute] = time.split(":").map(Number);
+          reservations.push({
+            id: uuidv4(),
+            names: filteredNames,
+            date: new Date(year, month - 1, day, hour, minute),
+            dayIndex,
+            timeIndex,
+          });
+        }
+      }
+    }
+    onSubmit(reservations);
+    onClose(); // ポップアップを閉じる
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-6 rounded shadow-md">
-        <h2 className="text-lg font-bold">
-          使用する人の名前を入力してください
-        </h2>
-        {names.map((name, index) => (
+        <label className="text-lg font-bold">
+          使用する人の名前を選択してください
+        </label>
+        <select id="members" value="{selectedName}" onChange={handleNameChange}>
+          {members.map((member) => (
+            <option key={member.lineId} value={member.name}>
+              {member.name}
+            </option>
+          ))}
+        </select>
+
+        {/* {names.map((name, index) => (
           <input
             key={index}
             type="text"
@@ -55,19 +81,7 @@ const handleSubmit = () => {
             className="border p-2 mt-2 block rounded-lg"
             placeholder="名前を入力"
           />
-        ))}
-        <button
-          className="mt-2 p-2 mr-2 bg-gradient-to-b from-sky-400 to-blue-500 text-white rounded-full w-10"
-          onClick={handleAddInput}
-        >
-          +
-        </button>
-        <button
-          className="mt-2 p-2 bg-gradient-to-b from-sky-400 to-blue-500 text-white rounded-full w-10"
-          onClick={handleSubInput}
-        >
-          -
-        </button>
+        ))} */}
         <div className="flex justify-between mt-4">
           <button
             className="p-2 bg-gradient-to-b from-sky-600 to-blue-700  text-white rounded-full w-20"

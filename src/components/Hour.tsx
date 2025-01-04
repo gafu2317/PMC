@@ -1,13 +1,16 @@
 // Hour.tsx
 import React from "react";
+import { getDayIndex } from "../utils/utils";
 
 interface HourProps {
+  dayIndex: number; // 日付のインデックス
+  timeIndex: number; // 時間のインデックス
   isSelected: boolean; // クリックフラグ
   isReserved: boolean; // 予約フラグ
   onClick: () => void; // クリック時のハンドラ
 }
 
-const Hour: React.FC<HourProps> = ({ isSelected, isReserved, onClick }) => {
+const Hour: React.FC<HourProps> = ({ isSelected, isReserved, onClick, dayIndex, timeIndex }) => {
   return (
     <div
       className={`flex items-center justify-center p-2 border ${
@@ -19,7 +22,7 @@ const Hour: React.FC<HourProps> = ({ isSelected, isReserved, onClick }) => {
     >
       <span className={`text-xs ${isReserved ? "text-gray-700" : "text-black"}`}>
         {isReserved ? "×" : "⚪︎"}{" "}
-        {/* 予約されている場合は「予約あり」を表示 */}
+        {/* {dayIndex}日目{timeIndex}時間目 */}
       </span>
     </div>
   );

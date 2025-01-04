@@ -6,11 +6,7 @@ interface ReservationDisplayProps {
   reservations: Reservation[]; // 予約情報
   selectedHours: boolean[][]; // 選択された時間帯
   selectedReservations: string[][][]; // 選択された予約
-  onReservationClick: (
-    dayIndex: number,
-    timeIndex: number,
-    id: string
-  ) => void; // 予約を選択したときのハンドラ
+  onReservationClick: (dayIndex: number, timeIndex: number, id: string) => void; // 予約を選択したときのハンドラ
 }
 
 const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
