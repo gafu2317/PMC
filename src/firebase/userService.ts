@@ -20,12 +20,12 @@ export const addUser = async (
 ): Promise<void> => {
   try {
     // usersドキュメントの参照を取得
-    const docRef = doc(db, "users", studentId);
+    const docRef = doc(db, "users", lineId);
 
     // ユーザー情報を追加
     await setDoc(docRef, {
       name: name,
-      lineId: lineId,
+      studentId: studentId,
     });
     console.log(`ユーザーが追加されました。`);
   } catch (error) {
@@ -34,10 +34,10 @@ export const addUser = async (
 };
 
 // ユーザーを削除する関数
-export const deleteUser = async (studentId: string): Promise<void> => {
+export const deleteUser = async (lineId: string): Promise<void> => {
   try {
     // usersのドキュメントの参照を取得
-    const docRef = doc(db, "users", studentId);
+    const docRef = doc(db, "users", lineId);
 
     // ドキュメントを削除
     await deleteDoc(docRef);
@@ -54,9 +54,9 @@ export const getAllUser = async (): Promise<Members[] | undefined> => {
     const userColRef = collection(db, "users"); //usersコレクションの参照を取得
     const userDocs = await getDocs(userColRef); //コレクション内の全てのドキュメントを取得
     const users = userDocs.docs.map((doc) => ({
-      studentId: doc.id,
+      lineId: doc.id,
       name: doc.data().name,
-      lineId: doc.data().lineId,
+      studentId: doc.data().studentId,
     }));
     return users;
   } catch (error) {
@@ -117,5 +117,20 @@ export const getAllReservations = async (): Promise<
     return reservations;
   } catch (error) {
     console.error("予約の取得に失敗しました:", error);
+  }
+};
+
+//　プリセットをユーザーデータに追加する関数
+export const addPreset = async (studentId: string, preset: string[]): Promise<void> => {
+  try {
+    // ドキュメントの参照を取得
+    const docRef = doc(db, "users", studentId);
+
+    // プリセットを追加
+    await setDoc(docRef, { preset: preset }, { merge: true });
+
+    console.log("プリセットが追加されました。");
+  } catch (error) {
+    console.error("プリセットの追加に失敗しました:", error);
   }
 };

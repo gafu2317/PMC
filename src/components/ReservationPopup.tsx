@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Members, Reservation } from "../types/type";
 import { v4 as uuidv4 } from "uuid";
 import { daysOfWeek, weekDays, timeSlots } from "../utils/utils";
+import { testLindId } from "../liff/liffService";
 
 interface ReservationPopupProps {
   members: Members[]; // 部員の名前
@@ -17,6 +18,10 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   onSubmit,
   onClose,
 }) => {
+  // lineId
+  const lineId = testLindId;
+  // studentId
+  const studentId = members.find((member) => member.lineId === lineId);
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Members[]>([]); // 選択されたメンバーをMembersの配列で管理
   const handleCheckboxChange = (member: Members) => {
@@ -35,6 +40,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   const filteredMembers = members.filter((member) =>
     member.name.toLowerCase().includes(filterText.toLowerCase())
   );
+
+
 
   const handleSubmit = () => {
     // IDの配列を名前の配列に変換
@@ -114,8 +121,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           </ul>
         </div>
         {/* 選択されたメンバーを表示する横スクロール可能な要素 */}
-        <div className="overflow-x-auto m-1 h-16">
-          <span className="text-xs">選択されたメンバー</span>
+        <div className="overflow-x-auto mt-1 h-16 border border-blue-200 rounded ">
+          <span className="text-xs ml-1">選択されたメンバー</span>
           <div className="flex space-x-2">
             {selectedMembers.map((member) => (
               <div key={member.lineId} className="whitespace-nowrap">
@@ -124,7 +131,10 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             ))}
           </div>
         </div>
-        <div>//今回のメンバーをプリセットに登録</div>
+        <div>
+          <input type="checkbox" id="preset" name="preset"/>
+          <label htmlFor="preset" className="ml-1">今回のメンバーをプリセットに登録する</label>
+        </div>
 
         {/* {names.map((name, index) => (
           <input
