@@ -1,12 +1,10 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { Members, Reservation } from "../types/type";
 import { v4 as uuidv4 } from "uuid";
 import { weekDays, timeSlots } from "../utils/utils";
-import { testLindId, initLiff } from "../liff/liffService";
 import {
   addPresets,
-  getPresets,
   addReservation,
 } from "../firebase/userService";
 import PresetPopup from "./PresetPopup";
@@ -27,8 +25,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   onClose,
 }) => {
   // studentId
-  const foundMember = members.find((member) => member.lineId === myLineId);
-  const myStudentId: number = foundMember ? foundMember.studentId : -1; // デフォルト値を0に設定
+  // const foundMember = members.find((member) => member.lineId === myLineId);
+  // const myStudentId: number = foundMember ? foundMember.studentId : -1; // デフォルト値を0に設定
 
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Members[]>([]); // 選択されたメンバーをMembersの配列で管理

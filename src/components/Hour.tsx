@@ -1,6 +1,5 @@
 // Hour.tsx
 import React from "react";
-import { getDayIndex } from "../utils/utils";
 
 interface HourProps {
   dayIndex: number; // 日付のインデックス
@@ -10,7 +9,7 @@ interface HourProps {
   onClick: () => void; // クリック時のハンドラ
 }
 
-const Hour: React.FC<HourProps> = ({ isSelected, isReserved, onClick, dayIndex, timeIndex }) => {
+const Hour: React.FC<HourProps> = ({ isSelected, isReserved, onClick}) => {
   return (
     <div
       className={`flex items-center justify-center p-2 border ${

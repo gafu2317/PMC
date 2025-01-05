@@ -8,6 +8,7 @@ export const initLiff = async (): Promise<string | null> => {
       const profile = await liff.getProfile();
       return profile.userId; // これがlineIdです
     } else {
+      return testLindId;//テスト用
       liff.login(); // ログインしていない場合はログインを促す
       return null;
     }

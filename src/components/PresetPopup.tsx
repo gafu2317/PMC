@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Members } from "../types/type";
 import { getPresets, deletePresets } from "../firebase/userService";
-import { testLindId } from "../liff/liffService";
 
 // インターフェースの定義
 interface PresetPopupProps {
