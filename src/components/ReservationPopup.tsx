@@ -1,11 +1,18 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Members, Reservation } from "../types/type";
 import { v4 as uuidv4 } from "uuid";
-import { daysOfWeek, weekDays, timeSlots } from "../utils/utils";
-import { testLindId } from "../liff/liffService";
+import { weekDays, timeSlots } from "../utils/utils";
+import { testLindId, initLiff } from "../liff/liffService";
+import {
+  addPresets,
+  getPresets,
+  addReservation,
+} from "../firebase/userService";
+import PresetPopup from "./PresetPopup";
 
 interface ReservationPopupProps {
+  myLineId: string; // lineId
   members: Members[]; // 部員の名前
   selectedHours: boolean[][]; // 選択された時間帯
   onSubmit: (reservations: Reservation[]) => void; // 送信ハンドラ
@@ -13,18 +20,19 @@ interface ReservationPopupProps {
 }
 
 const ReservationPopup: React.FC<ReservationPopupProps> = ({
+  myLineId,
   members,
   selectedHours,
   onSubmit,
   onClose,
 }) => {
-  // lineId
-  const lineId = testLindId;
   // studentId
-  const studentId = members.find((member) => member.lineId === lineId);
+  const foundMember = members.find((member) => member.lineId === myLineId);
+  const myStudentId: number = foundMember ? foundMember.studentId : -1; // デフォルト値を0に設定
+
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Members[]>([]); // 選択されたメンバーをMembersの配列で管理
-  const handleCheckboxChange = (member: Members) => {
+  const handleAddSelectedMembers = (member: Members) => {
     setSelectedMembers(
       (prev) =>
         prev.includes(member)
@@ -33,7 +41,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     );
   };
 
-
   // 入力されたフィルター文字列を管理
   const [filterText, setFilterText] = useState<string>("");
   // フィルタリングされたメンバーを取得
@@ -41,11 +48,26 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     member.name.toLowerCase().includes(filterText.toLowerCase())
   );
 
+  //プリセットポップアップの状態
+  const [isPresetPopup, setIsPresetPopup] = useState<boolean>(false);
 
+  // プリセットに登録するかどうか
+  const [isPreset, setIsPreset] = useState<boolean>(false);
+  // ハンドラ
+  const handleIsAddPreset = () => {
+    setIsPreset((prev) => !prev);
+  };
 
   const handleSubmit = () => {
-    // IDの配列を名前の配列に変換
+    // 選択されたメンバーの名前を取得
     const selectedNames = selectedMembers.map((member) => member.name);
+    // プリセットに登録する場合
+    if (isPreset) {
+      // presetsの状態が更新されてからaddPresetsを呼び出す
+      const newPreset = selectedMembers.map((member) => member.lineId);
+      addPresets(myLineId, newPreset);
+    }
+    // IDの配列を名前の配列に変換
     const reservations: Reservation[] = [];
     // 予約情報を生成
     for (let dayIndex = 0; dayIndex < selectedHours.length; dayIndex++) {
@@ -71,6 +93,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
       }
     }
     onSubmit(reservations);
+    addReservation(reservations);
     onClose(); // ポップアップを閉じる
   };
 
@@ -89,8 +112,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             ))}
           </div>
         ))} */}
-        <div>//プリセットを使用する(ポップアップ)</div>
-        {/* 名前を検索 */}
+        {/* 名前を検索する要素 */}
         <input
           type="text"
           placeholder="検索"
@@ -98,7 +120,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           onChange={(e) => setFilterText(e.target.value)}
           className="border border-blue-200 rounded p-1 mb-1 w-full"
         />
-        {/* メンバー選択 */}
+        {/* 縦スクロース可能なメンバー選択要素 */}
         <div className="border border-blue-200 rounded h-32 overflow-y-auto">
           <ul className="list-disc pl-5">
             {filteredMembers.map((member) => (
@@ -106,14 +128,17 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 key={member.lineId}
                 className={`py-1 flex items-center rounded-full`}
               >
+                <label
+                  htmlFor={member.lineId}
+                  className="user-select-none cursor-pointer"
+                >
                 <input
                   type="checkbox"
                   id={member.lineId}
                   checked={selectedMembers.includes(member)}
-                  onChange={() => handleCheckboxChange(member)}
+                  onChange={() => handleAddSelectedMembers(member)}
                   className="mr-2 appearance-none h-3 w-3 border border-blue-200 rounded-full checked:bg-blue-500 checked:border-transparent focus:outline-none"
                 />
-                <label htmlFor={member.lineId} className="cursor-pointer">
                   {member.name}
                 </label>
               </li>
@@ -131,21 +156,19 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             ))}
           </div>
         </div>
+        {/* プリセットに登録するかどうかのチェックボックス要素 */}
         <div>
-          <input type="checkbox" id="preset" name="preset"/>
-          <label htmlFor="preset" className="ml-1">今回のメンバーをプリセットに登録する</label>
-        </div>
-
-        {/* {names.map((name, index) => (
           <input
-            key={index}
-            type="text"
-            value={name}
-            onChange={(e) => handleNameChange(index, e.target.value)} // 入力値の更新
-            className="border p-2 mt-2 block rounded-lg"
-            placeholder="名前を入力"
+            type="checkbox"
+            id="preset"
+            name="preset"
+            onChange={() => handleIsAddPreset()}
           />
-        ))} */}
+          <label htmlFor="preset" className="ml-1">
+            今回のメンバーをプリセットに登録する
+          </label>
+        </div>
+        {/* ボタン要素 */}
         <div className="flex justify-between mt-4">
           <button
             className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-gray-300 to-gray-400"
@@ -153,6 +176,17 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           >
             閉じる
           </button>
+          <button className=" p-2 bg-gradient-to-b from-sky-400 to-sky-700  text-white rounded-full w-30">
+            <span onClick={() => setIsPresetPopup(true)}>プリセット</span>
+          </button>
+          {isPresetPopup && (
+            <PresetPopup
+              myLineId={myLineId}
+              members={members}
+              onClose={() => setIsPresetPopup(false)}
+              setSelectedMembers={setSelectedMembers}
+            />
+          )}
           <button
             className="p-2 bg-gradient-to-b from-sky-600 to-blue-700  text-white rounded-full w-20"
             onClick={handleSubmit}

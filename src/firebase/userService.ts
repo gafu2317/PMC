@@ -3,6 +3,7 @@ import { db } from "./firebase";
 import {
   collection,
   addDoc,
+  getDoc,
   getDocs,
   doc,
   setDoc,
@@ -66,17 +67,17 @@ export const getAllUser = async (): Promise<Members[] | undefined> => {
 
 //予約を追加する関数
 export const addReservation = async (
-  reservation: Reservation
+  reservatios: Reservation[]
 ): Promise<void> => {
   try {
-    //reservationsドキュメントの参照を取得
-    const docRef = doc(db, "reservations", reservation.id);
-
-    //予約情報を追加
-    await setDoc(docRef, {
-      names: reservation.names,
-      date: Timestamp.fromDate(reservation.date),
-    });
+    const docRef = collection(db, "reservations"); //reservationsコレクションの参照を取得
+    for (const reservation of reservatios) {
+      //予約情報を追加
+      await addDoc(docRef, {
+        names: reservation.names,
+        date: Timestamp.fromDate(reservation.date),
+      });
+    }
     console.log("予約が追加されました。");
   } catch (error) {
     console.error("予約の追加に失敗しました:", error);
@@ -120,17 +121,98 @@ export const getAllReservations = async (): Promise<
   }
 };
 
-//　プリセットをユーザーデータに追加する関数
-export const addPreset = async (studentId: string, preset: string[]): Promise<void> => {
+//　プリセットをユーザーデータに追加する関数(二次元配列のフィールドを持つには二次元配列ごと渡さないといけないっぽい？)
+export const addPresets = async (
+  lineId: string,
+  preset: string[]
+): Promise<void> => {
   try {
-    // ドキュメントの参照を取得
-    const docRef = doc(db, "users", studentId);
+    const docRef = doc(db, "users", lineId);
+    const docSnap = await getDoc(docRef);
+    const presetObj = { members: preset }; // 新しいプリセットオブジェクト
 
-    // プリセットを追加
-    await setDoc(docRef, { preset: preset }, { merge: true });
+    // ドキュメントが存在する場合
+    if (docSnap.exists()) {
+      const existingPresets = docSnap.data().presets || []; // presetsがない場合は空配列を使用
 
-    console.log("プリセットが追加されました。");
+      // 新しいプリセットの重複チェック
+      const isDuplicate = existingPresets.some(
+        (existingPreset: { members: string[] }) =>
+          existingPreset.members.length === presetObj.members.length &&
+          existingPreset.members.every((member) =>
+            presetObj.members.includes(member)
+          )
+      );
+
+      if (!isDuplicate) {
+        // 重複がなければプリセットを追加
+        await setDoc(
+          docRef,
+          { presets: [...existingPresets, presetObj] },
+          { merge: true }
+        );
+        console.log("プリセットが追加されました。");
+      } else {
+        console.log("重複するプリセットは追加されませんでした。");
+      }
+    } else {
+      // ドキュメントが存在しない場合、新しく作成
+      await setDoc(docRef, { presets: [presetObj] }, { merge: true });
+      console.log(
+        "新しいユーザーのドキュメントを作成し、プリセットが追加されました。"
+      );
+    }
   } catch (error) {
     console.error("プリセットの追加に失敗しました:", error);
+  }
+};
+
+// プリセットを削除する関数
+export const deletePresets = async (
+  lineId: string,
+  preset: string[],
+): Promise<void> => {
+  //presetと一致するものを削除
+  try {
+    const docRef = doc(db, "users", lineId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const existingPresets = docSnap.data().presets || [];
+      const newPresets = existingPresets.filter(
+        (existingPreset: { members: string[] }) =>
+          existingPreset.members.length !== preset.length ||
+          !existingPreset.members.every((member) => preset.includes(member))
+      );
+      await setDoc(docRef, { presets: newPresets }, { merge: true });
+      console.log("プリセットが削除されました。");
+    } else {
+      console.log("指定されたユーザーのドキュメントは存在しません。");
+    }
+  } catch (error) {
+    console.error("プリセットの削除に失敗しました:", error);
+  }
+};
+
+// プリセットを取得する関数
+export const getPresets = async (
+  lineId: string
+): Promise<string[][] | undefined> => {
+  try {
+    const userDocRef = doc(db, "users", lineId); // usersドキュメントの参照を取得
+    const userDocSnap = await getDoc(userDocRef); // ドキュメントのスナップショットを取得
+
+    if (userDocSnap.exists()) {
+      const presetObj = userDocSnap.data()?.presets; // データを取得し、presetsを取得
+      const presets = presetObj.map(
+        (preset: { members: string[] }) => preset.members
+      ); // プリセットを二次元配列に変換
+      return presets;
+    } else {
+      console.log("指定されたユーザーのドキュメントは存在しません。");
+      return undefined; // ドキュメントが存在しない場合はundefinedを返す
+    }
+  } catch (error) {
+    console.error("プリセットの取得に失敗しました:", error);
+    return undefined; // エラー時にundefinedを返す
   }
 };

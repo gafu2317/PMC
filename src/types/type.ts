@@ -10,5 +10,6 @@ export interface Reservation {
 export interface Members {
   lineId: string;
   name: string;
-  studentId: string;
+  studentId: number;
 }
+

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ReservationPopup from "./components/ReservationPopup";
-import EditReservationPopup from "./components/EditReservationPopup";
+// import EditReservationPopup from "./components/EditReservationPopup";
 import ReservationDisplay from "./components/ReservationDisplay";
 import { Reservation, Members } from "./types/type";
 import { getAllReservations, getAllUser } from "./firebase/userService";
@@ -8,8 +8,24 @@ import { db } from "./firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlots } from "./utils/utils";
 import Calendar from "./components/Calendar";
+import RegistrationPopup from "./components/RegistrationPopup";
+import { initLiff } from "./liff/liffService";
 
 function App() {
+  //lineIdを取得
+  let lineId: string | null = null;
+  console.log("lineId", lineId);
+  useEffect(() => {
+    const fetchLineId = async () => {
+      lineId = await initLiff();
+      // lineId が members に存在しない場合、ポップアップを表示
+      if (lineId && !members.some((member) => member.lineId === lineId)) {
+        setIsRegistrationPopupVisible(true);
+      }
+    };
+    fetchLineId();
+  }, []);
+
   //部員を管理
   const [members, setMembers] = useState<Members[]>([]);
   // Firestoreから部員情報を取得
@@ -111,6 +127,10 @@ function App() {
     }
   };
 
+  //登録画面の表示状態を管理
+  const [isRegistrationPopupVisible, setIsRegistrationPopupVisible] = useState(false);
+
+
   // // 編集ポップアップの表示状態を管理
   // const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
 
@@ -191,6 +211,13 @@ function App() {
 
   return (
     <div className="p-5">
+      <div>
+        {isRegistrationPopupVisible && (
+          <RegistrationPopup
+            onClose={() => setIsRegistrationPopupVisible(false)}
+          />
+        )}
+      </div>
       <Calendar
         reservations={reservations}
         selectedHours={selectedHours}
@@ -210,8 +237,9 @@ function App() {
         予約
       </button>
 
-      {isReservationPopupVisible && (
+      {isReservationPopupVisible && lineId && (
         <ReservationPopup
+          myLineId={lineId}
           members={members}
           selectedHours={selectedHours}
           onSubmit={handleReservationAdd}
