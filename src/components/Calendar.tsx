@@ -5,12 +5,14 @@ import { weekDays, daysOfWeek, timeSlots } from '../utils/utils'
 import Hour from './Hour'
 
 interface CalendarProps {
+  name: string;
   reservations: Reservation[];
   selectedHours: boolean[][];
   onHourClick: (dayIndex: number, timeIndex: number) => void;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
+  name,
   reservations,
   selectedHours,
   onHourClick,
@@ -19,20 +21,32 @@ const Calendar: React.FC<CalendarProps> = ({
   const [reservedHours, setReservedHours] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false)) // 8日間、12時間の初期状態を設定
   );
-
   // reservationsが更新されるたびにreservedHoursを更新
   useEffect(() => {
     // reservedHoursの更新
     const updatedReservedHours = Array.from({ length: 8 }, () =>
       Array(12).fill(false)
     ); // 予約の状態をリセット
-
     reservations.forEach((reservation) => {
       updatedReservedHours[reservation.dayIndex][reservation.timeIndex] = true; // 予約がある場合はtrueを設定
     });
-
     setReservedHours(updatedReservedHours); // 状態を更新
   }, [reservations]); // reservationsが変更されたときに実行
+
+  const [isUserReservations, setIsUserReservations] = useState<boolean[][]> (
+    Array.from({ length: 8 }, () => Array(12).fill(false)) // 8日間、12時間の初期状態を設定
+  );
+  useEffect(() => {
+    const updatedIsUserReservations = Array.from({ length: 8 }, () =>
+      Array(12).fill(false)
+    ); // 予約の状態をリセット
+    reservations.forEach((reservation) => {
+      if (reservation.names.includes(name)) {
+        updatedIsUserReservations[reservation.dayIndex][reservation.timeIndex] = true; // 予約がある場合はtrueを設定
+      }
+    });
+    setIsUserReservations(updatedIsUserReservations); // 状態を更新
+  }, [reservations, name]); // reservationsが変更されたときに実行
 
   return (
     <div>
@@ -61,6 +75,7 @@ const Calendar: React.FC<CalendarProps> = ({
             <React.Fragment key={timeIndex}>
               {Array.from({ length: daysOfWeek.length }).map((_, dayIndex) => (
                 <Hour
+                  isUserReservation={isUserReservations[dayIndex][timeIndex]}
                   dayIndex={dayIndex}
                   timeIndex={timeIndex}
                   key={`hour-${dayIndex}-${timeIndex}`}

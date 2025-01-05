@@ -11,7 +11,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { getDayIndex, getTimeIndex } from "../utils/utils";
-import { Members, Reservation } from "../types/type";
+import { Member, Reservation } from "../types/type";
 
 // ユーザーを追加する関数
 export const addUser = async (
@@ -50,7 +50,7 @@ export const deleteUser = async (lineId: string): Promise<void> => {
 };
 
 // ユーザーの情報を取得する関数
-export const getAllUser = async (): Promise<Members[] | undefined> => {
+export const getAllUser = async (): Promise<Member[] | undefined> => {
   try {
     const userColRef = collection(db, "users"); //usersコレクションの参照を取得
     const userDocs = await getDocs(userColRef); //コレクション内の全てのドキュメントを取得

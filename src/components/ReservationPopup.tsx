@@ -1,6 +1,6 @@
 import React from "react";
 import { useState} from "react";
-import { Members, Reservation } from "../types/type";
+import { Member, Reservation } from "../types/type";
 import { v4 as uuidv4 } from "uuid";
 import { weekDays, timeSlots } from "../utils/utils";
 import {
@@ -11,7 +11,7 @@ import PresetPopup from "./PresetPopup";
 
 interface ReservationPopupProps {
   myLineId: string; // lineId
-  members: Members[]; // 部員の名前
+  members: Member[]; // 部員の名前
   selectedHours: boolean[][]; // 選択された時間帯
   onSubmit: (reservations: Reservation[]) => void; // 送信ハンドラ
   onClose: () => void; // 閉じるハンドラ
@@ -29,8 +29,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   // const myStudentId: number = foundMember ? foundMember.studentId : -1; // デフォルト値を0に設定
 
   // 選択されたメンバーを管理
-  const [selectedMembers, setSelectedMembers] = useState<Members[]>([]); // 選択されたメンバーをMembersの配列で管理
-  const handleAddSelectedMembers = (member: Members) => {
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
+  const handleAddSelectedMembers = (member: Member) => {
     setSelectedMembers(
       (prev) =>
         prev.includes(member)

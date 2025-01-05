@@ -37,7 +37,11 @@ export const timeSlots = [
 
 export function getDayIndex(date: Date): number {
   for (let i = 0; i < weekDays.length; i++) {
-    if (weekDays[i].day === date.getDate()) {
+    if (
+      weekDays[i].day === date.getDate() &&
+      weekDays[i].month === date.getMonth() + 1 &&
+      weekDays[i].year === date.getFullYear()
+    ) {
       const dayIndex = i;
       return dayIndex;
     }

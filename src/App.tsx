@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import ReservationPopup from "./components/ReservationPopup";
 // import EditReservationPopup from "./components/EditReservationPopup";
 import ReservationDisplay from "./components/ReservationDisplay";
-import { Reservation, Members } from "./types/type";
+import { Reservation, Member } from "./types/type";
 import { getAllReservations, getAllUser } from "./firebase/userService";
 import { db } from "./firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -12,22 +12,8 @@ import RegistrationPopup from "./components/RegistrationPopup";
 import { initLiff } from "./liff/liffService";
 
 function App() {
-  //lineIdを取得
-  let lineId: string | null = null;
-  console.log("lineId", lineId);
-  useEffect(() => {
-    const fetchLineId = async () => {
-      lineId = await initLiff();
-      // lineId が members に存在しない場合、ポップアップを表示
-      if (lineId && !members.some((member) => member.lineId === lineId)) {
-        setIsRegistrationPopupVisible(true);
-      }
-    };
-    fetchLineId();
-  }, []);
-
   //部員を管理
-  const [members, setMembers] = useState<Members[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   // Firestoreから部員情報を取得
   useEffect(() => {
     const collectionRef = collection(db, "members");
@@ -37,6 +23,8 @@ function App() {
         const newMembers = await getAllUser();
         if (newMembers) {
           setMembers(newMembers); // 状態を更新
+          console.log("部員情報を取得しました。");
+          console.log(newMembers);
         } else {
           console.warn("部員情報が取得できませんでした。");
         }
@@ -47,6 +35,24 @@ function App() {
     // クリーンアップ関数を返すことで、コンポーネントがアンマウントされるときにリスナーを解除
     return () => unsubscribe();
   }, []); // マウント時にのみ実行
+
+  //lineIdを取得
+  const [lineId, setLineId] = useState<string | null>(null);
+  useEffect(() => {
+    if (members.length > 0) {
+      const fetchLineId = async () => {
+        setLineId(await initLiff());
+        // lineId が members に存在しない場合、ポップアップを表示
+        if (lineId && !members.some((member) => member.lineId === lineId)) {
+          setIsRegistrationPopupVisible(true);
+        } else {
+          setIsRegistrationPopupVisible(false);
+        }
+      };
+      fetchLineId();
+      console.log("lineId", lineId);
+    }
+  }, [members, lineId]);
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -120,16 +126,21 @@ function App() {
   // 予約ボタンをクリックしたときのハンドラ
   const handleReserve = () => {
     //Hourが選択されているときのみポップアップを表示
-    if (selectedHours.some((hours) => hours.includes(true))){
+    if (selectedHours.some((hours) => hours.includes(true))) {
       setIsReservationPopupVisible(true);
-    } else{
+    } else {
       alert("予約する日時を選択してください");
     }
   };
 
   //登録画面の表示状態を管理
-  const [isRegistrationPopupVisible, setIsRegistrationPopupVisible] = useState(false);
+  const [isRegistrationPopupVisible, setIsRegistrationPopupVisible] =
+    useState(false);
 
+  const getName = (lineId: string) => {
+    const member = members.find((member) => member.lineId === lineId);
+    return member ? member.name : "名前が登録されていません";
+  };
 
   // // 編集ポップアップの表示状態を管理
   // const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
@@ -210,51 +221,47 @@ function App() {
   // };
 
   return (
-    <div className="p-5">
-      <div>
-        {isRegistrationPopupVisible && (
-          <RegistrationPopup
-            onClose={() => setIsRegistrationPopupVisible(false)}
+    <div>
+      {lineId && (
+        <div className="p-5">
+          <Calendar
+            name={getName(lineId)}
+            reservations={reservations}
+            selectedHours={selectedHours}
+            onHourClick={handleHourClick}
           />
-        )}
-      </div>
-      <Calendar
-        reservations={reservations}
-        selectedHours={selectedHours}
-        onHourClick={handleHourClick}
-      />
-      <ReservationDisplay
-        reservations={reservations}
-        selectedHours={selectedHours}
-        selectedReservations={selectedReservations}
-        onReservationClick={handleReservationClic}
-      />
+          <ReservationDisplay
+            reservations={reservations}
+            selectedHours={selectedHours}
+            selectedReservations={selectedReservations}
+            onReservationClick={handleReservationClic}
+          />
 
-      <button
-        className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
-        onClick={handleReserve}
-      >
-        予約
-      </button>
+          <button
+            className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
+            onClick={handleReserve}
+          >
+            予約
+          </button>
 
-      {isReservationPopupVisible && lineId && (
-        <ReservationPopup
-          myLineId={lineId}
-          members={members}
-          selectedHours={selectedHours}
-          onSubmit={handleReservationAdd}
-          onClose={() => setIsReservationPopupVisible(false)}
-        />
-      )}
+          {isReservationPopupVisible && (
+            <ReservationPopup
+              myLineId={lineId}
+              members={members}
+              selectedHours={selectedHours}
+              onSubmit={handleReservationAdd}
+              onClose={() => setIsReservationPopupVisible(false)}
+            />
+          )}
 
-      {/* <button
+          {/* <button
         className="fixed bottom-8 right-8 p-2 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
         onClick={handleEditPopup}
       >
         編集
       </button> */}
 
-      {/* {isEditPopupVisible && (
+          {/* {isEditPopupVisible && (
         <EditReservationPopup
           daysOfWeek={daysOfWeek}
           timeSlots={timeSlots}
@@ -266,6 +273,18 @@ function App() {
           onDelete={handleReservationRemove}
         />
       )} */}
+          <div>
+            {isRegistrationPopupVisible && (
+              <RegistrationPopup
+                lineId={lineId}
+                members={members}
+                onClose={() => setIsRegistrationPopupVisible(false)}
+              />
+            )}
+          </div>
+        </div>
+      )}
+      {!lineId && <p>LINEアカウントでログインしてください</p>}
     </div>
   );
 }

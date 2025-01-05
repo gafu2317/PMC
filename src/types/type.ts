@@ -7,7 +7,7 @@ export interface Reservation {
   timeIndex: number; //時間のインデックス
 }
 
-export interface Members {
+export interface Member {
   lineId: string;
   name: string;
   studentId: number;

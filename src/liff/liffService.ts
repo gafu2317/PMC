@@ -8,7 +8,7 @@ export const initLiff = async (): Promise<string | null> => {
       const profile = await liff.getProfile();
       return profile.userId; // これがlineIdです
     } else {
-      return testLindId;//テスト用
+      return "testLineId";
       liff.login(); // ログインしていない場合はログインを促す
       return null;
     }
@@ -18,4 +18,4 @@ export const initLiff = async (): Promise<string | null> => {
   }
 };
 
-export const testLindId:string = "testLindId";
+export const testLindId:string = "testLineId";

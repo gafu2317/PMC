@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Members } from "../types/type";
+import { Member } from "../types/type";
 import { getPresets, deletePresets } from "../firebase/userService";
 
 // インターフェースの定義
 interface PresetPopupProps {
   myLineId: string; // lineId
-  members: Members[]; // メンバーの情報
+  members: Member[]; // メンバーの情報
   onClose: () => void; // ポップアップを閉じるための関数
-  setSelectedMembers: (members: Members[]) => void; // メンバーを選択するための関数
+  setSelectedMembers: (members: Member[]) => void; // メンバーを選択するための関数
 }
 
 const PresetPopup: React.FC<PresetPopupProps> = ({
@@ -30,7 +30,7 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
         const namePresets = data.map((row) =>
           row.map((lineId) => {
             const member = members.find((member) => member.lineId === lineId);
-            return member ? member.name : lineId; // memberが見つからない場合はlineIdをそのまま返す
+            return member ? member.name : "データなし"; // memberが見つからない場合はlineIdをそのまま返す
           })
         );
 
@@ -71,8 +71,8 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
       const selectedMembers = presetsLineId[selectedIndex].map((lineId) => {
         const member = members.find((member) => member.lineId === lineId);
         if (!member) {
-          deletePreset(selectedIndex); // プリセットを削除
-          throw new Error("プリセットの内容エラー");
+          alert("メンバーが見つかりませんでした、プリセットを削除してください");
+          throw new Error("メンバーが見つかりませんでした");
         }
         return member;
       });
