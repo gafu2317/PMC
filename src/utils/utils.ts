@@ -46,7 +46,6 @@ export function getDayIndex(date: Date): number {
       return dayIndex;
     }
   }
-  console.log("dayIndex not found");
   return -1;
 }
 
@@ -58,6 +57,5 @@ export function getTimeIndex(date: Date): number {
       return timeIndex;
     }
   }
-  console.log("timeIndex not found");
   return -1;
 }

@@ -41,7 +41,7 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({lineId, members,  
   return (
     <div>
       <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
-        <div className="bg-white p-4 rounded shadow">
+        <div className="bg-white p-4 rounded shadow w-80">
           <h2 className="text-lg font-bold text-center">登録画面</h2>
 
           {/* 名前の入力フィールド */}

@@ -99,6 +99,24 @@ export const deleteReservation = async (id: string): Promise<void> => {
   }
 };
 
+// 予約を更新する関数
+export const updateReservation = async (
+  id: string,
+  names: string[]
+): Promise<void> => {
+  try {
+    // reservationsのドキュメントの参照を取得
+    const docRef = doc(db, "reservations", id);
+
+    // ドキュメントを更新
+    await setDoc(docRef, { names: names }, { merge: true });
+
+    console.log("予約が更新されました。");
+  } catch (error) {
+    console.error("予約の更新に失敗しました:", error);
+  }
+};
+
 // 予約情報を取得する関数
 export const getAllReservations = async (): Promise<
   Reservation[] | undefined
@@ -107,13 +125,18 @@ export const getAllReservations = async (): Promise<
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
-    const reservations = reservationsDocs.docs.map((doc) => ({
-      id: doc.id,
-      names: doc.data().names,
-      date: doc.data().date.toDate(),
-      dayIndex: getDayIndex(doc.data().date.toDate()),
-      timeIndex: getTimeIndex(doc.data().date.toDate()),
-    }));
+    const reservations = reservationsDocs.docs
+      .map((doc) => ({
+        id: doc.id,
+        names: doc.data().names,
+        date: doc.data().date.toDate(),
+        dayIndex: getDayIndex(doc.data().date.toDate()),
+        timeIndex: getTimeIndex(doc.data().date.toDate()),
+      }))
+      .filter(
+        (reservation) =>
+          reservation.dayIndex !== -1 && reservation.timeIndex !== -1
+      ); 
 
     return reservations;
   } catch (error) {

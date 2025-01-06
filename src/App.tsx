@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import ReservationPopup from "./components/ReservationPopup";
-// import EditReservationPopup from "./components/EditReservationPopup";
+import EditReservationPopup from "./components/EditReservationPopup";
 import ReservationDisplay from "./components/ReservationDisplay";
 import { Reservation, Member } from "./types/type";
 import { getAllReservations, getAllUser } from "./firebase/userService";
@@ -24,7 +24,6 @@ function App() {
         if (newMembers) {
           setMembers(newMembers); // 状態を更新
           console.log("部員情報を取得しました。");
-          console.log(newMembers);
         } else {
           console.warn("部員情報が取得できませんでした。");
         }
@@ -102,14 +101,30 @@ function App() {
       Array.from({ length: timeSlots.length }, () => [])
     )
   );
+  useEffect(() => {
+    setSelectedReservations((prev) =>
+      selectedHours.map((day, dayIndex) =>
+        day.map((time, timeIndex) => {
+          if (time) {
+            return [...prev[dayIndex][timeIndex]];
+          } else {
+            return [];
+          }
+        })
+      )
+    );
+  },[selectedHours]);
   //予約をクリックした時のハンドラ
-  const handleReservationClic = (
+  const handleReservationClick = (
     dayIndex: number,
     timeIndex: number,
     id: string
   ) => {
     setSelectedReservations((prev) => {
-      const newSelectedReservations = [...prev];
+      // 深いコピーを作成
+      const newSelectedReservations = prev.map((day) =>
+        day.map((timeSlot) => [...timeSlot])
+      );
       const index = newSelectedReservations[dayIndex][timeIndex].indexOf(id);
       if (index > -1) {
         newSelectedReservations[dayIndex][timeIndex].splice(index, 1);
@@ -142,83 +157,15 @@ function App() {
     return member ? member.name : "名前が登録されていません";
   };
 
-  // // 編集ポップアップの表示状態を管理
-  // const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
-
-  // // 名前を追加するするハンドラー
-  // const handleNameSubmit = (names: string[]) => {
-  //   const newReservedNames = [...reservedNames];
-  //   const newSelectedHours = [...selectedHours];
-
-  //   for (let i = 0; i < timeSlots.length; i++) {
-  //     for (let j = 0; j < daysOfWeek.length; j++) {
-  //       if (newSelectedHours[i][j]) {
-  //         newReservedNames[i][j].push(names);
-  //       }
-  //     }
-  //   }
-
-  //   setReservedNames(newReservedNames);
-  // };
-
-  // // 名前を追加するハンドラー
-  // const handleNameAdd = (
-  //   dayIndex: number,
-  //   timeIndex: number,
-  //   teamIndex: number,
-  //   namesToAdd: string[]
-  // ) => {
-  //   const newReservedNames = [...reservedNames];
-  //   namesToAdd.forEach((name) => {
-  //     newReservedNames[timeIndex][dayIndex][teamIndex].push(name);
-  //   });
-  //   setReservedNames(newReservedNames);
-  // };
-
-  // // 名前を削除するハンドラー
-  // const handleNameRemove = (
-  //   dayIndex: number,
-  //   timeIndex: number,
-  //   teamIndex: number,
-  //   namesToRemove: string[]
-  // ) => {
-  //   const namesSet = new Set(namesToRemove);
-
-  //   // 新しい配列を作成
-  //   const newReservedNames = [...reservedNames];
-
-  //   // currentTeamをフィルタリングして新しい配列を作成
-  //   newReservedNames[timeIndex][dayIndex][teamIndex] = newReservedNames[
-  //     timeIndex
-  //   ][dayIndex][teamIndex].filter((name) => !namesSet.has(name));
-  //   console.log("newReservedNames", newReservedNames);
-  //   // 状態を更新
-  //   setReservedNames(newReservedNames);
-  // };
-
-  // // 予約を削除するハンドラ
-  // const handleReservationRemove = (
-  //   dayIndex: number,
-  //   timeIndex: number,
-  //   teamIndex: number
-  // ) => {
-  //   // 選択された予約をクリア
-  //   setSelectedReservations([]);
-  //   const newReservedNames = [...reservedNames];
-
-  //   // 指定されたインデックスの要素を削除する
-  //   newReservedNames[timeIndex][dayIndex].splice(teamIndex, 1);
-
-  //   // 状態を更新
-  //   setReservedNames(newReservedNames);
-  // };
-
-  // // 編集ボタンをクリックしたときのハンドラ
-  // const handleEditPopup = () => {
-  //   if (selectedReservations.length > 0) {
-  //     setIsEditPopupVisible(true);
-  //   }
-  // };
+  // 編集ポップアップの表示状態を管理
+  const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
+  const handleEdit = () => {
+    if (selectedReservations.some((day) => day.some((time) => time.length > 0))) {
+      setIsEditPopupVisible(true);
+    } else {
+      alert("編集する予約を選択してください");
+    }
+  };
 
   return (
     <div>
@@ -234,7 +181,7 @@ function App() {
             reservations={reservations}
             selectedHours={selectedHours}
             selectedReservations={selectedReservations}
-            onReservationClick={handleReservationClic}
+            onReservationClick={handleReservationClick}
           />
 
           <button
@@ -242,6 +189,13 @@ function App() {
             onClick={handleReserve}
           >
             予約
+          </button>
+
+          <button
+            className="fixed bottom-8 right-8 p-2 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
+            onClick={handleEdit}
+          >
+            編集
           </button>
 
           {isReservationPopupVisible && (
@@ -254,34 +208,22 @@ function App() {
             />
           )}
 
-          {/* <button
-        className="fixed bottom-8 right-8 p-2 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
-        onClick={handleEditPopup}
-      >
-        編集
-      </button> */}
+          {isEditPopupVisible && (
+            <EditReservationPopup
+              name={getName(lineId)} // 名前を渡す
+              reservations={reservations} // 予約情報を渡す
+              selectedReservations={selectedReservations} // 選択された予約情報を渡す
+              onClose={() => setIsEditPopupVisible(false)}
+            />
+          )}
 
-          {/* {isEditPopupVisible && (
-        <EditReservationPopup
-          daysOfWeek={daysOfWeek}
-          timeSlots={timeSlots}
-          reservedNames={reservedNames}
-          selectedReservations={selectedReservations} // 選択された予約情報を渡す
-          onClose={() => setIsEditPopupVisible(false)}
-          onNameAdd={handleNameAdd}
-          onNameRemove={handleNameRemove}
-          onDelete={handleReservationRemove}
-        />
-      )} */}
-          <div>
-            {isRegistrationPopupVisible && (
-              <RegistrationPopup
-                lineId={lineId}
-                members={members}
-                onClose={() => setIsRegistrationPopupVisible(false)}
-              />
-            )}
-          </div>
+          {isRegistrationPopupVisible && (
+            <RegistrationPopup
+              lineId={lineId}
+              members={members}
+              onClose={() => setIsRegistrationPopupVisible(false)}
+            />
+          )}
         </div>
       )}
       {!lineId && <p>LINEアカウントでログインしてください</p>}

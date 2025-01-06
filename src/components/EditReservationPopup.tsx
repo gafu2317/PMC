@@ -1,165 +1,164 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Reservation } from "../types/type";
+import { weekDays, timeSlots } from "../utils/utils";
+import { deleteReservation, updateReservation } from "../firebase/userService";
 
 interface ReservationPopupProps {
-  daysOfWeek: string[];
-  timeSlots: string[];
-  reservedNames: string[][][][];
-  selectedReservations: {
-    dayIndex: number;
-    timeIndex: number;
-    teamIndex: number;
-  }[];
+  name: string;
   onClose: () => void;
-  onNameAdd: (
-    dayIndex: number,
-    timeIndex: number,
-    teamIndex: number,
-    namesToAdd: string[]
-  ) => void;
-  onNameRemove: (
-    dayIndex: number,
-    timeIndex: number,
-    teamIndex: number,
-    namesToRemove: string[]
-  ) => void;
-  onDelete: (
-    dayIndex: number, 
-    timeIndex: number, 
-    teamIndex: number,
-  ) => void;
+  selectedReservations: string[][][];
+  reservations: Reservation[];
 }
 
 const EditReservationPopup: React.FC<ReservationPopupProps> = ({
-  daysOfWeek,
-  timeSlots,
-  reservedNames,
-  selectedReservations,
   onClose,
-  onNameAdd,
-  onNameRemove,
-  onDelete,
+  selectedReservations,
+  reservations,
+  name,
 }) => {
-  // 名前の入力値を管理
-  const [names, setNames] = useState<string[]>([""]);
+  const [newReservations, setNewReservations] = useState<Reservation[]>(reservations);
+  const [ids, setIds] = useState<string[]>([]);
+  useEffect(() => {
+    const newIds: string[] = [];
+    selectedReservations.forEach((dayReservations) => {
+      dayReservations.forEach((hourReservations) => {
+        newIds.push(...hourReservations);
+      });
+    });
+    setIds(newIds);
+  }, [selectedReservations]);
 
-  // 名前の入力フィールドの値を更新
-  const handleNameChange = (index: number, value: string) => {
-    const newNames = [...names];
-    newNames[index] = value; // 指定したインデックスの値を更新
-    setNames(newNames);
-  };
-
-  // +ボタンがクリックされたときのハンドラ
-  const handleAddInput = () => {
-    setNames([...names, ""]); // 新しい空の文字列を追加
-  };
-  // -ボタンがクリックされたときのハンドラ
-  const handleSubInput = () => {
-    if (names.length > 1) {
-      setNames(names.slice(0, -1)); // 最後の要素を削除
-    }
-  };
-
-  // 追加ボタンがクリックされたときのハンドラ
-  const handleAdd = () => {
-    selectedReservations.forEach((reservation) => {
-      const { dayIndex, timeIndex, teamIndex } = reservation;
-      console.log("reservation", reservation);
-      onNameAdd(dayIndex, timeIndex, teamIndex, names);
+  const joinReservations = () => {
+    setNewReservations((prevReservations) => {
+      const newReservations = prevReservations.map((reservation) => {
+        if (ids.includes(reservation.id)) {
+          if (!reservation.names.includes(name)) {
+            reservation.names.push(name);
+            updateReservation(reservation.id, reservation.names);
+          } 
+        }
+        return reservation;
+      });
+      return newReservations;
     });
   };
-
-  // 削除ボタンがクリックされたときのハンドラ
-  const handleRemove = () => {
-    selectedReservations.forEach((reservation) => {
-      const { dayIndex, timeIndex, teamIndex } = reservation;
-      onNameRemove(dayIndex, timeIndex, teamIndex, names);
+  const leaveReservations = () => {
+    setNewReservations((prevReservations) => {
+      const newReservations = prevReservations.map((reservation) => {
+        if (ids.includes(reservation.id)) {
+          if (reservation.names.includes(name)) {
+            if (reservation.names.length > 1) {
+              reservation.names = reservation.names.filter(
+                (member) => member !== name
+              );
+              updateReservation(reservation.id, reservation.names);
+            } else {
+              alert("自分のみの予約からは削除されませんでした。");
+            }
+          } 
+        } 
+        return reservation;
+      });
+      return newReservations;
     });
   };
-
-  //　予約自体を削除するハンドラ
-  const handleDelete = () => {
-    onClose();
-    selectedReservations.forEach((reservation) => {
-      const { dayIndex, timeIndex, teamIndex } = reservation;
-      onDelete(dayIndex, timeIndex, teamIndex);
+  const deleteReservations = () => {
+    setNewReservations((prevReservations) => {
+      //過去の予約や、当日の予約、自分の含まれていない予約は削除できない
+      const isMyReservation = prevReservations.some(
+        (reservation) =>
+          ids.includes(reservation.id) && reservation.names.includes(name)
+      );
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1); // 明日の日付に設定
+      tomorrow.setHours(0, 0, 0, 0); // 明日の午前0時の時間を設定
+      const isFutureReservation = prevReservations.some(
+        (reservation) => reservation.date.getTime() >= tomorrow.getTime() // 明日以降の予約をチェック
+      );
+      if (isMyReservation) {
+        if (isFutureReservation) {
+          const newReservations = prevReservations.filter(
+            (reservation) => !ids.includes(reservation.id)
+          );
+          ids.forEach((id) => {
+            deleteReservation(id);
+          });
+          return newReservations;
+        } else {
+          alert("過去と当日の予約dは削除できません");
+        }
+      } else {
+        alert("自分がメンバーの予約のみ削除できます");
+      }
+      return prevReservations;
     });
   };
 
   return (
     <div>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white p-4 rounded shadow-md">
-          <h2 className="text-lg font-bold mb-3 w-80 flex justify-center">
-            {" "}
-            予約を編集してください{" "}
+        <div className="bg-white p-4 rounded shadow-md w-80">
+          <h2 className="text-xl font-semibold mb-4 text-center ">
+            予約の編集
           </h2>
-          <div className="border border-gray-400 rounded">
-            {selectedReservations.map((reservation, index) => {
-              const { dayIndex, timeIndex, teamIndex } = reservation;
-              const teams = reservedNames[timeIndex][dayIndex][teamIndex]; // チームメンバーを取得
-              return (
-                <div key={index} className="mb-2 p-2">
-                  <h3>
-                    {daysOfWeek[dayIndex]}曜日 {timeSlots[timeIndex]}
-                  </h3>
-                  <div> {teams.join(", ")}</div>
-                </div>
-              );
-            })}
+          <div className="border border-blue-200 rounded h-32 overflow-y-auto">
+            <ul className="list-disc pl-5">
+              {weekDays.map((day, dayIndex) => {
+                return timeSlots.map((time, timeIndex) => {
+                  const selectedHourReservations =
+                    selectedReservations[dayIndex][timeIndex];
+                  if (selectedHourReservations.length > 0) {
+                    return (
+                      <li key={dayIndex + timeIndex}>
+                        <div>
+                          {day.date} {time}~{timeSlots[timeIndex + 1]}
+                        </div>
+                        <ul>
+                          {selectedHourReservations.map((teamId, teamIndex) => {
+                            const team = newReservations.find(
+                              (reservation) => reservation.id === teamId
+                            );
+                            return (
+                              <li key={teamIndex}>{team?.names.join(", ")}</li>
+                            );
+                          })}
+                        </ul>
+                      </li>
+                    );
+                  }
+                });
+              })}
+            </ul>
           </div>
-          {names.map((name, index) => (
-            <input
-              key={index}
-              type="text"
-              value={name}
-              onChange={(e) => handleNameChange(index, e.target.value)} // 入力値の更新
-              className="border p-2 mt-2 block rounded-lg"
-              placeholder="名前を入力"
-            />
-          ))}
-          <button
-            className="mt-2 p-2 mr-2 bg-gradient-to-b from-sky-400 to-blue-500 text-white rounded-full w-10"
-            onClick={handleAddInput}
-          >
-            +
-          </button>
-          <button
-            className="mt-2 p-2 mr-2 bg-gradient-to-b from-sky-400 to-blue-500 text-white rounded-full w-10"
-            onClick={handleSubInput}
-          >
-            -
-          </button>
-          <button
-            className="mt-2 mr-2 p-2 bg-gradient-to-b from-green-400 to-green-500 text-white rounded-full"
-            onClick={handleAdd}
-          >
-            追加
-          </button>
-          <button
-            className="mt-2 mr-2 p-2 bg-gradient-to-b from-red-400 to-red-500 text-white rounded-full"
-            onClick={handleRemove}
-          >
-            削除
-          </button>
-          <div className="mt-4 flex justify-between">
-            <div className="flex">
-              <button
-                className="mt-2 p-2 bg-gradient-to-b from-red-600 to-red-700 text-white rounded-full"
-                onClick={handleDelete}
-              >
-                予約自体を削除
-              </button>
-            </div>
-            <div className="flex items-center">
-              <button
-                className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-gray-300 to-gray-400"
-                onClick={onClose}
-              >
-                閉じる
-              </button>
-            </div>
+          <div className="flex justify-around mt-4">
+            <button
+              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-green-300 to-green-500"
+              onClick={joinReservations}
+            >
+              参加
+            </button>
+            <button
+              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-blue-300 to-blue-500"
+              onClick={leaveReservations}
+            >
+              不参加
+            </button>
+          </div>
+          <div className="flex justify-around mt-4">
+            <button
+              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-gray-300 to-gray-400"
+              onClick={onClose}
+            >
+              閉じる
+            </button>
+
+            <button
+              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-red-400 to-red-500"
+              onClick={deleteReservations}
+            >
+              予約削除
+            </button>
           </div>
         </div>
       </div>

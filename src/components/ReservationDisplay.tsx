@@ -65,10 +65,11 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                             key={teamIndex}
                             className={
                               isSelected
-                                ? "border border-black rounded-sm"
-                                : "border border-white"
+                                ? "bg-blue-100"
+                                : ""
                             }
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation(); // バブリングを防ぐ
                               onReservationClick(dayIndex, timeIndex, team.id);
                             }}
                             style={{ cursor: "pointer" }}

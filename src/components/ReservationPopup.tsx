@@ -101,15 +101,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
         <h3 className="text-lg font-bold">
           使用する人の名前を選択してください
         </h3>
-        {/* <div>//oo日oo時間の予約</div>
-        {Array.from({ length: daysOfWeek.length }).map((_, dayIndex) => (
-          <div key={dayIndex}>
-            {daysOfWeek[dayIndex]}
-            {Array.from({ length: timeSlots.length }).map((_, timeIndex) => (
-              <div key={timeIndex}>{timeSlots[timeIndex]}</div>
-            ))}
-          </div>
-        ))} */}
         {/* 名前を検索する要素 */}
         <input
           type="text"
