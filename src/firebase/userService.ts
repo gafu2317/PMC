@@ -125,6 +125,19 @@ export const getAllReservations = async (): Promise<
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); // 一年前の日付を計算
+
+    const oldReservations = reservationsDocs.docs.filter((doc) => {
+      const reservationDate = doc.data().date.toDate(); // Firestoreの日付をJavaScriptのDateオブジェクトに変換
+      return reservationDate < oneYearAgo; // 一年前より古い予約をフィルタリング
+    });
+
+    // 古い予約を削除
+    for (const oldDoc of oldReservations) {
+      await deleteReservation(oldDoc.id);
+    }
+
     const reservations = reservationsDocs.docs
       .map((doc) => ({
         id: doc.id,
@@ -143,6 +156,54 @@ export const getAllReservations = async (): Promise<
     console.error("予約の取得に失敗しました:", error);
   }
 };
+
+//指定した期間の予約を取得する関数
+export const getReservationsByDateRange = async (
+  startDate: Date,
+  endDate: Date
+): Promise<{id:string, names:string[], date:Date}[]> => {
+  try {
+    const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
+    const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
+
+    const reservations = reservationsDocs.docs
+      .map((doc) => ({
+        id: doc.id,
+        names: doc.data().names,
+        date: doc.data().date.toDate(),
+      }))
+      .filter(
+        (reservation) =>
+          reservation.date >= startDate &&
+          reservation.date <= endDate.setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
+      );
+
+    return reservations;
+  } catch (error) {
+    console.error("予約の取得に失敗しました:", error);
+    return [];
+  }
+}
+
+//全ての期間の予約を取得する関数
+export const getAllPeriodReservations = async (): Promise<{id:string, names:string[], date:Date}[]> => {
+  try {
+    const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
+    const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
+
+    const reservations = reservationsDocs.docs
+      .map((doc) => ({
+        id: doc.id,
+        names: doc.data().names,
+        date: doc.data().date.toDate(),
+      }))
+
+    return reservations;
+  } catch (error) {
+    console.error("予約の取得に失敗しました:", error);
+    return [];
+  }
+}
 
 //　プリセットをユーザーデータに追加する関数(二次元配列のフィールドを持つには二次元配列ごと渡さないといけないっぽい？)
 export const addPresets = async (
@@ -239,3 +300,5 @@ export const getPresets = async (
     return undefined; // エラー時にundefinedを返す
   }
 };
+
+//

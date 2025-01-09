@@ -10,20 +10,21 @@ import { daysOfWeek, timeSlots } from "./utils/utils";
 import Calendar from "./components/Calendar";
 import RegistrationPopup from "./components/RegistrationPopup";
 import { initLiff } from "./liff/liffService";
+import HamburgerMenu from "./components/HamburgerMenu";
+import Header from "./components/Header";
 
 function App() {
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
   // Firestoreから部員情報を取得
   useEffect(() => {
-    const collectionRef = collection(db, "members");
+    const collectionRef = collection(db, "users");
     // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
         const newMembers = await getAllUser();
         if (newMembers) {
           setMembers(newMembers); // 状態を更新
-          console.log("部員情報を取得しました。");
         } else {
           console.warn("部員情報が取得できませんでした。");
         }
@@ -49,7 +50,6 @@ function App() {
         }
       };
       fetchLineId();
-      console.log("lineId", lineId);
     }
   }, [members, lineId]);
 
@@ -113,7 +113,7 @@ function App() {
         })
       )
     );
-  },[selectedHours]);
+  }, [selectedHours]);
   //予約をクリックした時のハンドラ
   const handleReservationClick = (
     dayIndex: number,
@@ -160,7 +160,9 @@ function App() {
   // 編集ポップアップの表示状態を管理
   const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
   const handleEdit = () => {
-    if (selectedReservations.some((day) => day.some((time) => time.length > 0))) {
+    if (
+      selectedReservations.some((day) => day.some((time) => time.length > 0))
+    ) {
       setIsEditPopupVisible(true);
     } else {
       alert("編集する予約を選択してください");
@@ -171,6 +173,8 @@ function App() {
     <div>
       {lineId && (
         <div className="p-5">
+          <Header></Header>
+          <HamburgerMenu members={members} />
           <Calendar
             name={getName(lineId)}
             reservations={reservations}
@@ -226,7 +230,11 @@ function App() {
           )}
         </div>
       )}
-      {!lineId && <p>LINEアカウントでログインしてください</p>}
+      {!lineId && (
+        <div className="flex justify-center items-center h-screen">
+          <div>ロード中...</div>
+        </div>
+      )}
     </div>
   );
 }

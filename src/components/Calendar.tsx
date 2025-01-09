@@ -52,7 +52,8 @@ const Calendar: React.FC<CalendarProps> = ({
     <div>
       <div className="flex space-x-1">
         <div className="flex flex-col justify-between">
-          <div className="h-5"></div>
+          <div className="h-5">
+          </div>
           {Array.from({ length: timeSlots.length }).map((_, index) => (
             <div key={index} className="text-center p-1 text-xs rounded">
               {timeSlots[index]}

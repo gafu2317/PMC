@@ -24,10 +24,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   onSubmit,
   onClose,
 }) => {
-  // studentId
-  // const foundMember = members.find((member) => member.lineId === myLineId);
-  // const myStudentId: number = foundMember ? foundMember.studentId : -1; // デフォルト値を0に設定
-
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
   const handleAddSelectedMembers = (member: Member) => {

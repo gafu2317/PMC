@@ -18,18 +18,16 @@ const Hour: React.FC<HourProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center justify-center p-2 border ${
-        isSelected ? "border-red-500" : "border-gray-300"
+      className={`flex items-center justify-center p-2  ${
+        isSelected ? "border-2 border-red-500" : "border-2 border-gray-300"
       } transition-all cursor-pointer ${
-        isSelected ? "" : "hover:border-gray-300"
-      }`}
+        isReserved ? (isUserReservation ? "" : "bg-gray-300") : ""
+      } `}
       onClick={onClick} // クリック時にハンドラを呼び出す
     >
-      <span
-        className={`text-xs ${isReserved ? "text-gray-700" : "text-black"}`}
-      >
-        {isReserved ? (isUserReservation? "⭐️":"×") : "⚪︎"} {/* {dayIndex}日目{timeIndex}時間目 */}
-      </span>
+      <div className="flex justify-center items-center">
+        {isReserved ? isUserReservation ? "🟢" : "　" : "　"}
+      </div>
     </div>
   );
 };
