@@ -4,7 +4,7 @@ import { Reservation, Member } from "../types/type";
 import { weekDays, timeSlots } from "../utils/utils";
 import { deleteReservation, updateReservation } from "../firebase/userService";
 import MemberList from "./MemberList ";
-
+import Swal from "sweetalert2";
 
 interface ReservationPopupProps {
   myLineId: string;
@@ -72,7 +72,12 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
       });
       // すべての予約を確認した後にエラーメッセージを表示
       if (isError) {
-        alert("自分がメンバーの予約のみ招待できます");
+        Swal.fire({
+          icon: "warning",
+          title: "注意",
+          text: "自分がメンバーの予約のみ招待できます",
+          confirmButtonText: "OK",
+        });
       }
       return newReservations; // 更新された予約リストを返す
     });
@@ -90,7 +95,12 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
               );
               updateReservation(reservation.id, reservation.names);
             } else {
-              alert("自分のみの予約からは削除されませんでした。");
+              Swal.fire({
+                icon: "warning",
+                title: "注意",
+                text: "自分のみの予約は削除されませんでした。",
+                confirmButtonText: "OK",
+              });
             }
           }
         }
@@ -122,10 +132,20 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
           });
           return newReservations;
         } else {
-          alert("過去と当日の予約dは削除できません");
+          Swal.fire({
+            icon: "warning",
+            title: "注意",
+            text: "過去と当日の予約は削除できません",
+            confirmButtonText: "OK",
+          });
         }
       } else {
-        alert("自分がメンバーの予約のみ削除できます");
+        Swal.fire({
+          icon: "warning",
+          title: "注意",
+          text: "自分がメンバーの予約のみ削除できます",
+          confirmButtonText: "OK",
+        });
       }
       return prevReservations;
     });

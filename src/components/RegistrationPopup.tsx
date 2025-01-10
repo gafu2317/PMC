@@ -1,6 +1,7 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { addUser } from "../firebase/userService";
 import { Member } from "../types/type";
+import Swal from "sweetalert2";
 
 interface RegistrationPopupProps {
   lineId: string;
@@ -8,16 +9,26 @@ interface RegistrationPopupProps {
   onClose: () => void;
 }
 
-const RegistrationPopup: React.FC<RegistrationPopupProps> = ({lineId, members,  onClose }) => {
-  const [name, setName] = useState<string|null>(null); // 名前
-  const [studentId, setStudentId] = useState<string|null>(null); // 学籍番号
-  const [isConfirmationVisible, setIsConfirmationVisible] = useState<boolean>(false); // 確認ポップアップの表示状態
+const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
+  lineId,
+  members,
+  onClose,
+}) => {
+  const [name, setName] = useState<string | null>(null); // 名前
+  const [studentId, setStudentId] = useState<string | null>(null); // 学籍番号
+  const [isConfirmationVisible, setIsConfirmationVisible] =
+    useState<boolean>(false); // 確認ポップアップの表示状態
 
   const handleSubmit = () => {
     setIsConfirmationVisible(false);
     // 名前と学籍番号が入力されているかチェック
     if (!name || !studentId) {
-      alert("名前と学籍番号を入力してください。");
+      Swal.fire({
+        icon: "warning",
+        title: "エラー",
+        text: "名前と学籍番号を入力してください。",
+        confirmButtonText: "OK",
+      });
       return;
     }
 
@@ -28,15 +39,20 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({lineId, members,  
     // 既存のメンバーがいる場合
     if (existingMember) {
       // 名前の後に (学籍番号) を追加
-      alert("既に同じ名前が登録されているので。"+name+"("+studentId+")"+"で登録します。");
+      Swal.fire({
+        icon: "warning",
+        title: "注意",
+        text: `既に同じ名前が登録されているので。${name} (${studentId}) で登録します。`,
+        confirmButtonText: "OK",
+      });
       const newName = `${name} (${studentId})`;
       addUser(lineId, newName, studentId);
     } else {
       // 名前が重複していない場合
-      addUser(name,lineId, studentId);
+      addUser(name, lineId, studentId);
     }
     onClose();
-  }
+  };
 
   return (
     <div>
@@ -94,7 +110,9 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({lineId, members,  
                 <p>以下の内容でよろしいですか？</p>
                 <p>名前: {name}</p>
                 <p>学籍番号: {studentId}</p>
-                <p className="text-xs mt-2">※同姓同名がいた場合、名前の後ろに学籍番号が付きます</p>
+                <p className="text-xs mt-2">
+                  ※同姓同名がいた場合、名前の後ろに学籍番号が付きます
+                </p>
                 <div className="flex justify-between mt-4">
                   <button
                     className=" p-2 bg-gradient-to-b from-red-400 to-red-700  text-white rounded-full"

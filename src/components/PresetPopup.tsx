@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Member } from "../types/type";
 import { getPresets, deletePresets } from "../firebase/userService";
+import Swal from "sweetalert2";
 
 // インターフェースの定義
 interface PresetPopupProps {
@@ -70,7 +71,12 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
       const selectedMembers = presetsLineId[selectedIndex].map((lineId) => {
         const member = members.find((member) => member.lineId === lineId);
         if (!member) {
-          alert("メンバーが見つかりませんでした、プリセットを削除してください");
+          Swal.fire({
+            icon: "warning",
+            title: "エラー",
+            text: "メンバーが見つかりませんでした、プリセットを削除してください",
+            confirmButtonText: "OK",
+          });
           throw new Error("メンバーが見つかりませんでした");
         }
         return member;
@@ -78,7 +84,12 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
       setSelectedMembers(selectedMembers); // 選択されたメンバーを設定
       onClose(); // ポップアップを閉じる
     } else {
-      alert("プリセットを選択してください");
+      Swal.fire({
+        icon: "warning",
+        title: "注意",
+        text: "プリセットを選択してください",
+        confirmButtonText: "OK",
+      });
     }
   };
   return (

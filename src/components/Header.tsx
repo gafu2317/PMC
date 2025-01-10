@@ -8,7 +8,7 @@ const Header = () => {
         予約可能
         <span className="inline-block w-4 h-4 bg-gray-300 rounded"></span>{" "}
         予約済み
-        <span className="inline-block w-4 h-4 bg-green-300 rounded"></span>{" "}
+        <span className="inline-block w-4 h-4 bg-green-500 rounded"></span>{" "}
         自分の予約
         <span className="inline-block w-4 h-4 bg-red-500 rounded text-white"></span>{" "}
         予約の重複

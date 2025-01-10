@@ -6,6 +6,7 @@ import {
   deleteUser,
   getAllPeriodReservations,
 } from "../firebase/userService";
+import Swal from "sweetalert2";
 
 interface HamburgerMenuProps {
   members: Member[];
@@ -205,7 +206,12 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
     if (password === correctPassword) {
       setIsAuthenticated(true);
     } else {
-      alert("パスワードが間違っています");
+      Swal.fire({
+        icon: "warning",
+        title: "エラー",
+        text: "パスワードが間違っています",
+        confirmButtonText: "OK",
+      });
     }
   };
 

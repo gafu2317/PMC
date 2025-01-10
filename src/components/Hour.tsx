@@ -18,16 +18,17 @@ const Hour: React.FC<HourProps> = ({
 }) => {
   return (
     <div
-      className={`flex items-center justify-center p-2  ${
+      className={`flex items-center justify-center  ${
         isSelected ? "border-2 border-red-500" : "border-2 border-gray-300"
       } transition-all cursor-pointer ${
-        isReserved ? (isUserReservation ? "" : "bg-gray-300") : ""
+        isReserved ? (isUserReservation ? "bg-green-500" : "bg-gray-300") : ""
       } `}
+      style={{ aspectRatio: 1 }}
       onClick={onClick} // クリック時にハンドラを呼び出す
     >
-      <div className="flex justify-center items-center">
-        {isReserved ? isUserReservation ? "🟢" : "　" : "　"}
-      </div>
+      {/* <div className="flex justify-center items-center">
+        {isReserved ? (isUserReservation ? "🟢" : "　") : "　"}
+      </div> */}
     </div>
   );
 };

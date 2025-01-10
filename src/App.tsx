@@ -12,6 +12,7 @@ import RegistrationPopup from "./components/RegistrationPopup";
 import { initLiff } from "./liff/liffService";
 import HamburgerMenu from "./components/HamburgerMenu";
 import Header from "./components/Header";
+import Swal from "sweetalert2";
 
 function App() {
   //部員を管理
@@ -144,7 +145,12 @@ function App() {
     if (selectedHours.some((hours) => hours.includes(true))) {
       setIsReservationPopupVisible(true);
     } else {
-      alert("予約する日時を選択してください");
+      Swal.fire({
+        icon: "warning",
+        title: "エラー",
+        text: "予約する日時を選択してください",
+        confirmButtonText: "OK",
+      });
     }
   };
 
@@ -165,7 +171,12 @@ function App() {
     ) {
       setIsEditPopupVisible(true);
     } else {
-      alert("編集する予約を選択してください");
+      Swal.fire({
+        icon: "warning",
+        title: "エラー",
+        text: "編集する予約を選択してください",
+        confirmButtonText: "OK",
+      });
     }
   };
 
