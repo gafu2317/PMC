@@ -233,9 +233,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
             <div className="flex justify-between mt-4">
               <button
                 className={` rounded p-1 ${
-                  isAll || (!isAll && reservations.length === 0)
-                    ? "bg-gray-300"
-                    : "bg-gray-400"
+                  isAll ? "bg-gray-400" : "bg-gray-300"
                 }`}
                 onClick={fetchAllReservation}
               >
@@ -243,7 +241,9 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
               </button>
               <button
                 className={` rounded p-1 ${
-                  isAll ? "bg-gray-300" : "bg-gray-400"
+                  isAll || (!isAll && reservations.length === 0)
+                    ? "bg-gray-300"
+                    : "bg-gray-400"
                 }`}
                 onClick={fetchReservation}
               >
@@ -381,8 +381,8 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
               <button
                 className={` rounded p-1 ${
                   isAll || (!isAll && reservations.length === 0)
-                    ? "bg-gray-300" 
-                    : "bg-gray-400" 
+                    ? "bg-gray-300"
+                    : "bg-gray-400"
                 }`}
                 onClick={fetchReservation}
               >
@@ -411,7 +411,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
     <div className="relative">
       {/* ハンバーガーメニュー */}
       <button
-        className="absolute top1 left-1 z-50 p-1 flex w-7 h-7 flex-col items-center justify-center bg-gray-600 text-white rounded focus:outline-none"
+        className="absolute top1 left-1 p-1 flex w-7 h-7 flex-col items-center justify-center bg-gray-600 text-white rounded focus:outline-none"
         onClick={toggleMenu}
       >
         <div className="w-full h-0.5 bg-white mb-1"></div>
@@ -459,9 +459,21 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
             </form>
           ) : (
             <div
-              className="bg-white shadow-lg rounded p-4 w-80 h-80 overflow-y-auto"
+              className="bg-white shadow-lg rounded p-4 w-4/5 h-80 overflow-y-auto"
               onClick={(e) => e.stopPropagation()} // クリックイベントの伝播を止める
             >
+              {/* &timesは×ボタン */}
+              <div className="flex justify-between items-center">
+                <h2 className="flex-grow text-center text-lg font-semibold">
+                  管理者メニュー
+                </h2>
+                <button
+                  className="text-lg font-bold hover:text-gray-800 focus:outline-none"
+                  onClick={toggleMenu}
+                >
+                  &times;
+                </button>
+              </div>
               <ul className="py-2">
                 {[
                   "deleteReservation",

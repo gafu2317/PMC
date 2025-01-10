@@ -16,7 +16,6 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
   onClose,
   setSelectedMembers,
 }) => {
-
   const [presetsLineId, setPresetsLineId] = useState<string[][] | undefined>(
     undefined
   ); // presetsの状態
@@ -41,15 +40,15 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
     fetchPresets(); // プリセットを取得
   }, [presetsLineId, presets]); // myLineIdやmembersが変更されたときに再実行
   //setPresetsLineIdとsetPresetsからpresetを削除
-  const deletePreset = (index:number) => {
-    if(presetsLineId){
+  const deletePreset = (index: number) => {
+    if (presetsLineId) {
       deletePresets(myLineId, presetsLineId[index]);
       const newPresetsLineId = presetsLineId?.filter((_, i) => i !== index);
       setPresetsLineId(newPresetsLineId);
       const newPresets = presets?.filter((_, i) => i !== index);
       setPresets(newPresets);
     }
-  }
+  };
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null); // 選択されたプリセットの番号を管理
   const handleChange = (index: number) => {
@@ -83,11 +82,23 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
     }
   };
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-80">
-        <h2 className="text-xl font-semibold mb-4">
-          使用するプリセットを選んでください
-        </h2>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg  px-6 pb-6 pt-3 w-4/5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-semibold">プリセットを選んでください</h2>
+          <button
+            className="text-lg font-bold hover:text-gray-800 focus:outline-none"
+            onClick={onClose}
+          >
+            &times;
+          </button>
+        </div>
         <div className="h-40 overflow-y-auto border border-blue-200 rounded p-2">
           {!presets || presets.length === 0 ? (
             <p className="text-center text-gray-500">
@@ -97,11 +108,11 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
             presets.map((preset, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between py-1"
+                className="flex items-center justify-between p-1 hover:bg-blue-100 rounded"
               >
                 <label
                   htmlFor={`${preset}-${index}`}
-                  className="flex items-center cursor-pointer user-select-none"
+                  className="cursor-pointer user-select-none"
                 >
                   <input
                     type="checkbox"
@@ -110,19 +121,17 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
                     value={preset.toString()}
                     checked={selectedIndex === index}
                     onChange={() => handleChange(index)}
-                    className="appearance-none h-3 w-3 border border-blue-200 rounded-full checked:bg-blue-500 checked:border-transparent focus:outline-none cursor-pointer"
+                    className="appearance-none h-3 w-3 border border-blue-200 rounded-full checked:bg-blue-500 checked:border-transparent focus:outline-none cursor-pointer flex-shrink-0"
                   />
-                  <span className="ml-2">{preset.join("、")}</span>
+                  <span className="ml-2 ">{preset.join("、")}</span>
                 </label>
                 {presetsLineId !== undefined && (
-                  <div className="flex items-center justify-center w-4 h-4 bg-red-500 rounded-full">
+                  <div className="flex items-center justify-center w-4 h-4 bg-red-500 rounded-full flex-shrink-0">
                     <button
-                      className="text-white text-xs"
-                      onClick={() =>
-                        deletePreset(index)
-                      }
+                      className="text-white text-xs "
+                      onClick={() => deletePreset(index)}
                     >
-                      ×
+                      &times;
                     </button>
                   </div>
                 )}
@@ -130,16 +139,10 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
             ))
           )}
         </div>
-        <div className="flex justify-between mt-4">
-          <button
-            className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-gray-300 to-gray-400"
-            onClick={onClose}
-          >
-            閉じる
-          </button>
+        <div className="flex justify-end mt-4">
           {presets !== undefined && (
             <button
-              className="p-2 bg-gradient-to-b from-sky-600 to-blue-700 text-white rounded-full w-20"
+              className="p-2 bg-blue-500 text-white rounded-full w-20"
               onClick={handleSubmit} // 決定ボタンのクリックハンドラ
             >
               決定

@@ -1,10 +1,14 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { Reservation } from "../types/type";
+import { Reservation, Member } from "../types/type";
 import { weekDays, timeSlots } from "../utils/utils";
 import { deleteReservation, updateReservation } from "../firebase/userService";
+import MemberList from "./MemberList ";
+
 
 interface ReservationPopupProps {
+  myLineId: string;
+  members: Member[];
   name: string;
   onClose: () => void;
   selectedReservations: string[][][];
@@ -12,13 +16,28 @@ interface ReservationPopupProps {
 }
 
 const EditReservationPopup: React.FC<ReservationPopupProps> = ({
+  myLineId,
+  members,
   onClose,
   selectedReservations,
   reservations,
   name,
 }) => {
-  const [newReservations, setNewReservations] = useState<Reservation[]>(reservations);
-  const [ids, setIds] = useState<string[]>([]);
+  const [newReservations, setNewReservations] =
+    useState<Reservation[]>(reservations); //　予約の編集で表示する予約情報
+  const [ids, setIds] = useState<string[]>([]); //予約の編集で表示する予約のID
+  const [isJoinPopupVisible, setIsJoinPopupVisible] = useState<boolean>(false);
+  // 選択されたメンバーを管理
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
+  const handleAddSelectedMembers = (member: Member) => {
+    setSelectedMembers(
+      (prev) =>
+        prev.includes(member)
+          ? prev.filter((m) => m.lineId !== member.lineId) // lineIdでフィルタリング
+          : [...prev, member] // メンバーを追加
+    );
+  };
+
   useEffect(() => {
     const newIds: string[] = [];
     selectedReservations.forEach((dayReservations) => {
@@ -31,18 +50,35 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
 
   const joinReservations = () => {
     setNewReservations((prevReservations) => {
+      let isError = false; // エラーフラグを初期化
       const newReservations = prevReservations.map((reservation) => {
-        if (ids.includes(reservation.id)) {
-          if (!reservation.names.includes(name)) {
-            reservation.names.push(name);
-            updateReservation(reservation.id, reservation.names);
-          } 
+        // 自分のlineIdが予約に含まれているかを確認
+        const isMember = reservation.names.includes(myLineId);
+        // 自分が予約のメンバーであるときのみ処理を行う
+        if (isMember) {
+          selectedMembers.forEach((member) => {
+            if (ids.includes(reservation.id)) {
+              // 予約にメンバーがまだ含まれていない場合、追加する
+              if (!reservation.names.includes(member.name)) {
+                reservation.names.push(member.name);
+                updateReservation(reservation.id, reservation.names);
+              }
+            }
+          });
+        } else {
+          isError = true; // エラーフラグをセット
         }
-        return reservation;
+        return reservation; // 予約を返す
       });
-      return newReservations;
+      // すべての予約を確認した後にエラーメッセージを表示
+      if (isError) {
+        alert("自分がメンバーの予約のみ招待できます");
+      }
+      return newReservations; // 更新された予約リストを返す
     });
+    setIsJoinPopupVisible(false);
   };
+
   const leaveReservations = () => {
     setNewReservations((prevReservations) => {
       const newReservations = prevReservations.map((reservation) => {
@@ -56,8 +92,8 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
             } else {
               alert("自分のみの予約からは削除されませんでした。");
             }
-          } 
-        } 
+          }
+        }
         return reservation;
       });
       return newReservations;
@@ -97,11 +133,23 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
 
   return (
     <div>
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white p-4 rounded shadow-md w-80">
-          <h2 className="text-xl font-semibold mb-4 text-center ">
-            予約の編集
-          </h2>
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+        onClick={onClose}
+      >
+        <div
+          className="bg-white  px-6 pb-6 pt-3 rounded shadow-md w-4/5"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-1">
+            <h2 className="text-xl font-semibold text-center ">予約の編集</h2>
+            <button
+              className="text-lg font-bold hover:text-gray-800 focus:outline-none"
+              onClick={onClose}
+            >
+              &times;
+            </button>
+          </div>
           <div className="border border-blue-200 rounded h-32 overflow-y-auto">
             <ul className="list-disc pl-5">
               {weekDays.map((day, dayIndex) => {
@@ -133,33 +181,60 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
           </div>
           <div className="flex justify-around mt-4">
             <button
-              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-green-300 to-green-500"
-              onClick={joinReservations}
+              className="p-2 text-white rounded-full w-20 bg-green-500"
+              onClick={() => setIsJoinPopupVisible(true)}
             >
-              参加
+              招待
             </button>
             <button
-              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-blue-300 to-blue-500"
+              className="p-2 text-white rounded-full w-20 bg-gray-500"
               onClick={leaveReservations}
             >
               不参加
             </button>
-          </div>
-          <div className="flex justify-around mt-4">
             <button
-              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-gray-300 to-gray-400"
-              onClick={onClose}
-            >
-              閉じる
-            </button>
-
-            <button
-              className="p-2 text-black rounded-full w-20 bg-gradient-to-b from-red-400 to-red-500"
+              className="p-2 text-white rounded-full w-20 bg-red-500"
               onClick={deleteReservations}
             >
               予約削除
             </button>
           </div>
+          {isJoinPopupVisible && (
+            <div
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+              onClick={() => setIsJoinPopupVisible(false)}
+            >
+              <div
+                className="bg-white  px-6 pb-6 pt-3 rounded shadow-md w-4/5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-lg font-bold">
+                    招待する人を選択してください
+                  </h3>
+                  <button
+                    className="text-lg font-bold hover:text-gray-800 focus:outline-none"
+                    onClick={onClose}
+                  >
+                    &times;
+                  </button>
+                </div>
+                <MemberList
+                  members={members}
+                  selectedMembers={selectedMembers}
+                  handleAddSelectedMembers={handleAddSelectedMembers}
+                />
+                <div className="flex justify-end mt-4">
+                  <button
+                    className="p-2 bg-blue-500  text-white rounded-full w-20"
+                    onClick={joinReservations}
+                  >
+                    招待する
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

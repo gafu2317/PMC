@@ -214,6 +214,8 @@ function App() {
 
           {isEditPopupVisible && (
             <EditReservationPopup
+              myLineId={lineId} // lineIdを渡す
+              members={members} // 部員情報を渡す
               name={getName(lineId)} // 名前を渡す
               reservations={reservations} // 予約情報を渡す
               selectedReservations={selectedReservations} // 選択された予約情報を渡す

@@ -64,9 +64,9 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                           <li
                             key={teamIndex}
                             className={
-                              isSelected
+                              `px-1 rounded ${isSelected
                                 ? "bg-blue-100"
-                                : ""
+                                : ""}`
                             }
                             onClick={(e) => {
                               e.stopPropagation(); // バブリングを防ぐ
