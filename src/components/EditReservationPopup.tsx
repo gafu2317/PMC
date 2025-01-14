@@ -201,10 +201,10 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
           </div>
           <div className="flex justify-around mt-4">
             <button
-              className="p-2 text-white rounded-full w-20 bg-green-500"
-              onClick={() => setIsJoinPopupVisible(true)}
+              className="p-2 text-white rounded-full w-20 bg-red-500"
+              onClick={deleteReservations}
             >
-              招待
+              予約削除
             </button>
             <button
               className="p-2 text-white rounded-full w-20 bg-gray-500"
@@ -213,10 +213,10 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
               不参加
             </button>
             <button
-              className="p-2 text-white rounded-full w-20 bg-red-500"
-              onClick={deleteReservations}
+              className="p-2 text-white rounded-full w-20 bg-green-500"
+              onClick={() => setIsJoinPopupVisible(true)}
             >
-              予約削除
+              招待
             </button>
           </div>
           {isJoinPopupVisible && (

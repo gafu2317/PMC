@@ -13,3 +13,8 @@ export interface Member {
   studentId: number;
 }
 
+export interface Band {
+  bandId: string;
+  name: string;
+  memberIds: string[];
+}

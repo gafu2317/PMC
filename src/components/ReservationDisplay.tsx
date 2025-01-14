@@ -63,11 +63,9 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                           // チームを表示
                           <li
                             key={teamIndex}
-                            className={
-                              `px-1 rounded ${isSelected
-                                ? "bg-blue-100"
-                                : ""}`
-                            }
+                            className={`px-1 rounded hover:bg-blue-100 ${
+                              isSelected ? "bg-blue-100" : ""
+                            }`}
                             onClick={(e) => {
                               e.stopPropagation(); // バブリングを防ぐ
                               onReservationClick(dayIndex, timeIndex, team.id);

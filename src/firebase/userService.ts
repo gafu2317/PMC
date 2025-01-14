@@ -11,7 +11,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { getDayIndex, getTimeIndex } from "../utils/utils";
-import { Member, Reservation } from "../types/type";
+import { Member, Reservation, Band } from "../types/type";
 
 // ユーザーを追加する関数
 export const addUser = async (
@@ -149,7 +149,7 @@ export const getAllReservations = async (): Promise<
       .filter(
         (reservation) =>
           reservation.dayIndex !== -1 && reservation.timeIndex !== -1
-      ); 
+      );
 
     return reservations;
   } catch (error) {
@@ -161,7 +161,7 @@ export const getAllReservations = async (): Promise<
 export const getReservationsByDateRange = async (
   startDate: Date,
   endDate: Date
-): Promise<{id:string, names:string[], date:Date}[]> => {
+): Promise<{ id: string; names: string[]; date: Date }[]> => {
   try {
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
@@ -183,37 +183,38 @@ export const getReservationsByDateRange = async (
     console.error("予約の取得に失敗しました:", error);
     return [];
   }
-}
+};
 
 //全ての期間の予約を取得する関数
-export const getAllPeriodReservations = async (): Promise<{id:string, names:string[], date:Date}[]> => {
+export const getAllPeriodReservations = async (): Promise<
+  { id: string; names: string[]; date: Date }[]
+> => {
   try {
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
-    const reservations = reservationsDocs.docs
-      .map((doc) => ({
-        id: doc.id,
-        names: doc.data().names,
-        date: doc.data().date.toDate(),
-      }))
+    const reservations = reservationsDocs.docs.map((doc) => ({
+      id: doc.id,
+      names: doc.data().names,
+      date: doc.data().date.toDate(),
+    }));
 
     return reservations;
   } catch (error) {
     console.error("予約の取得に失敗しました:", error);
     return [];
   }
-}
+};
 
 //　プリセットをユーザーデータに追加する関数(二次元配列のフィールドを持つには二次元配列ごと渡さないといけないっぽい？)
 export const addPresets = async (
   lineId: string,
-  preset: string[]
+  presetMemberLineIds: string[]
 ): Promise<void> => {
   try {
     const docRef = doc(db, "users", lineId);
     const docSnap = await getDoc(docRef);
-    const presetObj = { members: preset }; // 新しいプリセットオブジェクト
+    const presetObj = { members: presetMemberLineIds }; // 新しいプリセットオブジェクト
 
     // ドキュメントが存在する場合
     if (docSnap.exists()) {
@@ -254,7 +255,7 @@ export const addPresets = async (
 // プリセットを削除する関数
 export const deletePresets = async (
   lineId: string,
-  preset: string[],
+  presetMemberLineIds: string[]
 ): Promise<void> => {
   //presetと一致するものを削除
   try {
@@ -264,8 +265,10 @@ export const deletePresets = async (
       const existingPresets = docSnap.data().presets || [];
       const newPresets = existingPresets.filter(
         (existingPreset: { members: string[] }) =>
-          existingPreset.members.length !== preset.length ||
-          !existingPreset.members.every((member) => preset.includes(member))
+          existingPreset.members.length !== presetMemberLineIds.length ||
+          !existingPreset.members.every((member) =>
+            presetMemberLineIds.includes(member)
+          )
       );
       await setDoc(docRef, { presets: newPresets }, { merge: true });
       console.log("プリセットが削除されました。");
@@ -301,4 +304,53 @@ export const getPresets = async (
   }
 };
 
-//
+//バンドを追加する関数
+export const addBand = async (
+  name: string,
+  memberIds: string[]
+): Promise<void> => {
+  try {
+    const docRef = collection(db, "bands"); //bandsコレクションの参照を取得
+    //バンド情報を追加
+    await addDoc(docRef, {
+      name: name,
+      memberIds: memberIds,
+    });
+    console.log("バンドが追加されました。");
+  } catch (error) {
+    console.error("バンドの追加に失敗しました:", error);
+  }
+};
+
+//バンドを削除する関数
+export const deleteBand = async (id: string): Promise<void> => {
+  try {
+    // bandsのドキュメントの参照を取得
+    const docRef = doc(db, "bands", id);
+
+    // ドキュメントを削除
+    await deleteDoc(docRef);
+
+    console.log("バンドが削除されました。");
+  } catch (error) {
+    console.error("バンドの削除に失敗しました:", error);
+  }
+};
+
+//バンドを取得する関数
+export const getAllBands = async (): Promise<Band[] | undefined> => {
+  try {
+    const bandsColRef = collection(db, "bands"); // bandsコレクションの参照を取得
+    const bandsDocs = await getDocs(bandsColRef); // コレクション内の全てのドキュメントを取得
+
+    const bands = bandsDocs.docs.map((doc) => ({
+      bandId: doc.id,
+      name: doc.data().name,
+      memberIds: doc.data().memberIds,
+    }));
+
+    return bands;
+  } catch (error) {
+    console.error("バンドの取得に失敗しました:", error);
+  }
+};

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import ReservationPopup from "./components/ReservationPopup";
 import EditReservationPopup from "./components/EditReservationPopup";
 import ReservationDisplay from "./components/ReservationDisplay";
-import { Reservation, Member } from "./types/type";
+import { Reservation, Member, Band } from "./types/type";
 import { getAllReservations, getAllUser } from "./firebase/userService";
 import { db } from "./firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -13,6 +13,8 @@ import { initLiff } from "./liff/liffService";
 import HamburgerMenu from "./components/HamburgerMenu";
 import Header from "./components/Header";
 import Swal from "sweetalert2";
+import BandPopup from "./components/BandPopup";
+import { getAllBands } from "./firebase/userService";
 
 function App() {
   //部員を管理
@@ -79,6 +81,27 @@ function App() {
   const handleReservationAdd = (newReservations: Reservation[]) => {
     setReservations((prev) => [...prev, ...newReservations]);
   };
+  //バンドを管理
+  const [bands, setBands] = useState<Band[]>([]);
+
+  useEffect(() => {
+    const collectionRef = collection(db, "bands");
+    const unsubscribe = onSnapshot(collectionRef, async() => {
+      try {
+        const newBands = await getAllBands();
+        if (newBands) {
+          setBands(newBands);
+        } else {
+          console.warn("バンド情報が取得できませんでした。");
+        }
+      } catch (error) {
+        console.error("バンド情報の取得に失敗しました:", error);
+      }
+    });
+
+    // クリーンアップ関数
+    return () => unsubscribe();
+  }, []); // membersが変更されたときに再実行
 
   //　選択している時間帯を管理(Hourに渡しやすい型)
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
@@ -180,6 +203,9 @@ function App() {
     }
   };
 
+  // バンドポップアップの表示状態を管理
+  const [isBandPopupVisible, setIsBandPopupVisible] = useState(false);
+
   return (
     <div>
       {lineId && (
@@ -200,17 +226,24 @@ function App() {
           />
 
           <button
-            className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
+            className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
             onClick={handleReserve}
           >
             予約
           </button>
 
           <button
-            className="fixed bottom-8 right-8 p-2 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center"
+            className="fixed bottom-8 right-8 p-2 bg-green-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
             onClick={handleEdit}
           >
             編集
+          </button>
+
+          <button
+            className="fixed bottom-40 right-8 p-2 bg-red-500 text-white rounded-full w-14 h-14 flex items-center justify-center whitespace-nowrap "
+            onClick={() => setIsBandPopupVisible(true)}
+          >
+            バンド
           </button>
 
           {isReservationPopupVisible && (
@@ -239,6 +272,15 @@ function App() {
               lineId={lineId}
               members={members}
               onClose={() => setIsRegistrationPopupVisible(false)}
+            />
+          )}
+
+          {isBandPopupVisible && (
+            <BandPopup
+              myLineId={lineId}
+              members={members}
+              bands={bands}
+              onClose={() => setIsBandPopupVisible(false)}
             />
           )}
         </div>

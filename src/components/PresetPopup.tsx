@@ -19,7 +19,7 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
 }) => {
   const [presetsLineId, setPresetsLineId] = useState<string[][] | undefined>(
     undefined
-  ); // presetsの状態
+  ); 
   const [presets, setPresets] = useState<string[][] | undefined>(undefined); // presetsの状態
   useEffect(() => {
     const fetchPresets = async () => {
