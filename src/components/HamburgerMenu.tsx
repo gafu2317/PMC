@@ -1,35 +1,39 @@
 import React, { useState } from "react";
-import { Member } from "../types/type";
+import { Member, Band } from "../types/type";
 import {
   getReservationsByDateRange,
   deleteReservation,
   deleteUser,
   getAllPeriodReservations,
+  getAllBands,
+  deleteBand,
 } from "../firebase/userService";
 import Swal from "sweetalert2";
 
 interface HamburgerMenuProps {
   members: Member[];
+  bands: Band[];
 }
 
-const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [selectedAction, setSelectedAction] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
+  const [isOpen, setIsOpen] = useState(false); // メニューの開閉状態を管理
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // 認証状態を管理
+  const [password, setPassword] = useState(""); // パスワードを管理
+  const [selectedAction, setSelectedAction] = useState<string | null>(null); // 選択されたアクションを管理
+  const [startDate, setStartDate] = useState(""); // 開始日を管理
+  const [endDate, setEndDate] = useState(""); // 終了日を管理
   const [reservations, setReservations] = useState<
     { id: string; names: string[]; date: Date }[]
-  >([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  >([]); // 予約情報を管理
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()); // 選択されたIDを管理
   const [loading, setLoading] = useState(false); // ローディング状態を管理
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // 検索キーワードを管理
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(
     new Set()
-  );
+  ); // 選択されたメンバーのLineIdを管理
   const [isAll, setIsAll] = useState(false); //全て選択されているかどうか
   const [isCopy, setIsCopy] = useState(false); //コピーされているかどうか
+  const [selectedBands, setSelectedBands] = useState<Set<string>>(new Set()); // 選択されたバンドのIdを管理
 
   const handleMenuClick = (action: string) => {
     if (selectedAction === action) {
@@ -45,6 +49,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
     setSelectedMembers(new Set());
     setIsAll(false);
     setIsCopy(false);
+    setSelectedBands(new Set());
   };
 
   const calculateFees = (
@@ -121,7 +126,19 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
     });
   };
 
-  const handleDeleteSelected = async () => {
+  const toggleSelectBand = (bandId: string) => {
+    setSelectedBands((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(bandId)) {
+        newSelected.delete(bandId);
+      } else {
+        newSelected.add(bandId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleDeleteMembers = async () => {
     for (const lineId of selectedMembers) {
       setLoading(true);
       await deleteUser(lineId);
@@ -130,11 +147,21 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
     setSelectedMembers(new Set());
   };
 
+  const handleDeleteBands = async () => {
+    for (const bandId of selectedBands) {
+      setLoading(true);
+      await deleteBand(bandId);
+      setLoading(false);
+    }
+    setSelectedBands(new Set());
+  };
+
   const filteredMembers = members.filter((member) =>
     member.name.includes(searchTerm)
   );
+  const filteredBands = bands.filter((band) => band.name.includes(searchTerm));
 
-  const SelectAllMember = () => {
+  const selectAllMember = () => {
     if (selectedMembers.size === filteredMembers.length) {
       // 全て選択されている場合は解除
       setSelectedMembers(new Set());
@@ -144,6 +171,17 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
         filteredMembers.map((member) => member.lineId)
       );
       setSelectedMembers(allSelected);
+    }
+  };
+
+  const selectAllBand = () => {
+    if (selectedBands.size === filteredBands.length) {
+      // 全て選択されている場合は解除
+      setSelectedBands(new Set());
+    } else {
+      // 全て選択
+      const allSelected = new Set(filteredBands.map((band) => band.bandId));
+      setSelectedBands(allSelected);
     }
   };
 
@@ -291,13 +329,13 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
                 </ul>
 
                 <div className="flex justify-end mt-4">
+                  {loading && <span>削除中...</span>}
                   <button
                     className="bg-red-500 text-white rounded p-1"
                     onClick={handleReservationDelete}
                   >
                     削除
                   </button>
-                  {loading && <span>削除中...</span>}
                 </div>
               </div>
             )}
@@ -321,7 +359,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
               <div>
                 <button
                   className="bg-blue-500 text-white rounded p-1 "
-                  onClick={SelectAllMember}
+                  onClick={selectAllMember}
                 >
                   {selectedMembers.size === filteredMembers.length
                     ? "すべて解除"
@@ -346,13 +384,13 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
               </div>
             )}
             <div className="flex justify-end mt-4">
+              {loading && <span>削除中...</span>}
               <button
                 className="bg-red-500 text-white rounded p-1"
-                onClick={handleDeleteSelected}
+                onClick={handleDeleteMembers}
               >
                 削除
               </button>
-              {loading && <span>削除中...</span>}
             </div>
           </div>
         );
@@ -404,6 +442,57 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
               >
                 コピー
               </button>
+            </div>
+          </div>
+        );
+
+      case "changeBandData":
+        return (
+          <div>
+            <h2 className="mb-2">バンドデータの削除</h2>
+            <input
+              type="text"
+              placeholder="名前(一部でも可)"
+              className="border rounded p-1 mb-2 w-full"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            {filteredBands.length > 0 && (
+              <div>
+                <button
+                  className="bg-blue-500 text-white rounded p-1 "
+                  onClick={selectAllBand}
+                >
+                  {selectedBands.size === filteredBands.length
+                    ? "すべて解除"
+                    : "すべて選択"}
+                </button>
+                <ul className="mt-4">
+                  {filteredBands.map((band) => (
+                    <li
+                      key={band.bandId}
+                      className="flex items-center border-b py-1"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedBands.has(band.bandId)}
+                        onChange={() => toggleSelectBand(band.bandId)}
+                        className="mr-2"
+                      />
+                      {band.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="flex justify-end mt-4">
+              <button
+                className="bg-red-500 text-white rounded p-1"
+                onClick={handleDeleteBands}
+              >
+                削除
+              </button>
+              {loading && <span>削除中...</span>}
             </div>
           </div>
         );
@@ -485,6 +574,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
                   "deleteReservation",
                   "changeMemberData",
                   "copyReservation",
+                  "changeBandData",
                 ].map((action) => (
                   <li
                     key={action}
@@ -495,6 +585,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ members }) => {
                   >
                     {action === "deleteReservation" && "・予約データの削除"}
                     {action === "changeMemberData" && "・部員データの削除"}
+                    {action === "changeBandData" && "・バンドデータの削除"}
                     {action === "copyReservation" && "・予約データのコピー"}
                   </li>
                 ))}

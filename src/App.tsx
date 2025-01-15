@@ -211,7 +211,7 @@ function App() {
       {lineId && (
         <div className="p-5">
           <Header></Header>
-          <HamburgerMenu members={members} />
+          <HamburgerMenu bands={bands} members={members} />
           <Calendar
             name={getName(lineId)}
             reservations={reservations}
