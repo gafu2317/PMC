@@ -119,7 +119,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
         </div>
         {/* ボタン要素 */}
         <div className="flex justify-between mt-4">
-          <button className=" p-2 bg-sky-500  text-white rounded-full w-30">
+          <button className=" p-2 bg-sky-500  text-white rounded-full  ">
             <span onClick={() => setIsPresetPopup(true)}>プリセット</span>
           </button>
           {isPresetPopup && (

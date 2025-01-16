@@ -337,6 +337,25 @@ export const deleteBand = async (id: string): Promise<void> => {
   }
 };
 
+//バンドを更新する関数
+export const updateBand = async (
+  id: string,
+  name: string,
+  memberIds: string[]
+): Promise<void> => {
+  try {
+    // bandsのドキュメントの参照を取得
+    const docRef = doc(db, "bands", id);
+
+    // ドキュメントを更新
+    await setDoc(docRef, { name: name, memberIds: memberIds }, { merge: true });
+
+    console.log("バンドが更新されました。");
+  } catch (error) {
+    console.error("バンドの更新に失敗しました:", error);
+  }
+};
+
 //バンドを取得する関数
 export const getAllBands = async (): Promise<Band[] | undefined> => {
   try {
