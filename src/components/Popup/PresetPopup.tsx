@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Member } from "../types/type";
-import { getPresets, deletePresets } from "../firebase/userService";
+import { Member } from "../../types/type";
+import { getPresets, deletePresets } from "../../firebase/userService";
 import Swal from "sweetalert2";
 
 // インターフェースの定義
@@ -19,7 +19,7 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
 }) => {
   const [presetsLineId, setPresetsLineId] = useState<string[][] | undefined>(
     undefined
-  ); 
+  );
   const [presets, setPresets] = useState<string[][] | undefined>(undefined); // presetsの状態
   useEffect(() => {
     const fetchPresets = async () => {

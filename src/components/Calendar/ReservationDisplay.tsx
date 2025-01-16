@@ -1,6 +1,6 @@
 import React from "react";
-import { weekDays, timeSlots } from "../utils/utils";
-import { Reservation } from "../types/type";
+import { weekDays, timeSlots } from "../../utils/utils";
+import { Reservation } from "../../types/type";
 
 interface ReservationDisplayProps {
   reservations: Reservation[]; // 予約情報

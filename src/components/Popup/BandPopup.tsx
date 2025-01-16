@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Band, Member } from "../types/type";
-import { addBand, addPresets, updateBand } from "../firebase/userService";
-import MemberList from "./MemberList ";
+import { Band, Member } from "../../types/type";
+import { addBand, addPresets, updateBand } from "../../firebase/userService";
+import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
 
 interface BandPopupProps {
@@ -37,7 +37,7 @@ const BandPopup: React.FC<BandPopupProps> = ({
     setBandName(null);
     setSelectedMembers([]);
     setselectedBand(undefined);
-  }
+  };
   const handleAddSelectedMembers = (member: Member) => {
     setSelectedMembers((prev) =>
       prev.includes(member)
@@ -104,7 +104,7 @@ const BandPopup: React.FC<BandPopupProps> = ({
       });
     }
   };
-  const changeBandName = () => {  
+  const changeBandName = () => {
     if (selectedBand && bandName) {
       updateBand(selectedBand.bandId, bandName, selectedBand.memberIds);
     } else {
@@ -115,7 +115,7 @@ const BandPopup: React.FC<BandPopupProps> = ({
         confirmButtonText: "OK",
       });
     }
-  }
+  };
 
   // バンドを追加する関数
   const handleAddBand = () => {

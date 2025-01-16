@@ -1,20 +1,14 @@
 import { useState, useEffect } from "react";
-import ReservationPopup from "./components/ReservationPopup";
-import EditReservationPopup from "./components/EditReservationPopup";
-import ReservationDisplay from "./components/ReservationDisplay";
+import { ReservationPopup, EditReservationPopup, RegistrationPopup, BandPopup } from "./components/Popup";
+import { Calendar, ReservationDisplay } from "./components/Calendar";
+import { HamburgerMenu, Header } from "./components/Layout";
 import { Reservation, Member, Band } from "./types/type";
-import { getAllReservations, getAllUser } from "./firebase/userService";
+import { getAllReservations, getAllUser, getAllBands } from "./firebase/userService";
 import { db } from "./firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlots } from "./utils/utils";
-import Calendar from "./components/Calendar";
-import RegistrationPopup from "./components/RegistrationPopup";
 import { initLiff } from "./liff/liffService";
-import HamburgerMenu from "./components/HamburgerMenu";
-import Header from "./components/Header";
 import Swal from "sweetalert2";
-import BandPopup from "./components/BandPopup";
-import { getAllBands } from "./firebase/userService";
 
 function App() {
   //部員を管理

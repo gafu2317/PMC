@@ -1,11 +1,11 @@
 import React from "react";
 import { useState } from "react";
-import { Member, Reservation } from "../types/type";
+import { Member, Reservation } from "../../types/type";
 import { v4 as uuidv4 } from "uuid";
-import { weekDays, timeSlots } from "../utils/utils";
-import { addPresets, addReservation } from "../firebase/userService";
+import { weekDays, timeSlots } from "../../utils/utils";
+import { addPresets, addReservation } from "../../firebase/userService";
 import PresetPopup from "./PresetPopup";
-import MemberList from "./MemberList ";
+import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
 
 interface ReservationPopupProps {
@@ -47,8 +47,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   const handleSubmit = () => {
     // 選択されたメンバーの名前を取得
     const selectedNames = selectedMembers.map((member) => member.name);
-    if(selectedNames.length === 0) {
-      Swal.fire({ 
+    if (selectedNames.length === 0) {
+      Swal.fire({
         icon: "warning",
         title: "エラー",
         text: "一名以上のメンバーを選択してください",

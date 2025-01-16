@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { addUser } from "../firebase/userService";
-import { Member } from "../types/type";
+import { addUser } from "../../firebase/userService";
+import { Member } from "../../types/type";
 import Swal from "sweetalert2";
 
 interface RegistrationPopupProps {

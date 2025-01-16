@@ -10,8 +10,8 @@ import {
   deleteDoc,
   Timestamp,
 } from "firebase/firestore";
-import { getDayIndex, getTimeIndex } from "../utils/utils";
-import { Member, Reservation, Band } from "../types/type";
+import { getDayIndex, getTimeIndex } from "../../utils/utils";
+import { Member, Reservation, Band } from "../../types/type";
 
 // ユーザーを追加する関数
 export const addUser = async (

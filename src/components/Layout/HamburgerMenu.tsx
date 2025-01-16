@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Member, Band } from "../types/type";
+import { Member, Band } from "../../types/type";
 import {
   getReservationsByDateRange,
   deleteReservation,
   deleteUser,
   getAllPeriodReservations,
   deleteBand,
-} from "../firebase/userService";
+} from "../../firebase/userService";
 import Swal from "sweetalert2";
 
 interface HamburgerMenuProps {
@@ -142,7 +142,9 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
       setLoading(true);
       await deleteUser(lineId);
       setLoading(false);
-      setSelectedMembers((prev) => new Set([...prev].filter((id) => id !== lineId)));
+      setSelectedMembers(
+        (prev) => new Set([...prev].filter((id) => id !== lineId))
+      );
     }
     setSelectedMembers(new Set());
   };
@@ -220,7 +222,9 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
       setLoading(true);
       await deleteReservation(id);
       setLoading(false);
-      setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
+      setReservations((prev) =>
+        prev.filter((reservation) => reservation.id !== id)
+      );
     }
     // 削除後は選択を解除する場合
     setSelectedIds(new Set());

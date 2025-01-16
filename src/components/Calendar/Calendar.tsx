@@ -1,8 +1,8 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
-import { Reservation } from '../types/type'
-import { weekDays, daysOfWeek, timeSlots } from '../utils/utils'
-import Hour from './Hour'
+import React from "react";
+import { useState, useEffect } from "react";
+import { Reservation } from "../../types/type";
+import { weekDays, daysOfWeek, timeSlots } from "../../utils/utils";
+import Hour from "./Hour";
 
 interface CalendarProps {
   name: string;
@@ -17,7 +17,6 @@ const Calendar: React.FC<CalendarProps> = ({
   selectedHours,
   onHourClick,
 }) => {
-
   const [reservedHours, setReservedHours] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false)) // 8日間、12時間の初期状態を設定
   );
@@ -33,7 +32,7 @@ const Calendar: React.FC<CalendarProps> = ({
     setReservedHours(updatedReservedHours); // 状態を更新
   }, [reservations]); // reservationsが変更されたときに実行
 
-  const [isUserReservations, setIsUserReservations] = useState<boolean[][]> (
+  const [isUserReservations, setIsUserReservations] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false)) // 8日間、12時間の初期状態を設定
   );
   useEffect(() => {
@@ -42,7 +41,8 @@ const Calendar: React.FC<CalendarProps> = ({
     ); // 予約の状態をリセット
     reservations.forEach((reservation) => {
       if (reservation.names.includes(name)) {
-        updatedIsUserReservations[reservation.dayIndex][reservation.timeIndex] = true; // 予約がある場合はtrueを設定
+        updatedIsUserReservations[reservation.dayIndex][reservation.timeIndex] =
+          true; // 予約がある場合はtrueを設定
       }
     });
     setIsUserReservations(updatedIsUserReservations); // 状態を更新
@@ -52,8 +52,7 @@ const Calendar: React.FC<CalendarProps> = ({
     <div>
       <div className="flex space-x-1">
         <div className="flex flex-col justify-between">
-          <div className="h-5">
-          </div>
+          <div className="h-5"></div>
           {Array.from({ length: timeSlots.length }).map((_, index) => (
             <div key={index} className="text-center p-1 text-xs rounded">
               {timeSlots[index]}
@@ -91,6 +90,6 @@ const Calendar: React.FC<CalendarProps> = ({
       </div>
     </div>
   );
-}
+};
 
-export default Calendar
+export default Calendar;

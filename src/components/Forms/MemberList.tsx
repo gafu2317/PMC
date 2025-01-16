@@ -1,6 +1,6 @@
-import React from 'react'
-import { useState } from 'react'
-import { Member } from '../types/type'
+import React from "react";
+import { useState } from "react";
+import { Member } from "../../types/type";
 
 interface MemberListProps {
   members: Member[]; // 部員の名前
@@ -13,7 +13,6 @@ const MemberList: React.FC<MemberListProps> = ({
   selectedMembers,
   handleAddSelectedMembers,
 }) => {
-
   // 入力されたフィルター文字列を管理
   const [filterText, setFilterText] = useState<string>("");
   // フィルタリングされたメンバーを取得
@@ -73,4 +72,4 @@ const MemberList: React.FC<MemberListProps> = ({
   );
 };
 
-export default MemberList 
+export default MemberList;

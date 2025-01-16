@@ -1,9 +1,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { Reservation, Member } from "../types/type";
-import { weekDays, timeSlots } from "../utils/utils";
-import { deleteReservation, updateReservation } from "../firebase/userService";
-import MemberList from "./MemberList ";
+import { Reservation, Member } from "../../types/type";
+import { weekDays, timeSlots } from "../../utils/utils";
+import {
+  deleteReservation,
+  updateReservation,
+} from "../../firebase/userService";
+import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
 
 interface ReservationPopupProps {
