@@ -12,9 +12,9 @@ const Header = () => {
         自分の予約
         <span className="inline-block w-4 h-4 bg-red-500 rounded text-white"></span>{" "}
         予約の重複
-        <button className="rounded-full w-4 h-4 flex items-center justify-center border border-black">
+        {/* <button className="rounded-full w-4 h-4 flex items-center justify-center border border-black">
           ?
-        </button>
+        </button> */}
       </div>
     </div>
   );

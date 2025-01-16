@@ -5,7 +5,6 @@ import {
   deleteReservation,
   deleteUser,
   getAllPeriodReservations,
-  getAllBands,
   deleteBand,
 } from "../firebase/userService";
 import Swal from "sweetalert2";
@@ -143,6 +142,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
       setLoading(true);
       await deleteUser(lineId);
       setLoading(false);
+      setSelectedMembers((prev) => new Set([...prev].filter((id) => id !== lineId)));
     }
     setSelectedMembers(new Set());
   };
@@ -152,6 +152,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
       setLoading(true);
       await deleteBand(bandId);
       setLoading(false);
+      setSelectedBands(new Set());
     }
     setSelectedBands(new Set());
   };
@@ -219,6 +220,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
       setLoading(true);
       await deleteReservation(id);
       setLoading(false);
+      setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
     }
     // 削除後は選択を解除する場合
     setSelectedIds(new Set());

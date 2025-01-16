@@ -19,3 +19,16 @@ export const initLiff = async (): Promise<string | null> => {
 };
 
 export const testLindId:string = "testLineId";
+
+export const sendMessages = async (message: string) => { 
+  try {
+    await liff.sendMessages([
+      {
+        type: "text",
+        text: message,
+      },
+    ]);
+  } catch (error) {
+    console.error("Failed to send message:", error);
+  }
+}

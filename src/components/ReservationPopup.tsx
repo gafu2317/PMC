@@ -6,6 +6,7 @@ import { weekDays, timeSlots } from "../utils/utils";
 import { addPresets, addReservation } from "../firebase/userService";
 import PresetPopup from "./PresetPopup";
 import MemberList from "./MemberList ";
+import Swal from "sweetalert2";
 
 interface ReservationPopupProps {
   myLineId: string; // lineId
@@ -46,6 +47,15 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   const handleSubmit = () => {
     // 選択されたメンバーの名前を取得
     const selectedNames = selectedMembers.map((member) => member.name);
+    if(selectedNames.length === 0) {
+      Swal.fire({ 
+        icon: "warning",
+        title: "エラー",
+        text: "一名以上のメンバーを選択してください",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
     // プリセットに登録する場合
     if (isPreset) {
       // presetsの状態が更新されてからaddPresetsを呼び出す
