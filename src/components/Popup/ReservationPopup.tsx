@@ -12,7 +12,6 @@ interface ReservationPopupProps {
   myLineId: string; // lineId
   members: Member[]; // 部員の名前
   selectedHours: boolean[][]; // 選択された時間帯
-  onSubmit: (reservations: Reservation[]) => void; // 送信ハンドラ
   onClose: () => void; // 閉じるハンドラ
 }
 
@@ -20,7 +19,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   myLineId,
   members,
   selectedHours,
-  onSubmit,
   onClose,
 }) => {
   // 選択されたメンバーを管理
@@ -87,7 +85,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
         }
       }
     }
-    onSubmit(reservations);
     addReservation(reservations);
     onClose(); // ポップアップを閉じる
   };

@@ -373,3 +373,74 @@ export const getAllBands = async (): Promise<Band[] | undefined> => {
     console.error("バンドの取得に失敗しました:", error);
   }
 };
+
+// 罰金情報を追加
+export const addFine = async (
+  lineId: string,
+  fine: number
+): Promise<void> => {
+  try {
+    const docRef = doc(db, "users", lineId);
+    const docSnap = await getDoc(docRef);
+    const existingFine = docSnap.data()?.fine || 0; // 現在の罰金を取得
+    await setDoc(docRef, { fine: existingFine + fine }, { merge: true });
+    console.log("罰金が追加されました。");
+  } catch (error) {
+    console.error("罰金の追加に失敗しました:", error);
+  }
+}
+
+// 罰金情報を削除
+export const deleteFine = async (lineId: string): Promise<void> => {
+  try {
+    const docRef = doc(db, "users", lineId);
+    await setDoc(docRef, { fine: 0 }, { merge: true });
+    console.log("罰金が削除されました。");
+  } catch (error) {
+    console.error("罰金の削除に失敗しました:", error);
+  }
+}
+
+// 罰金情報を取得
+export const getFine = async (lineId: string): Promise<number | undefined> => {
+  try {
+    const userDocRef = doc(db, "users", lineId);
+    const userDocSnap = await getDoc(userDocRef);
+    return userDocSnap.data()?.fine;
+  } catch (error) {
+    console.error("罰金の取得に失敗しました:", error);
+  }
+}
+
+// 料金を支払い済みにする関数
+export const checkPaid = async (lineId: string,isPaid: boolean): Promise<void> => {
+  // try {
+  //   const docRef = doc(db, "users", lineId);
+  //   await setDoc(docRef, { isPaid: isPaid }, { merge: true });
+  //   console.log("支払い済みになりました。");
+  // } catch (error) {
+  //   console.error("支払い済みにするのに失敗しました:", error);
+  // }
+};
+
+// パスワードを変更する関数
+export const changePassword = async (newPassword: string): Promise<void> => {
+  try {
+    const docRef = doc(db, "password", "default");
+    await setDoc(docRef, { password: newPassword });
+    console.log("パスワードが変更されました。");
+  } catch (error) {
+    console.error("パスワードの変更に失敗しました:", error);
+  }
+};
+
+// パスワードを取得する関数
+export const getPassword = async (): Promise<string | undefined> => {
+  try {
+    const passwordDocRef = doc(db, "password", "default");
+    const passwordDocSnap = await getDoc(passwordDocRef);
+    return passwordDocSnap.data()?.password;
+  } catch (error) {
+    console.error("パスワードの取得に失敗しました:", error);
+  }
+};

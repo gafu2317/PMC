@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Member, Band } from "../../types/type";
 import {
-  getReservationsByDateRange,
-  deleteReservation,
-  deleteUser,
-  getAllPeriodReservations,
-  deleteBand,
-} from "../../firebase/userService";
+  DeleteMemberData,
+  DeleteReservationData,
+  DeleteBandData,
+  Calculate,
+  AddFineData,
+  CheckPaid,
+  ChangePassword,
+} from "../HamburgerMenu/index";
+import { getPassword } from "../../firebase/userService";
 import Swal from "sweetalert2";
 
 interface HamburgerMenuProps {
@@ -19,227 +22,21 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // 認証状態を管理
   const [password, setPassword] = useState(""); // パスワードを管理
   const [selectedAction, setSelectedAction] = useState<string | null>(null); // 選択されたアクションを管理
-  const [startDate, setStartDate] = useState(""); // 開始日を管理
-  const [endDate, setEndDate] = useState(""); // 終了日を管理
-  const [reservations, setReservations] = useState<
-    { id: string; names: string[]; date: Date }[]
-  >([]); // 予約情報を管理
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()); // 選択されたIDを管理
-  const [loading, setLoading] = useState(false); // ローディング状態を管理
-  const [searchTerm, setSearchTerm] = useState(""); // 検索キーワードを管理
-  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(
-    new Set()
-  ); // 選択されたメンバーのLineIdを管理
-  const [isAll, setIsAll] = useState(false); //全て選択されているかどうか
-  const [isCopy, setIsCopy] = useState(false); //コピーされているかどうか
-  const [selectedBands, setSelectedBands] = useState<Set<string>>(new Set()); // 選択されたバンドのIdを管理
-
+  const [correctPassword, setCorrectPassword] = useState<string>(""); // 正しいパスワードを管理
+  useEffect(() => {
+    getPassword().then((password) => {
+      if (password) {
+        setCorrectPassword(password);
+      }
+    });
+  }, []);
   const handleMenuClick = (action: string) => {
     if (selectedAction === action) {
       setSelectedAction(null);
     } else {
       setSelectedAction(action);
     }
-    setStartDate("");
-    setEndDate("");
-    setReservations([]);
-    setSelectedIds(new Set());
-    setSearchTerm("");
-    setSelectedMembers(new Set());
-    setIsAll(false);
-    setIsCopy(false);
-    setSelectedBands(new Set());
   };
-
-  const calculateFees = (
-    reservations: { id: string; names: string[]; date: Date }[]
-  ) => {
-    const fees: { name: string; fee: number }[] = []; // 名前と料金のオブジェクトの配列
-    const feeMap: { [key: string]: number } = {}; // 名前ごとの料金を一時的に保持するマップ
-    reservations.forEach((reservation) => {
-      const feePerPerson = 100 / reservation.names.length;
-      reservation.names.forEach((name) => {
-        const member = members.find((member) => member.name === name);
-        const memberName = member ? member.name : name; // メンバー名を取得
-
-        // 一時マップに料金を加算
-        feeMap[memberName] = (feeMap[memberName] || 0) + feePerPerson;
-      });
-    });
-    // マップを配列に変換
-    for (const [name, fee] of Object.entries(feeMap)) {
-      fees.push({ name, fee });
-    }
-    return fees; // 名前と料金のオブジェクトの配列を返す
-  };
-
-  const generateClipboardData = (
-    reservations: { id: string; names: string[]; date: Date }[]
-  ) => {
-    const fees = calculateFees(reservations);
-    const data = reservations.map((reservation, index) => {
-      const date = `${reservation.date.getFullYear()}/${
-        reservation.date.getMonth() + 1
-      }/${reservation.date.getDate()} ${reservation.date.getHours()}:${String(
-        reservation.date.getMinutes()
-      ).padStart(2, "0")}`;
-      const names = reservation.names.join(",");
-      const name = fees[index] ? fees[index].name : "";
-      const fee = fees[index] ? fees[index].fee : "";
-      return `${date}\t${names}\t${""}\t${name}\t${fee}`;
-    });
-    return data.join("\n");
-  };
-
-  const handleCopyData = () => {
-    const heder = "予約日時\t使用者の名前\t\t名前\t料金";
-    const clipboardData = generateClipboardData(reservations);
-    const data = `${heder}\n${clipboardData}`;
-    navigator.clipboard
-      .writeText(data)
-      .then(() => {
-        console.log("データがクリップボードにコピーされました");
-        setIsCopy(true);
-        setReservations([]);
-        setIsAll(false);
-      })
-      .catch((err) => {
-        console.error("クリップボードへのコピーに失敗しました:", err);
-        setIsCopy(false);
-      });
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
-
-  const toggleSelectMember = (lineId: string) => {
-    setSelectedMembers((prev) => {
-      const newSelected = new Set(prev);
-      if (newSelected.has(lineId)) {
-        newSelected.delete(lineId);
-      } else {
-        newSelected.add(lineId);
-      }
-      return newSelected;
-    });
-  };
-
-  const toggleSelectBand = (bandId: string) => {
-    setSelectedBands((prev) => {
-      const newSelected = new Set(prev);
-      if (newSelected.has(bandId)) {
-        newSelected.delete(bandId);
-      } else {
-        newSelected.add(bandId);
-      }
-      return newSelected;
-    });
-  };
-
-  const handleDeleteMembers = async () => {
-    for (const lineId of selectedMembers) {
-      setLoading(true);
-      await deleteUser(lineId);
-      setLoading(false);
-      setSelectedMembers(
-        (prev) => new Set([...prev].filter((id) => id !== lineId))
-      );
-    }
-    setSelectedMembers(new Set());
-  };
-
-  const handleDeleteBands = async () => {
-    for (const bandId of selectedBands) {
-      setLoading(true);
-      await deleteBand(bandId);
-      setLoading(false);
-      setSelectedBands(new Set());
-    }
-    setSelectedBands(new Set());
-  };
-
-  const filteredMembers = members.filter((member) =>
-    member.name.includes(searchTerm)
-  );
-  const filteredBands = bands.filter((band) => band.name.includes(searchTerm));
-
-  const selectAllMember = () => {
-    if (selectedMembers.size === filteredMembers.length) {
-      // 全て選択されている場合は解除
-      setSelectedMembers(new Set());
-    } else {
-      // 全て選択
-      const allSelected = new Set(
-        filteredMembers.map((member) => member.lineId)
-      );
-      setSelectedMembers(allSelected);
-    }
-  };
-
-  const selectAllBand = () => {
-    if (selectedBands.size === filteredBands.length) {
-      // 全て選択されている場合は解除
-      setSelectedBands(new Set());
-    } else {
-      // 全て選択
-      const allSelected = new Set(filteredBands.map((band) => band.bandId));
-      setSelectedBands(allSelected);
-    }
-  };
-
-  const fetchReservation = async () => {
-    if (startDate && endDate) {
-      const fetchedReservations = await getReservationsByDateRange(
-        new Date(startDate),
-        new Date(endDate)
-      );
-      setReservations(fetchedReservations);
-      setIsAll(false);
-    }
-  };
-
-  const fetchAllReservation = async () => {
-    const fetchedReservations = await getAllPeriodReservations();
-    setReservations(fetchedReservations);
-    setIsAll(true);
-  };
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const newSelectedIds = new Set(prev);
-      if (newSelectedIds.has(id)) {
-        newSelectedIds.delete(id); // すでに選択されている場合は解除
-      } else {
-        newSelectedIds.add(id); // 選択
-      }
-      return newSelectedIds;
-    });
-  };
-
-  const handleReservationDelete = async () => {
-    for (const id of selectedIds) {
-      setLoading(true);
-      await deleteReservation(id);
-      setLoading(false);
-      setReservations((prev) =>
-        prev.filter((reservation) => reservation.id !== id)
-      );
-    }
-    // 削除後は選択を解除する場合
-    setSelectedIds(new Set());
-  };
-
-  const selectAllReservation = () => {
-    if (selectedIds.size === reservations.length) {
-      setSelectedIds(new Set()); // すべて解除
-    } else {
-      const allIds = new Set(reservations.map((reservation) => reservation.id));
-      setSelectedIds(allIds); // すべて選択
-    }
-  };
-
-  const correctPassword = "a"; // ここに正しいパスワードを設定
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -258,251 +55,32 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
       });
     }
   };
-
+  const actions = [
+    "deleteMemberData",
+    "deleteReservation",
+    "deleteBandData",
+    "addFineData",
+    "checkPaid",
+    "changePassword",
+    "calculate",
+  ];
   const renderForm = () => {
     if (!selectedAction) return null;
     switch (selectedAction) {
+      case "deleteMemberData":
+        return <DeleteMemberData members={members} />;
       case "deleteReservation":
-        return (
-          <div>
-            <h2 className="mb-2">予約の取得</h2>
-            <label className="block mb-1 text-xs">開始日</label>
-            <input
-              type="date"
-              className="border rounded p-1 mb-2 w-full"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <label className="block mb-1 text-xs">終了日</label>
-            <input
-              type="date"
-              className="border rounded p-1 mb-2 w-full"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-            <div className="flex justify-between mt-4">
-              <button
-                className={` rounded p-1 ${
-                  isAll ? "bg-gray-400" : "bg-gray-300"
-                }`}
-                onClick={fetchAllReservation}
-              >
-                全ての予約を取得
-              </button>
-              <button
-                className={` rounded p-1 ${
-                  isAll || (!isAll && reservations.length === 0)
-                    ? "bg-gray-300"
-                    : "bg-gray-400"
-                }`}
-                onClick={fetchReservation}
-              >
-                予約を取得
-              </button>
-            </div>
-
-            {/* 取得した予約を表示 */}
-            {reservations.length > 0 && (
-              <div>
-                <div className="flex justify-between mt-2">
-                  <button
-                    className="bg-blue-500 text-white rounded p-1 "
-                    onClick={selectAllReservation}
-                  >
-                    {selectedIds.size === reservations.length
-                      ? "すべて解除"
-                      : "すべて選択"}
-                  </button>
-                </div>
-                <ul className="mt-4">
-                  {reservations.map((reservation) => (
-                    <li key={reservation.id} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(reservation.id)}
-                        onChange={() => toggleSelect(reservation.id)}
-                        className="mr-2"
-                      />
-                      {/* 日付と時間を表示 */}
-                      {`${
-                        reservation.date.getMonth() + 1
-                      }/${reservation.date.getDate()}, ${reservation.date.getHours()}:${String(
-                        reservation.date.getMinutes()
-                      ).padStart(2, "0")}`}
-                      - {reservation.names.join(", ")}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="flex justify-end mt-4">
-                  {loading && <span>削除中...</span>}
-                  <button
-                    className="bg-red-500 text-white rounded p-1"
-                    onClick={handleReservationDelete}
-                  >
-                    削除
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        );
-
-      case "changeMemberData":
-        return (
-          <div>
-            <h2 className="mb-2">部員データの削除</h2>
-            <input
-              type="text"
-              placeholder="名前(一部でも可)"
-              className="border rounded p-1 mb-2 w-full"
-              value={searchTerm}
-              onChange={handleSearchChange} // 入力が変更されたときに呼び出す
-            />
-
-            {/* フィルタリングされたメンバーの表示 */}
-            {filteredMembers.length > 0 && (
-              <div>
-                <button
-                  className="bg-blue-500 text-white rounded p-1 "
-                  onClick={selectAllMember}
-                >
-                  {selectedMembers.size === filteredMembers.length
-                    ? "すべて解除"
-                    : "すべて選択"}
-                </button>
-                <ul className="mt-4">
-                  {filteredMembers.map((member) => (
-                    <li
-                      key={member.lineId}
-                      className="flex items-center border-b py-1"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedMembers.has(member.lineId)}
-                        onChange={() => toggleSelectMember(member.lineId)}
-                        className="mr-2"
-                      />
-                      {member.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="flex justify-end mt-4">
-              {loading && <span>削除中...</span>}
-              <button
-                className="bg-red-500 text-white rounded p-1"
-                onClick={handleDeleteMembers}
-              >
-                削除
-              </button>
-            </div>
-          </div>
-        );
-
-      case "copyReservation":
-        return (
-          <div>
-            <h2 className="mb-2">コピーしたいデータの期間を入力</h2>
-            <label className="block mb-1 text-xs">開始日</label>
-            <input
-              type="date"
-              className="border rounded p-1 mb-2 w-full"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <label className="block mb-1 text-xs">終了日</label>
-            <input
-              type="date"
-              className="border rounded p-1 mb-2 w-full"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-            <div className="flex justify-between mt-4">
-              <button
-                className={` rounded p-1 ${
-                  isAll ? "bg-gray-400" : "bg-gray-300"
-                }`}
-                onClick={fetchAllReservation}
-              >
-                全ての予約を取得
-              </button>
-              <button
-                className={` rounded p-1 ${
-                  isAll || (!isAll && reservations.length === 0)
-                    ? "bg-gray-300"
-                    : "bg-gray-400"
-                }`}
-                onClick={fetchReservation}
-              >
-                予約を取得
-              </button>
-            </div>
-            {reservations.length > 0 && <p>データ取得しました</p>}
-            {isCopy && <p>コピーしました!</p>}
-            <div className="flex justify-end mt-4">
-              <button
-                className="bg-gray-300 rounded p-1"
-                onClick={handleCopyData}
-              >
-                コピー
-              </button>
-            </div>
-          </div>
-        );
-
-      case "changeBandData":
-        return (
-          <div>
-            <h2 className="mb-2">バンドデータの削除</h2>
-            <input
-              type="text"
-              placeholder="名前(一部でも可)"
-              className="border rounded p-1 mb-2 w-full"
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-            {filteredBands.length > 0 && (
-              <div>
-                <button
-                  className="bg-blue-500 text-white rounded p-1 "
-                  onClick={selectAllBand}
-                >
-                  {selectedBands.size === filteredBands.length
-                    ? "すべて解除"
-                    : "すべて選択"}
-                </button>
-                <ul className="mt-4">
-                  {filteredBands.map((band) => (
-                    <li
-                      key={band.bandId}
-                      className="flex items-center border-b py-1"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedBands.has(band.bandId)}
-                        onChange={() => toggleSelectBand(band.bandId)}
-                        className="mr-2"
-                      />
-                      {band.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            <div className="flex justify-end mt-4">
-              <button
-                className="bg-red-500 text-white rounded p-1"
-                onClick={handleDeleteBands}
-              >
-                削除
-              </button>
-              {loading && <span>削除中...</span>}
-            </div>
-          </div>
-        );
-
+        return <DeleteReservationData />;
+      case "deleteBandData":
+        return <DeleteBandData bands={bands} />;
+      case "addFineData":
+        return <AddFineData members={members} />;
+      case "checkPaid":
+        return <CheckPaid members={members} />;
+      case "changePassword":
+        return <ChangePassword />;
+      case "calculate":
+        return <Calculate members={members} bands={bands} />;
       default:
         return null;
     }
@@ -560,7 +138,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
             </form>
           ) : (
             <div
-              className="bg-white shadow-lg rounded p-4 w-4/5 h-80 overflow-y-auto"
+              className="bg-white shadow-lg rounded p-4 w-4/5 h-2/5 overflow-y-auto"
               onClick={(e) => e.stopPropagation()} // クリックイベントの伝播を止める
             >
               {/* &timesは×ボタン */}
@@ -576,12 +154,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                 </button>
               </div>
               <ul className="py-2">
-                {[
-                  "deleteReservation",
-                  "changeMemberData",
-                  "copyReservation",
-                  "changeBandData",
-                ].map((action) => (
+                {actions.map((action) => (
                   <li
                     key={action}
                     className={`px-4 py-2 hover:bg-gray-200 ${
@@ -590,9 +163,12 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                     onClick={() => handleMenuClick(action)}
                   >
                     {action === "deleteReservation" && "・予約データの削除"}
-                    {action === "changeMemberData" && "・部員データの削除"}
-                    {action === "changeBandData" && "・バンドデータの削除"}
-                    {action === "copyReservation" && "・予約データのコピー"}
+                    {action === "deleteMemberData" && "・部員データの削除"}
+                    {action === "deleteBandData" && "・バンドデータの削除"}
+                    {action === "addFineData" && "・罰金データ追加"}
+                    {action === "checkPaid" && "・支払い確認"}
+                    {action === "changePassword" && "・パスワード変更"}
+                    {action === "calculate" && "・料金計算"}
                   </li>
                 ))}
               </ul>
