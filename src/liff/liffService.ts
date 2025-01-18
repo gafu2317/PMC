@@ -44,6 +44,7 @@ export const sendMessages = async (lineId: string, message: string): Promise<voi
   try {
     await axios.post(url, data, { headers });
   } catch (error) {
+    alert("Failed to send message"+error);
     console.error("Failed to send message:", error);
   }
 };

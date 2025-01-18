@@ -256,10 +256,18 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
           指定した期間
         </button>
       </div>
+      <span className="text-xs">注意:決定ボタンを押すと以下が実行されます。</span>
+      <ul className="list-disc ml-4 text-xs" >
+        <li>各メンバーに料金の通知</li>
+        <li>クリップボードにデータをコピー</li>
+        <li>指定された期間の予約データを削除</li>
+        <li>罰金データを削除(バンド費用等とともに未払金に追加されます)</li>
+        <li>未払い料金をデータに追加</li>
+      </ul>
       {reservations.length > 0 && <p className="p-1">データ取得しました</p>}
       {isNotify && <p className="p-1">通知しました！</p>}
       {isCopy && <p className="p-1">コピーしました！</p>}
-      {isDelete && <p className="p-1">削除しました！</p>}
+      {isDelete && <p className="p-1">予約データを削除しました！</p>}
       <div className="flex justify-end mt-4 items-center">
         <button className="bg-gray-300 rounded p-1 w-16 " onClick={handleClick}>
           決定
