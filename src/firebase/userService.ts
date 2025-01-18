@@ -22,14 +22,12 @@ export const addUser = async (
   try {
     // usersドキュメントの参照を取得
     const docRef = doc(db, "users", lineId);
-
     // ユーザー情報を追加
     await setDoc(docRef, {
       name: name,
       studentId: studentId,
       fine: 0,
       unPaidFee: 0,
-      presets:[{members:[]}],
     });
     console.log(`ユーザーが追加されました。`);
   } catch (error) {
@@ -59,13 +57,10 @@ export const getAllUser = async (): Promise<Member[] | undefined> => {
     const userDocs = await getDocs(userColRef); //コレクション内の全てのドキュメントを取得
     const users = userDocs.docs.map((doc) => ({
       lineId: doc.id,
-      name: doc.data().name,
-      studentId: doc.data().studentId,
-      fine: doc.data().fine,
-      unPaidFee: doc.data().unPaidFee,
-      presets: doc.data().presets.map(
-        (preset: { members: string[] }) => preset.members
-      ),
+      name: doc.data().name || "データなし",
+      studentId: doc.data().studentId || 0,
+      fine: doc.data().fine || 0,
+      unPaidFee: doc.data().unPaidFee || 0,
     }));
     return users;
   } catch (error) {
@@ -223,11 +218,9 @@ export const addPresets = async (
     const docRef = doc(db, "users", lineId);
     const docSnap = await getDoc(docRef);
     const presetObj = { members: presetMemberLineIds }; // 新しいプリセットオブジェクト
-
     // ドキュメントが存在する場合
     if (docSnap.exists()) {
       const existingPresets = docSnap.data().presets || []; // presetsがない場合は空配列を使用
-
       // 新しいプリセットの重複チェック
       const isDuplicate = existingPresets.some(
         (existingPreset: { members: string[] }) =>
@@ -236,7 +229,6 @@ export const addPresets = async (
             presetObj.members.includes(member)
           )
       );
-
       if (!isDuplicate) {
         // 重複がなければプリセットを追加
         await setDoc(
@@ -406,17 +398,6 @@ export const deleteFine = async (lineId: string): Promise<void> => {
   }
 };
 
-// 罰金情報を取得
-export const getFine = async (lineId: string): Promise<number | undefined> => {
-  try {
-    const userDocRef = doc(db, "users", lineId);
-    const userDocSnap = await getDoc(userDocRef);
-    return userDocSnap.data()?.fine;
-  } catch (error) {
-    console.error("罰金の取得に失敗しました:", error);
-  }
-};
-
 // パスワードを変更する関数
 export const changePassword = async (newPassword: string): Promise<void> => {
   try {
@@ -439,10 +420,10 @@ export const getPassword = async (): Promise<string | undefined> => {
   }
 };
 
-// 未払いの料金を追加する関数
+// 未払いの料金を上書きする関数
 export const addUnpaidFee = async (
   lineId: string,
-  unpaidFee: number
+  unPaidFee: number
 ): Promise<void> => {
   try {
     if (!lineId) {
@@ -451,7 +432,7 @@ export const addUnpaidFee = async (
     }
     const docRef = doc(db, "users", lineId);
     // 未払い料金を上書き
-    await setDoc(docRef, { unpaidFee }, { merge: false });
+    await setDoc(docRef, { unPaidFee }, { merge: true });
     console.log("未払い料金が上書きされました。");
   } catch (error) {
     console.error("未払い料金の上書きに失敗しました:", error);
@@ -468,17 +449,3 @@ export const deleteUnpaidFee = async (lineId: string): Promise<void> => {
     console.error("未払い料金の削除に失敗しました:", error);
   }
 };
-
-// 未払いの料金を取得する関数
-export const getUnpaidFee = async (
-  lineId: string
-): Promise<number | undefined> => {
-  try {
-    const userDocRef = doc(db, "users", lineId);
-    const userDocSnap = await getDoc(userDocRef);
-    return userDocSnap.data()?.unpaidFee;
-  } catch (error) {
-    console.error("未払い料金の取得に失敗しました:", error);
-  }
-};
-

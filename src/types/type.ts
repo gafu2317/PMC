@@ -13,7 +13,6 @@ export interface Member {
   studentId: number;
   fine: number;
   unPaidFee: number;
-  presets:[];
 }
 
 export interface Band {

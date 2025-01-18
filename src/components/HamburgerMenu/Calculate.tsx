@@ -3,10 +3,8 @@ import {
   getReservationsByDateRange,
   getAllPeriodReservations,
   deleteReservation,
-  getFine,
   deleteFine,
   addUnpaidFee,
-  getUnpaidFee,
 } from "../../firebase/userService";
 import { sendMessages } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
@@ -61,14 +59,15 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
     setIsAll(true);
   };
 
-  const fetchFine = async (name: string) => {
-    const lineId = members.find((member) => member.name === name)?.lineId;
-    if (!lineId) {
-      return 0;
-    }
-    const fine = await getFine(lineId);
-    return fine ?? 0; // undefined の場合は0を返す
+  const getFine = (name: string) => {
+    const member = members.find((member) => member.name === name);
+    return member ? member.fine : 0;
   };
+
+  const getUnpaidFee = (name: string) => {
+    const member = members.find((member) => member.name === name);
+    return member ? member.unPaidFee : 0;
+  }
 
   const generateReservationData = (
     reservations: { id: string; names: string[]; date: Date }[]
@@ -94,7 +93,7 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
     return member ? member.lineId : "";
   };
 
-  const generateUserData = async (
+  const generateUserData =(
     reservations: { id: string; names: string[]; date: Date }[]
   ) => {
     const userData: {
@@ -122,19 +121,19 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
     });
     // マップを配列に変換
     for (const [name, fee] of Object.entries(feeMap)) {
-      const fine = await fetchFine(name);
+      const fine = getFine(name);
       const performanceFee = bandMemberNames.includes(name) ? 500 : 0;
       const roundedFee = Math.round(fee);
       const lineId = changeNameToLineId(name);
-      const unPaidFee = lineId ? await getUnpaidFee(lineId) : 0;
-      const total = roundedFee + fine + performanceFee + (unPaidFee || 0);
+      const unPaidFee = getUnpaidFee(name);
+      const total = roundedFee + fine + performanceFee + unPaidFee;
       userData.push({
         name,
         lineId,
         fee: roundedFee,
         fine,
         performanceFee,
-        unPaidFee: unPaidFee || 0,
+        unPaidFee,
         total,
       });
     }

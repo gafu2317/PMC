@@ -33,11 +33,9 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
             return member ? member.name : "データなし"; // memberが見つからない場合はlineIdをそのまま返す
           })
         );
-
         setPresets(namePresets); // nameを含む新しいデータをセット
       }
     };
-
     fetchPresets(); // プリセットを取得
   }, [presetsLineId, presets]); // myLineIdやmembersが変更されたときに再実行
   //setPresetsLineIdとsetPresetsからpresetを削除
