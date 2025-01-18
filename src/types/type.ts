@@ -11,6 +11,9 @@ export interface Member {
   lineId: string;
   name: string;
   studentId: number;
+  fine: number;
+  unPaidFee: number;
+  presets:[];
 }
 
 export interface Band {

@@ -1,5 +1,6 @@
-import React,{useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Member } from "../../types/type";
+import { getUnpaidFee } from "../../firebase/userService";
 
 interface CheckPaidProps {
   members: Member[];
@@ -8,25 +9,34 @@ interface CheckPaidProps {
 const CheckPaid: React.FC<CheckPaidProps> = ({ members }) => {
   // 検索キーワードを管理
   const [searchTerm, setSearchTerm] = useState("");
+  const [unPaidFee, setUnPaidFee] = useState<{lineId:string;unPaidFee:number}[]>([]);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.trim());
   };
   const filteredMembers = members.filter((member) =>
     member.name.includes(searchTerm)
   );
-  // 選択されたメンバーのLineIdを管理
-  const [selectedMembers, setSelectedMembers] = useState<string>("");
-  const toggleSelectMember = (lineId: string) => {
-    if (selectedMembers === lineId) {
-      setSelectedMembers("");
-    } else {
-      setSelectedMembers(lineId);
-    }
+  useEffect(() => {
+    const unPaidFee = members.map((member) => {
+      return {lineId:member.lineId,unPaidFee:0}//未払金を0円に初期化
+    })
+    setUnPaidFee(unPaidFee)
+  } ,[])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>,lineId:string) => {
+    const newUnPaidFee = unPaidFee.map((fee) => {
+      if(fee.lineId === lineId){
+        return {lineId:lineId,unPaidFee:Number(e)}
+      }else{
+        return fee
+      }
+    })
+    setUnPaidFee(newUnPaidFee)
   };
+
   return (
     <div>
-      
-      {/* <h2 className="mb-2">支払い済みのメンバーを選択してください</h2>
+      <h2 className="mb-2">支払った人のは未払金を０円にしてください</h2>
       <input
         type="text"
         placeholder="名前(一部でも可)"
@@ -38,17 +48,21 @@ const CheckPaid: React.FC<CheckPaidProps> = ({ members }) => {
         <ul className="">
           {filteredMembers.map((member) => (
             <li key={member.lineId} className="flex items-center border-b py-1">
-              <input
-                type="checkbox"
-                checked={selectedMembers === member.lineId}
-                onChange={() => toggleSelectMember(member.lineId)}
-                className="mr-2"
-              />
               {member.name}
+              <input
+                type="text"
+                id="unPaidFee"
+                value={unPaidFee.find((fee) => fee.lineId === member.lineId)?.unPaidFee}
+                onChange={(e) => handleChange(e,member.lineId)}
+                className="mr-2 text-right"
+              />
             </li>
           ))}
         </ul>
-      </div> */}
+      </div>
+      <div>
+        <button>決定</button>
+      </div>
     </div>
   );
 };

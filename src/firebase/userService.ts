@@ -27,6 +27,9 @@ export const addUser = async (
     await setDoc(docRef, {
       name: name,
       studentId: studentId,
+      fine: 0,
+      unPaidFee: 0,
+      presets:[{members:[]}],
     });
     console.log(`ユーザーが追加されました。`);
   } catch (error) {
@@ -58,6 +61,11 @@ export const getAllUser = async (): Promise<Member[] | undefined> => {
       lineId: doc.id,
       name: doc.data().name,
       studentId: doc.data().studentId,
+      fine: doc.data().fine,
+      unPaidFee: doc.data().unPaidFee,
+      presets: doc.data().presets.map(
+        (preset: { members: string[] }) => preset.members
+      ),
     }));
     return users;
   } catch (error) {
@@ -375,10 +383,7 @@ export const getAllBands = async (): Promise<Band[] | undefined> => {
 };
 
 // 罰金情報を追加
-export const addFine = async (
-  lineId: string,
-  fine: number
-): Promise<void> => {
+export const addFine = async (lineId: string, fine: number): Promise<void> => {
   try {
     const docRef = doc(db, "users", lineId);
     const docSnap = await getDoc(docRef);
@@ -388,7 +393,7 @@ export const addFine = async (
   } catch (error) {
     console.error("罰金の追加に失敗しました:", error);
   }
-}
+};
 
 // 罰金情報を削除
 export const deleteFine = async (lineId: string): Promise<void> => {
@@ -399,7 +404,7 @@ export const deleteFine = async (lineId: string): Promise<void> => {
   } catch (error) {
     console.error("罰金の削除に失敗しました:", error);
   }
-}
+};
 
 // 罰金情報を取得
 export const getFine = async (lineId: string): Promise<number | undefined> => {
@@ -410,17 +415,6 @@ export const getFine = async (lineId: string): Promise<number | undefined> => {
   } catch (error) {
     console.error("罰金の取得に失敗しました:", error);
   }
-}
-
-// 料金を支払い済みにする関数
-export const checkPaid = async (lineId: string,isPaid: boolean): Promise<void> => {
-  // try {
-  //   const docRef = doc(db, "users", lineId);
-  //   await setDoc(docRef, { isPaid: isPaid }, { merge: true });
-  //   console.log("支払い済みになりました。");
-  // } catch (error) {
-  //   console.error("支払い済みにするのに失敗しました:", error);
-  // }
 };
 
 // パスワードを変更する関数
@@ -444,3 +438,47 @@ export const getPassword = async (): Promise<string | undefined> => {
     console.error("パスワードの取得に失敗しました:", error);
   }
 };
+
+// 未払いの料金を追加する関数
+export const addUnpaidFee = async (
+  lineId: string,
+  unpaidFee: number
+): Promise<void> => {
+  try {
+    if (!lineId) {
+      console.error("無効なLine IDです。");
+      return;
+    }
+    const docRef = doc(db, "users", lineId);
+    // 未払い料金を上書き
+    await setDoc(docRef, { unpaidFee }, { merge: false });
+    console.log("未払い料金が上書きされました。");
+  } catch (error) {
+    console.error("未払い料金の上書きに失敗しました:", error);
+  }
+};
+
+// 未払いの料金を削除する関数
+export const deleteUnpaidFee = async (lineId: string): Promise<void> => {
+  try {
+    const docRef = doc(db, "users", lineId);
+    await setDoc(docRef, { unpaidFee: 0 }, { merge: true });
+    console.log("未払い料金が削除されました。");
+  } catch (error) {
+    console.error("未払い料金の削除に失敗しました:", error);
+  }
+};
+
+// 未払いの料金を取得する関数
+export const getUnpaidFee = async (
+  lineId: string
+): Promise<number | undefined> => {
+  try {
+    const userDocRef = doc(db, "users", lineId);
+    const userDocSnap = await getDoc(userDocRef);
+    return userDocSnap.data()?.unpaidFee;
+  } catch (error) {
+    console.error("未払い料金の取得に失敗しました:", error);
+  }
+};
+
