@@ -45,11 +45,21 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   const handleSubmit = () => {
     // 選択されたメンバーの名前を取得
     const selectedNames = selectedMembers.map((member) => member.name);
+    const myName = members.find((member) => member.lineId === myLineId)?.name;
     if (selectedNames.length === 0) {
       Swal.fire({
         icon: "warning",
         title: "エラー",
         text: "一名以上のメンバーを選択してください",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    if (!myName || !selectedNames.includes(myName)) {
+      Swal.fire({
+        icon: "warning",
+        title: "エラー",
+        text: "自分を含めて選択してください",
         confirmButtonText: "OK",
       });
       return;
