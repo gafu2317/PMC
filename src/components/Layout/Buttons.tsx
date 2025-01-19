@@ -8,6 +8,8 @@ import {
 import { Member, Band, Reservation } from "../../types/type";
 import Swal from "sweetalert2";
 import { sendMessages } from "../../liff/liffService";
+import { usePriority } from "../../context/PriorityContext";
+import { isReservationExist } from "../../utils/utils";
 
 interface ButtonsProps {
   lineId: string;
@@ -34,10 +36,20 @@ const Buttons: React.FC<ButtonsProps> = ({
   // 予約ポップアップの表示状態を管理
   const [isReservationPopupVisible, setIsReservationPopupVisible] =
     useState(false);
+  const { isPriority } = usePriority(); // Contextから状態を取得
   // 予約ボタンをクリックしたときのハンドラ
   const handleReserve = () => {
     //Hourが選択されているときのみポップアップを表示
     if (selectedHours.some((hours) => hours.includes(true))) {
+      if (!isPriority && isReservationExist(reservations, selectedHours)) {
+        Swal.fire({
+          icon: "warning",
+          title: "エラー",
+          text: "すでに予約が存在します",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
       setIsReservationPopupVisible(true);
     } else {
       Swal.fire({
@@ -72,12 +84,15 @@ const Buttons: React.FC<ButtonsProps> = ({
   };
 
   const handleNotification = () => {
-    sendMessages(lineId,"通知テスト");
-  }
+    sendMessages(lineId, "通知テスト");
+  };
 
   return (
     <div>
-      <button className="fixed bottom-56 right-8 p-2 bg-gray-500 text-white rounded-full w-14 h-14 flex items-center justify-center" onClick={handleNotification}>
+      <button
+        className="fixed bottom-56 right-8 p-2 bg-gray-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
+        onClick={handleNotification}
+      >
         通知
       </button>
       <button
@@ -99,7 +114,6 @@ const Buttons: React.FC<ButtonsProps> = ({
       >
         編集
       </button>
-
 
       {isReservationPopupVisible && (
         <ReservationPopup

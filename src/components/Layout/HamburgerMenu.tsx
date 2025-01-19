@@ -8,6 +8,7 @@ import {
   AddFineData,
   CheckPaid,
   ChangePassword,
+  MakePriority,
 } from "../HamburgerMenu/index";
 import { getPassword } from "../../firebase/userService";
 import Swal from "sweetalert2";
@@ -56,6 +57,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
     }
   };
   const actions = [
+    "makePriority",
     "deleteMemberData",
     "deleteReservation",
     "deleteBandData",
@@ -67,6 +69,8 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
   const renderForm = () => {
     if (!selectedAction) return null;
     switch (selectedAction) {
+      case "makePriority":
+        return <MakePriority />;
       case "deleteMemberData":
         return <DeleteMemberData members={members} />;
       case "deleteReservation":
@@ -162,6 +166,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                     }`} // クリックされた項目の背景色を変更
                     onClick={() => handleMenuClick(action)}
                   >
+                    {action === "makePriority" && "・優先権の有効化"}
                     {action === "deleteReservation" && "・予約データの削除"}
                     {action === "deleteMemberData" && "・部員データの削除"}
                     {action === "deleteBandData" && "・バンドデータの削除"}
@@ -173,7 +178,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                 ))}
               </ul>
               {/* 選択された項目に応じたフォームを表示 */}
-              {selectedAction && <div className="mt-4">{renderForm()}</div>}
+              {selectedAction && <div className="mt-2">{renderForm()}</div>}
             </div>
           )}
         </div>

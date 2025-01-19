@@ -1,3 +1,5 @@
+import { Reservation } from "../types/type";
+
 const today = new Date();
 const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1; // 月曜日を0とする
 
@@ -58,4 +60,25 @@ export function getTimeIndex(date: Date): number {
     }
   }
   return -1;
+}
+
+export function isReservationExist(
+  reservations: Reservation[],
+  hours: boolean[][],
+): boolean {
+  for (let i = 0; i < hours.length; i++) {
+    for (let j = 0; j < hours[i].length; j++) {
+      if (hours[i][j]) {
+        for (let k = 0; k < reservations.length; k++) {
+          if (
+            reservations[k].dayIndex === i &&
+            reservations[k].timeIndex === j
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
 }

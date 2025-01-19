@@ -12,6 +12,7 @@ import { db } from "./firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlots } from "./utils/utils";
 import { initLiff } from "./liff/liffService";
+import { PriorityProvider } from "./context/PriorityContext";
 
 function App() {
   //部員を管理
@@ -153,6 +154,7 @@ function App() {
       {lineId && (
         <div className="p-5">
           <Header></Header>
+          <PriorityProvider>
           <HamburgerMenu bands={bands} members={members} />
           <Calendar
             name={getName(lineId)}
@@ -174,6 +176,7 @@ function App() {
             selectedReservations={selectedReservations}
             bands={bands}
           />
+          </PriorityProvider>
           {isRegistrationPopupVisible && (
             <RegistrationPopup
               lineId={lineId}
