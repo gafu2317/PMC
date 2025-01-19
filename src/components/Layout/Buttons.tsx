@@ -7,6 +7,7 @@ import {
 } from "../../components/Popup";
 import { Member, Band, Reservation } from "../../types/type";
 import Swal from "sweetalert2";
+import { sendMessages } from "../../liff/liffService";
 
 interface ButtonsProps {
   lineId: string;
@@ -70,8 +71,21 @@ const Buttons: React.FC<ButtonsProps> = ({
     return member ? member.name : "名前が登録されていません";
   };
 
+  const handleNotification = () => {
+    sendMessages(lineId,"通知テスト");
+  }
+
   return (
     <div>
+      <button className="fixed bottom-56 right-8 p-2 bg-gray-500 text-white rounded-full w-14 h-14 flex items-center justify-center" onClick={handleNotification}>
+        通知
+      </button>
+      <button
+        className="fixed bottom-40 right-8 p-2 bg-red-500 text-white rounded-full w-14 h-14 flex items-center justify-center whitespace-nowrap "
+        onClick={() => setIsBandPopupVisible(true)}
+      >
+        バンド
+      </button>
       <button
         className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
         onClick={handleReserve}
@@ -86,12 +100,6 @@ const Buttons: React.FC<ButtonsProps> = ({
         編集
       </button>
 
-      <button
-        className="fixed bottom-40 right-8 p-2 bg-red-500 text-white rounded-full w-14 h-14 flex items-center justify-center whitespace-nowrap "
-        onClick={() => setIsBandPopupVisible(true)}
-      >
-        バンド
-      </button>
 
       {isReservationPopupVisible && (
         <ReservationPopup

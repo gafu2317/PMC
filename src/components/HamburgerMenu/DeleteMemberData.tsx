@@ -12,9 +12,11 @@ const DeleteMemberData: React.FC<DeleteMemberDataProps> = ({ members }) => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value.trim());
   };
-  const filteredMembers = members.filter((member) =>
-    member.name.includes(searchTerm)
-  );
+const filteredMembers = members.filter(
+  (member) =>
+    member.name.includes(searchTerm) ||
+    String(member.studentId).includes(String(searchTerm))
+);
 
   // 選択されたメンバーのLineIdを管理
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(
@@ -64,7 +66,7 @@ const DeleteMemberData: React.FC<DeleteMemberDataProps> = ({ members }) => {
       <h2 className="mb-2">部員データの削除</h2>
       <input
         type="text"
-        placeholder="名前(一部でも可)"
+        placeholder="名前か学籍番号(一部でも可)"
         className="border rounded p-1 mb-2 w-full"
         value={searchTerm}
         onChange={handleSearchChange} // 入力が変更されたときに呼び出す
