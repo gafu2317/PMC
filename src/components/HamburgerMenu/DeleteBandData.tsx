@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Band } from "../../types/type";
 import { deleteBand } from "../../firebase/userService";
+import Swal from "sweetalert2";
 
 interface DeleteBandDataProps {
   bands: Band[];
@@ -45,6 +46,10 @@ const DeleteBandData: React.FC<DeleteBandDataProps> = ({ bands }) => {
       setSelectedBands(new Set());
     }
     setSelectedBands(new Set());
+    Swal.fire({
+      icon: "success",
+      title: "バンドデータを削除しました",
+    });
   };
 
   return (

@@ -11,9 +11,7 @@ const ChangePassword: React.FC<ChangePasswordProps> = ({}) => {
     setNewPassword("");
     Swal.fire({
       icon: "success",
-      title: "変更完了",
-      text: "パスワードを変更しました",
-      confirmButtonText: "OK",
+      title: "パスワード変更完了",
     });
   };
   return (

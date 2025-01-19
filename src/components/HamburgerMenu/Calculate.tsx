@@ -219,6 +219,10 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
       }
     }
     setIsDelete(true);
+    Swal.fire({
+      icon: "success",
+      title: "処理が完了しました",
+    });
   };
 
   return (

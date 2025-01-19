@@ -157,7 +157,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                 {actions.map((action) => (
                   <li
                     key={action}
-                    className={`px-4 py-2 hover:bg-gray-200 ${
+                    className={`border border-gray-20 rounded p-1 mx-4 my-2 hover:bg-gray-200 ${
                       selectedAction === action ? "bg-gray-300" : ""
                     }`} // クリックされた項目の背景色を変更
                     onClick={() => handleMenuClick(action)}

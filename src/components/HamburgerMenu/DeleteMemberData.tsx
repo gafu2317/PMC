@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Member } from "../../types/type";
 import { deleteUser } from "../../firebase/userService";
+import Swal from "sweetalert2";
 
 interface DeleteMemberDataProps {
   members: Member[];
@@ -59,6 +60,10 @@ const filteredMembers = members.filter(
       );
     }
     setSelectedMembers(new Set());
+    Swal.fire({
+      icon: "success",
+      title: "部員削除完了",
+    });
   };
 
   return (

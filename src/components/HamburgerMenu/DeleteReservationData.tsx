@@ -4,6 +4,7 @@ import {
   getAllPeriodReservations,
   deleteReservation,
 } from "../../firebase/userService";
+import Swal from "sweetalert2";
 
 interface DeleteReservationDataProps {}
 
@@ -59,8 +60,11 @@ const DeleteReservationData: React.FC<DeleteReservationDataProps> = ({}) => {
         prev.filter((reservation) => reservation.id !== id)
       );
     }
-    // 削除後は選択を解除する場合
     setSelectedIds(new Set());
+    Swal.fire({
+      icon: "success",
+      title: "削除が完了しました",
+    });
   };
   return (
     <div>
