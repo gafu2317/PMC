@@ -19,7 +19,6 @@ interface ReservationPopupProps {
 }
 
 const EditReservationPopup: React.FC<ReservationPopupProps> = ({
-  myLineId,
   members,
   onClose,
   selectedReservations,

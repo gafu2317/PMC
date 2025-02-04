@@ -14,7 +14,9 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
   members,
   onClose,
 }) => {
-  const [name, setName] = useState<string | null>(null); // 名前
+  const [firstName, setFirstName] = useState<string | null>(null); // 苗字
+  const [lastName, setLastName] = useState<string | null>(null); // 名前
+  const name = `${firstName} ${lastName}`; // 名前
   const [studentId, setStudentId] = useState<string | null>(null); // 学籍番号
   const [isConfirmationVisible, setIsConfirmationVisible] =
     useState<boolean>(false); // 確認ポップアップの表示状態
@@ -22,7 +24,7 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
   const handleSubmit = () => {
     setIsConfirmationVisible(false);
     // 名前と学籍番号が入力されているかチェック
-    if (!name || !studentId) {
+    if (!firstName || !lastName || !studentId) {
       Swal.fire({
         icon: "warning",
         title: "エラー",
@@ -46,7 +48,7 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
         confirmButtonText: "OK",
       });
       const newName = `${name} (${studentId})`;
-      addUser(lineId, newName, studentId);
+      addUser(newName, lineId, studentId);
     } else {
       // 名前が重複していない場合
       addUser(name, lineId, studentId);
@@ -66,14 +68,21 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
               htmlFor="name"
               className="block text-sm font-medium text-gray-700"
             >
-              名前(本名を入力)
+              名前を入力
             </label>
             <input
               type="text"
               id="name"
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-              placeholder="名前を入力"
-              onChange={(e) => setName(e.target.value)}
+              placeholder="姓"
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <input
+              type="text"
+              id="name"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              placeholder="名"
+              onChange={(e) => setLastName(e.target.value)}
             />
           </div>
 
@@ -96,7 +105,7 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
 
           <div className="text-right mt-2">
             <button
-              className="p-2 bg-gradient-to-b from-sky-600 to-blue-700 text-white rounded-full w-20"
+              className="p-2 bg-blue-500 text-white rounded-full w-20"
               onClick={() => setIsConfirmationVisible(true)}
             >
               登録する
@@ -115,13 +124,13 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
                 </p>
                 <div className="flex justify-between mt-4">
                   <button
-                    className=" p-2 bg-gradient-to-b from-red-400 to-red-700  text-white rounded-full"
+                    className=" p-2 bg-red-500  text-white rounded-full"
                     onClick={() => setIsConfirmationVisible(false)}
                   >
                     キャンセル
                   </button>
                   <button
-                    className=" p-2 bg-gradient-to-b from-green-400 to-green-700  text-white rounded-full"
+                    className=" p-2 bg-green-500  text-white rounded-full"
                     onClick={handleSubmit}
                   >
                     確認しました
