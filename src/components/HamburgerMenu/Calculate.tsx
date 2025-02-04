@@ -5,6 +5,7 @@ import {
   deleteReservation,
   deleteFine,
   addUnpaidFee,
+  deleteBand,
 } from "../../firebase/userService";
 import { sendMessages } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
@@ -22,9 +23,6 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
   const [reservations, setReservations] = useState<
     { id: string; names: string[]; date: Date }[]
   >([]); // 予約情報を管理
-  const [isNotify, setIsNotify] = useState(false); //通知されているかどうか
-  const [isCopy, setIsCopy] = useState(false); //コピーされているかどうか
-  const [isDelete, setIsDelete] = useState(false); //削除されているかどうか
   const [userData, setUserData] = useState<
     {
       name: string;
@@ -180,20 +178,18 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
       return;
     }
     //料金の通知
-    for (const user of userData) {
-      await sendMessages(
-        user.lineId,
-        `学スタ使用料金等のお知らせ\n学スタ使用料: ${user.fee}円\nライブ出演費: ${user.performanceFee}円\n罰金: ${user.fine}円\n未払金: ${user.unPaidFee}\n合計: ${user.total}円`
-      );
-    }
-    setIsNotify(true);
+    // for (const user of userData) {
+    //   await sendMessages(
+    //     user.lineId,
+    //     `学スタ使用料金等のお知らせ\n学スタ使用料: ${user.fee}円\nライブ出演費: ${user.performanceFee}円\n罰金: ${user.fine}円\n未払金: ${user.unPaidFee}\n合計: ${user.total}円`
+    //   );
+    // }
     //クリップボードにコピー
     const data = await generateClipboardData();
     navigator.clipboard
       .writeText(data)
       .then(() => {
         console.log("データがクリップボードにコピーされました");
-        setIsCopy(true);
         setReservations([]);
         setIsAll(false);
       })
@@ -203,11 +199,14 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
           icon: "error",
           title: "クリップボードへのコピーに失敗しました",
         });
-        setIsCopy(false);
       });
     //予約データを削除
     for (const reservation of reservationData) {
       await deleteReservation(reservation.id);
+    }
+    //バンド削除
+    for (const band of bands) {
+      await deleteBand(band.bandId);
     }
     //罰金を削除 & 未払い料金を追加
     for (const user of userData) {
@@ -218,10 +217,9 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
         await addUnpaidFee(user.lineId, user.total);
       }
     }
-    setIsDelete(true);
     Swal.fire({
       icon: "success",
-      title: "処理が完了しました",
+      title: "処理が終了しました",
     });
   };
 
@@ -262,16 +260,14 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
       </div>
       <span className="text-xs">注意:決定ボタンを押すと以下が実行されます。</span>
       <ul className="list-disc ml-4 text-xs" >
-        <li>各メンバーに料金の通知</li>
+        <li>各メンバーに料金の通知(現在停止中)</li>
         <li>クリップボードにデータをコピー</li>
         <li>指定された期間の予約データを削除</li>
+        <li>バンド削除</li>
         <li>罰金データを削除(バンド費用等とともに未払金に追加されます)</li>
         <li>未払い料金をデータに追加</li>
       </ul>
       {reservations.length > 0 && <p className="p-1">データ取得しました</p>}
-      {isNotify && <p className="p-1">通知しました！</p>}
-      {isCopy && <p className="p-1">コピーしました！</p>}
-      {isDelete && <p className="p-1">予約データを削除しました！</p>}
       <div className="flex justify-end mt-4 items-center">
         <button className="bg-gray-300 rounded p-1 w-16 " onClick={handleClick}>
           決定

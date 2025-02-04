@@ -27,10 +27,6 @@ export const PriorityProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsPriority((prev) => !prev);
   };
 
-  useEffect(() => { 
-    console.log("isPriority", isPriority);
-  }, [isPriority]);
-
   return (
     <PriorityContext.Provider value={{ isPriority, togglePriority }}>
       {children}

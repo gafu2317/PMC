@@ -56,7 +56,7 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
       let isError = false; // エラーフラグを初期化
       const newReservations = prevReservations.map((reservation) => {
         // 自分のlineIdが予約に含まれているかを確認
-        const isMember = reservation.names.includes(myLineId);
+        const isMember = reservation.names.includes(name);
         // 自分が予約のメンバーであるときのみ処理を行う
         if (isMember) {
           selectedMembers.forEach((member) => {

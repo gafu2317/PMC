@@ -58,7 +58,7 @@ function App() {
       try {
         const newReservations = await getAllReservations();
         if (newReservations) {
-          setReservations(newReservations); 
+          setReservations(newReservations);
         } else {
           console.warn("予約情報が取得できませんでした。");
         }
@@ -86,7 +86,7 @@ function App() {
       }
     });
     return () => unsubscribe();
-  }, []); 
+  }, []);
 
   //　選択している時間帯を管理(Hourに渡しやすい型)
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
@@ -140,7 +140,7 @@ function App() {
       return newSelectedReservations;
     });
   };
-  
+
   //登録画面の表示状態を管理
   const [isRegistrationPopupVisible, setIsRegistrationPopupVisible] =
     useState(false);
@@ -155,27 +155,27 @@ function App() {
         <div className="p-5">
           <Header></Header>
           <PriorityProvider>
-          <HamburgerMenu bands={bands} members={members} />
-          <Calendar
-            name={getName(lineId)}
-            reservations={reservations}
-            selectedHours={selectedHours}
-            onHourClick={handleHourClick}
-          />
-          <ReservationDisplay
-            reservations={reservations}
-            selectedHours={selectedHours}
-            selectedReservations={selectedReservations}
-            onReservationClick={handleReservationClick}
-          />
-          <Buttons
-            lineId={lineId}
-            members={members}
-            reservations={reservations}
-            selectedHours={selectedHours}
-            selectedReservations={selectedReservations}
-            bands={bands}
-          />
+            <HamburgerMenu bands={bands} members={members} />
+            <Calendar
+              name={getName(lineId)}
+              reservations={reservations}
+              selectedHours={selectedHours}
+              onHourClick={handleHourClick}
+            />
+            <ReservationDisplay
+              reservations={reservations}
+              selectedHours={selectedHours}
+              selectedReservations={selectedReservations}
+              onReservationClick={handleReservationClick}
+            />
+            <Buttons
+              lineId={lineId}
+              members={members}
+              reservations={reservations}
+              selectedHours={selectedHours}
+              selectedReservations={selectedReservations}
+              bands={bands}
+            />
           </PriorityProvider>
           {isRegistrationPopupVisible && (
             <RegistrationPopup

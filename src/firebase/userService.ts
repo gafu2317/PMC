@@ -401,7 +401,7 @@ export const deleteFine = async (lineId: string): Promise<void> => {
 // パスワードを変更する関数
 export const changePassword = async (newPassword: string): Promise<void> => {
   try {
-    const docRef = doc(db, "password", "default");
+    const docRef = doc(db, "setting", "password");
     await setDoc(docRef, { password: newPassword });
     console.log("パスワードが変更されました。");
   } catch (error) {
@@ -412,7 +412,7 @@ export const changePassword = async (newPassword: string): Promise<void> => {
 // パスワードを取得する関数
 export const getPassword = async (): Promise<string | undefined> => {
   try {
-    const passwordDocRef = doc(db, "password", "default");
+    const passwordDocRef = doc(db, "setting", "password");
     const passwordDocSnap = await getDoc(passwordDocRef);
     return passwordDocSnap.data()?.password;
   } catch (error) {

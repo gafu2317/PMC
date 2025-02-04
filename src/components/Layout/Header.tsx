@@ -2,7 +2,7 @@
 
 const Header = () => {
   return (
-    <div className="mb-2 text-center">
+    <div className="mb-2 text-center max-w-sm">
       <div className="flex justify-around text-sm items-center text-xs">
         <span className="inline-block w-4 h-4 bg-white rounded border border-gray-400"></span>{" "}
         予約可能
