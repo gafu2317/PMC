@@ -9,6 +9,7 @@ import {
   CheckPaid,
   ChangePassword,
   MakePriority,
+  LiveDay,
 } from "../HamburgerMenu/index";
 import { getPassword } from "../../firebase/userService";
 import Swal from "sweetalert2";
@@ -58,13 +59,14 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
   };
   const actions = [
     "makePriority",
+    "checkPaid",
+    "calculate",
+    "liveDay",
+    "addFineData",
+    "changePassword",
     "deleteMemberData",
     "deleteReservation",
     "deleteBandData",
-    "addFineData",
-    "checkPaid",
-    "changePassword",
-    "calculate",
   ];
   const renderForm = () => {
     if (!selectedAction) return null;
@@ -85,6 +87,8 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
         return <ChangePassword />;
       case "calculate":
         return <Calculate members={members} bands={bands} />;
+      case "liveDay":
+        return <LiveDay />;
       default:
         return null;
     }
@@ -142,7 +146,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
             </form>
           ) : (
             <div
-              className="bg-white shadow-lg rounded p-4 w-4/5 h-2/5 overflow-y-auto"
+              className="bg-white shadow-lg rounded p-4 w-4/5 h-3/5 overflow-y-auto"
               onClick={(e) => e.stopPropagation()} // クリックイベントの伝播を止める
             >
               {/* &timesは×ボタン */}
@@ -174,6 +178,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                     {action === "checkPaid" && "・支払い確認"}
                     {action === "changePassword" && "・パスワード変更"}
                     {action === "calculate" && "・料金計算"}
+                    {action === "liveDay" && "・ライブ日の設定"}
                   </li>
                 ))}
               </ul>

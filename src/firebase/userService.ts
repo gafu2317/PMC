@@ -5,6 +5,7 @@ import {
   addDoc,
   getDoc,
   getDocs,
+  updateDoc,
   doc,
   setDoc,
   deleteDoc,
@@ -447,5 +448,50 @@ export const deleteUnpaidFee = async (lineId: string): Promise<void> => {
     console.log("未払い料金が削除されました。");
   } catch (error) {
     console.error("未払い料金の削除に失敗しました:", error);
+  }
+};
+
+// 今回のライブの日付を設定する関数
+export const setLiveDay1 = async (liveDay1: Date): Promise<void> => {
+  try {
+    const docRef = doc(db, "setting", "liveDays");
+    await updateDoc(docRef, { liveDay1: liveDay1 });
+    console.log("ライブの日付が設定されました。");
+  } catch (error) {
+    console.error("ライブの日付の設定に失敗しました:", error);
+  }
+};
+
+// 今回のライブの日付を取得する関数
+export const getLiveDay1 = async (): Promise<Date | undefined> => {
+  try {
+    const liveDayDocRef = doc(db, "setting", "liveDays");
+    const liveDayDocSnap = await getDoc(liveDayDocRef);
+    console.log(liveDayDocSnap.data()?.liveDay1.toDate());
+    return liveDayDocSnap.data()?.liveDay1.toDate();
+  } catch (error) {
+    console.error("ライブの日付の取得に失敗しました:", error);
+  }
+};
+
+// 前回のライブの日付を設定する関数
+export const setLiveDay2 = async (liveDay2: Date): Promise<void> => {
+  try {
+    const docRef = doc(db, "setting", "liveDays");
+    await updateDoc(docRef, { liveDay2: liveDay2 });
+    console.log("ライブの日付が設定されました。");
+  } catch (error) {
+    console.error("ライブの日付の設定に失敗しました:", error);
+  }
+};
+
+// 前回のライブの日付を取得する関数
+export const getLiveDay2 = async (): Promise<Date | undefined> => {
+  try {
+    const liveDayDocRef = doc(db, "setting", "liveDays");
+    const liveDayDocSnap = await getDoc(liveDayDocRef);
+    return liveDayDocSnap.data()?.liveDay2.toDate();
+  } catch (error) {
+    console.error("ライブの日付の取得に失敗しました:", error);
   }
 };

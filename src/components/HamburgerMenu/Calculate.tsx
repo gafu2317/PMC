@@ -10,6 +10,8 @@ import {
 import { sendMessages } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
 import Swal from "sweetalert2";
+import { db } from "../../firebase/firebase"; // Firestoreのインポート
+import { doc, onSnapshot } from "firebase/firestore";
 
 interface CalculateProps {
   members: Member[];
@@ -37,6 +39,24 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
   const [reservationData, setReservationData] = useState<
     { id: string; reservation: string; names: string[] }[]
   >([]); // 予約データを管理(整形済み)
+    const [liveDay1, setLiveDay1db] = useState<Date | undefined>(undefined);
+    const [liveDay2, setLiveDay2db] = useState<Date | undefined>(undefined);
+  
+    // Firestoreからライブ日をリアルタイムで取得
+    useEffect(() => {
+      const unsubscribe = onSnapshot(doc(db, "setting", "liveDays"), (doc) => {
+        const data = doc.data();
+        if (data) {
+          if (data.liveDay1) {
+            setLiveDay1db(new Date(data.liveDay1.toDate())); // 次のライブ日
+          }
+          if (data.liveDay2) {
+            setLiveDay2db(new Date(data.liveDay2.toDate())); // 前回のライブ日
+          }
+        }
+      });
+      return () => unsubscribe(); // クリーンアップ
+    }, []);
 
   const fetchReservation = async () => {
     if (startDate && endDate) {
@@ -226,7 +246,15 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
   return (
     <div>
       <h2 className="mb-2">料金を計算する期間を入力</h2>
-      <label className="block mb-1 text-xs">開始日</label>
+      <h3 className="text-xs">
+        現在の次回のライブ日:{" "}
+        {liveDay1 ? liveDay1.toLocaleDateString() : "読み込み中..."}
+      </h3>
+      <h3 className="text-xs">
+        現在の前回のライブ日:{" "}
+        {liveDay2 ? liveDay2.toLocaleDateString() : "読み込み中..."}
+      </h3>
+      <label className="block my-1 text-xs">開始日</label>
       <input
         type="date"
         className="border rounded p-1 mb-2 w-full"
@@ -258,8 +286,10 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
           指定した期間
         </button>
       </div>
-      <span className="text-xs">注意:決定ボタンを押すと以下が実行されます。</span>
-      <ul className="list-disc ml-4 text-xs" >
+      <span className="text-xs">
+        注意:決定ボタンを押すと以下が実行されます。
+      </span>
+      <ul className="list-disc ml-4 text-xs">
         <li>各メンバーに料金の通知(現在停止中)</li>
         <li>クリップボードにデータをコピー</li>
         <li>指定された期間の予約データを削除</li>
