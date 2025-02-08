@@ -1,5 +1,5 @@
-import React from "react";
-import { weekDays, timeSlots } from "../../utils/utils";
+import React, {useEffect, useState} from "react";
+import { weekDays, timeSlots , isDuplicate } from "../../utils/utils";
 import { Reservation } from "../../types/type";
 
 interface ReservationDisplayProps {
@@ -15,6 +15,12 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
   selectedReservations,
   onReservationClick,
 }) => {
+    const [isDuplicates, setIsDuplicates] = useState<boolean[][]>(
+      Array.from({ length: 8 }, () => Array(12).fill(false))
+    );
+    useEffect(() => {
+      setIsDuplicates(isDuplicate(reservations));
+    }, [reservations]);
   return (
     <div>
       {weekDays.map((day, dayIndex) => {
@@ -50,8 +56,10 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                   return (
                     <div key={timeIndex}>
                       {/* 時間を表示 */}
-                      <div className="bg-gray-100 rounded-sm">
-                        {time}~{timeSlots[timeIndex + 1]}
+                      <div
+                        className={`bg-gray-100 rounded-sm ${isDuplicates[dayIndex][timeIndex]? "bg-red-300" : ""}`}
+                      >
+                        {time}~{timeSlots[timeIndex + 1]}{isDuplicates[dayIndex][timeIndex]?"　　重複してます！":""}
                       </div>
                       {selectedHourReservations.map((team, teamIndex) => {
                         // 予約が選択されているかどうか

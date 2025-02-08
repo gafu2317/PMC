@@ -3,6 +3,7 @@ import React from "react";
 
 interface HourProps {
   isUserReservation: boolean; // ユーザーの予約状況
+  isDuplicate: boolean; // 重複フラグ
   dayIndex: number; // 日付のインデックス
   timeIndex: number; // 時間のインデックス
   isSelected: boolean; // クリックフラグ
@@ -12,6 +13,7 @@ interface HourProps {
 
 const Hour: React.FC<HourProps> = ({
   isUserReservation, 
+  isDuplicate,
   isSelected,
   isReserved,
   onClick,
@@ -22,13 +24,11 @@ const Hour: React.FC<HourProps> = ({
         isSelected ? "border-2 border-red-500" : "border-2 border-gray-300"
       } transition-all cursor-pointer ${
         isReserved ? (isUserReservation ? "bg-green-500" : "bg-gray-300") : ""
+      } ${isDuplicate ? "bg-red-500" : ""
       } `}
       style={{ aspectRatio: 1 }}
       onClick={onClick} // クリック時にハンドラを呼び出す
     >
-      {/* <div className="flex justify-center items-center">
-        {isReserved ? (isUserReservation ? "🟢" : "　") : "　"}
-      </div> */}
     </div>
   );
 };

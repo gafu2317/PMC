@@ -64,7 +64,7 @@ export function getTimeIndex(date: Date): number {
 
 export function isReservationExist(
   reservations: Reservation[],
-  hours: boolean[][],
+  hours: boolean[][]
 ): boolean {
   for (let i = 0; i < hours.length; i++) {
     for (let j = 0; j < hours[i].length; j++) {
@@ -81,4 +81,20 @@ export function isReservationExist(
     }
   }
   return false;
+}
+
+export function isDuplicate(reservations: Reservation[]) {
+  const updatedIsDuplicates = Array.from({ length: 8 }, () =>
+    Array(12).fill(false)
+  );
+  const reservationCounts = Array.from({ length: 8 }, () => Array(12).fill(0));
+  reservations.forEach((reservation) => {
+    reservationCounts[reservation.dayIndex][reservation.timeIndex] += 1;
+  });
+  reservations.forEach((reservation) => {
+    if (reservationCounts[reservation.dayIndex][reservation.timeIndex] > 1) {
+      updatedIsDuplicates[reservation.dayIndex][reservation.timeIndex] = true;
+    }
+  });
+  return updatedIsDuplicates;
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { Reservation } from "../../types/type";
-import { weekDays, daysOfWeek, timeSlots } from "../../utils/utils";
+import { weekDays, daysOfWeek, timeSlots , isDuplicate } from "../../utils/utils";
 import Hour from "./Hour";
 
 interface CalendarProps {
@@ -48,6 +48,13 @@ const Calendar: React.FC<CalendarProps> = ({
     setIsUserReservations(updatedIsUserReservations); // 状態を更新
   }, [reservations, name]); // reservationsが変更されたときに実行
 
+  const [isDuplicates, setIsDuplicates] = useState<boolean[][]>(
+    Array.from({ length: 8 }, () => Array(12).fill(false))
+  );
+  useEffect(() => {
+    setIsDuplicates(isDuplicate(reservations));
+  }, [reservations]);
+
   return (
     <div>
       <div className="flex space-x-1">
@@ -76,6 +83,7 @@ const Calendar: React.FC<CalendarProps> = ({
               {Array.from({ length: daysOfWeek.length }).map((_, dayIndex) => (
                 <Hour
                   isUserReservation={isUserReservations[dayIndex][timeIndex]}
+                  isDuplicate={isDuplicates[dayIndex][timeIndex]}
                   dayIndex={dayIndex}
                   timeIndex={timeIndex}
                   key={`hour-${dayIndex}-${timeIndex}`}
