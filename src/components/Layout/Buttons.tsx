@@ -84,7 +84,7 @@ const Buttons: React.FC<ButtonsProps> = ({
   };
 
   const handleNotification = () => {
-    sendMessages(lineId, "通知テスト");
+    sendMessages("Uaad36f829cb1c10a72df296f112a16dd", "通知テスト");
   };
 
   return (
