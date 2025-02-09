@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Member, Reservation } from "../../types/type";
 import { v4 as uuidv4 } from "uuid";
 import { weekDays, timeSlots } from "../../utils/utils";
-import { addPresets, addReservation } from "../../firebase/userService";
+import { addPresets, addReservations } from "../../firebase/userService";
 import PresetPopup from "./Preset";
 import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
@@ -95,7 +95,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
         }
       }
     }
-    addReservation(reservations);
+    addReservations(reservations);
     onClose(); // ポップアップを閉じる
   };
 

@@ -10,6 +10,7 @@ import {
   setDoc,
   deleteDoc,
   Timestamp,
+  writeBatch,
 } from "firebase/firestore";
 import { getDayIndex, getTimeIndex } from "../utils/utils";
 import { Member, Reservation, Band } from "../types/type";
@@ -70,36 +71,23 @@ export const getAllUser = async (): Promise<Member[] | undefined> => {
 };
 
 //予約を追加する関数
-export const addReservation = async (
+export const addReservations = async (
   reservatios: Reservation[]
 ): Promise<void> => {
   try {
+    const batch = writeBatch(db); //バッチ処理を開始
     const docRef = collection(db, "reservations"); //reservationsコレクションの参照を取得
     for (const reservation of reservatios) {
-      //予約情報を追加
-      await addDoc(docRef, {
+      const newDocRef = doc(docRef); //新しいドキュメントの参照を取得
+      batch.set(newDocRef, {
         names: reservation.names,
         date: Timestamp.fromDate(reservation.date),
       });
     }
+    await batch.commit(); //バッチ処理を実行
     console.log("予約が追加されました。");
   } catch (error) {
     console.error("予約の追加に失敗しました:", error);
-  }
-};
-
-// 予約を削除する関数
-export const deleteReservation = async (id: string): Promise<void> => {
-  try {
-    // reservationsのドキュメントの参照を取得
-    const docRef = doc(db, "reservations", id);
-
-    // ドキュメントを削除
-    await deleteDoc(docRef);
-
-    console.log("予約が削除されました。");
-  } catch (error) {
-    console.error("予約の削除に失敗しました:", error);
   }
 };
 
@@ -120,6 +108,22 @@ export const updateReservation = async (
     console.error("予約の更新に失敗しました:", error);
   }
 };
+
+// 予約を削除する関数
+export const deleteReservation = async (id: string): Promise<void> => {
+  try {
+    // reservationsのドキュメントの参照を取得
+    const docRef = doc(db, "reservations", id);
+
+    // ドキュメントを削除
+    await deleteDoc(docRef);
+
+    console.log("予約が削除されました。");
+  } catch (error) {
+    console.error("予約の削除に失敗しました:", error);
+  }
+};
+
 
 // 予約情報を取得する関数
 export const getAllReservations = async (): Promise<
