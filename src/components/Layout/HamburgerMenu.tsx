@@ -13,6 +13,7 @@ import {
 } from "../HamburgerMenu/index";
 import { getPassword } from "../../firebase/userService";
 import Swal from "sweetalert2";
+import {AdminInstruction} from "../Popup";
 
 interface HamburgerMenuProps {
   members: Member[];
@@ -25,6 +26,11 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
   const [password, setPassword] = useState(""); // パスワードを管理
   const [selectedAction, setSelectedAction] = useState<string | null>(null); // 選択されたアクションを管理
   const [correctPassword, setCorrectPassword] = useState<string>(""); // 正しいパスワードを管理
+  const [isShow, setIsShow] = useState(false);
+
+  const handleClick = () => {
+    setIsShow(!isShow);
+  };
   useEffect(() => {
     getPassword().then((password) => {
       if (password) {
@@ -155,6 +161,12 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                   管理者メニュー
                 </h2>
                 <button
+                  className="rounded-full w-4 h-4 flex items-center justify-center border border-black  mr-4"
+                  onClick={handleClick}
+                >
+                  ?
+                </button>
+                <button
                   className="text-lg font-bold hover:text-gray-800 focus:outline-none"
                   onClick={toggleMenu}
                 >
@@ -184,6 +196,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
               </ul>
               {/* 選択された項目に応じたフォームを表示 */}
               {selectedAction && <div className="mt-2">{renderForm()}</div>}
+              {isShow && <AdminInstruction onClose={()=>setIsShow(false)} />}
             </div>
           )}
         </div>

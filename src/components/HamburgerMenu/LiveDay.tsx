@@ -58,10 +58,6 @@ const LiveDay: React.FC<LiveDayProps> = () => {
     setLiveDay2Locale(new Date(selectedDate)); // 前回のライブ日を更新
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString();
-  };
-
   return (
     <div>
       <h2 className="mb-2">ライブ日を変更</h2>
