@@ -7,7 +7,7 @@ import {
   addUnpaidFee,
   deleteBand,
 } from "../../firebase/userService";
-import { sendMessages } from "../../liff/liffService";
+// import { sendMessages } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
 import Swal from "sweetalert2";
 import { db } from "../../firebase/firebase"; // Firestoreのインポート

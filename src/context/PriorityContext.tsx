@@ -1,5 +1,5 @@
 // PriorityContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 import Swal from "sweetalert2";
 
 // Contextの作成
