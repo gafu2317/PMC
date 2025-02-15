@@ -2,8 +2,6 @@
 import liff from "@line/liff";
 import axios from "axios";
 
-const token = import.meta.env.VITE_LINE_ACCESS_TOKEN;
-
 export const initLiff = async (): Promise<string | null> => {
   try {
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
@@ -11,7 +9,7 @@ export const initLiff = async (): Promise<string | null> => {
       const profile = await liff.getProfile();
       return profile.userId; // これがlineIdです
     } else {
-      return "testLineId";
+      return "Uaad36f829cb1c10a72df296f112a16dd";
       liff.login(); // ログインしていない場合はログインを促す
       return null;
     }
@@ -21,7 +19,7 @@ export const initLiff = async (): Promise<string | null> => {
   }
 };
 
-export const testLindId: string = "testLineId";
+export const testLindId: string = "Uaad36f829cb1c10a72df296f112a16dd";
 
 export const sendMessages = async (
   lineId: string,
@@ -46,7 +44,7 @@ export const sendMessages = async (
     }
   }
 };
-
+// const token = import.meta.env.VITE_LINE_ACCESS_TOKEN;
 // export const sendMessages = async (
 //   lineId: string,
 //   message: string

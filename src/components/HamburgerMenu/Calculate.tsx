@@ -7,7 +7,7 @@ import {
   addUnpaidFee,
   deleteBand,
 } from "../../firebase/userService";
-// import { sendMessages } from "../../liff/liffService";
+import { sendMessages } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
 import Swal from "sweetalert2";
 import { db } from "../../firebase/firebase"; // Firestoreのインポート
@@ -198,12 +198,12 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
       return;
     }
     //料金の通知
-    // for (const user of userData) {
-    //   await sendMessages(
-    //     user.lineId,
-    //     `学スタ使用料金等のお知らせ\n学スタ使用料: ${user.fee}円\nライブ出演費: ${user.performanceFee}円\n罰金: ${user.fine}円\n未払金: ${user.unPaidFee}\n合計: ${user.total}円`
-    //   );
-    // }
+    for (const user of userData) {
+      await sendMessages(
+        user.lineId,
+        `学スタ使用料金等のお知らせ\n学スタ使用料: ${user.fee}円\nライブ出演費: ${user.performanceFee}円\n罰金: ${user.fine}円\n未払金: ${user.unPaidFee}\n合計: ${user.total}円`
+      );
+    }
     //クリップボードにコピー
     const data = await generateClipboardData();
     navigator.clipboard
