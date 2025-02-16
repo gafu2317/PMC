@@ -7,7 +7,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 const app = express();
-app.use(cors()); // CORSを有効にする
+app.use(
+  cors({
+    origin: "*", // 全てのオリジンを許可
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // 許可するHTTPメソッド
+    credentials: true, // クッキーなどの資格情報を含める場合
+  })
+); // CORSを有効にする
 app.use(bodyParser.json());
 console.log("Server started");
 // const token = import.meta.env.VITE_LINE_ACCESS_TOKEN; // 環境変数からトークンを取得
@@ -43,6 +49,7 @@ app.post("/send-message", async (req, res) => {
     } else {
       // サーバーがレスポンスを返さなかった場合
       console.error("Error sending message:", error.message);
+      window.alert("Failed to send message", error);
       res.status(500).send("Failed to send message");
     }
   }
