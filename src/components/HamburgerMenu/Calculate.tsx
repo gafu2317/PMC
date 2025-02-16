@@ -201,7 +201,7 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
     for (const user of userData) {
       await sendMessages(
         user.lineId,
-        `学スタ使用料金等のお知らせ\n学スタ使用料: ${user.fee}円\nライブ出演費: ${user.performanceFee}円\n罰金: ${user.fine}円\n未払金: ${user.unPaidFee}\n合計: ${user.total}円`
+        `学スタ使用料金等のお知らせ\n学スタ使用料: ${user.fee}円\nライブ出演費: ${user.performanceFee}円\n罰金: ${user.fine}円\n未払金: ${user.unPaidFee}円\n合計: ${user.total}円`
       );
     }
     //クリップボードにコピー

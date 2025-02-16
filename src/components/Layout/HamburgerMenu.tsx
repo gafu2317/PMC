@@ -65,10 +65,10 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
   };
   const actions = [
     "makePriority",
-    "checkPaid",
-    "calculate",
     "liveDay",
     "addFineData",
+    "calculate",
+    "checkPaid",
     "changePassword",
     "deleteMemberData",
     "deleteReservation",
@@ -177,7 +177,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                 {actions.map((action) => (
                   <li
                     key={action}
-                    className={`border border-gray-20 rounded p-1 mx-4 my-2 hover:bg-gray-200 ${
+                    className={`text-xl border border-gray-20 rounded p-1 mx-4 my-4 hover:bg-gray-200 ${
                       selectedAction === action ? "bg-gray-300" : ""
                     }`} // クリックされた項目の背景色を変更
                     onClick={() => handleMenuClick(action)}

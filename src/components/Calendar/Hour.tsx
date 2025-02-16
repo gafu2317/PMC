@@ -24,7 +24,7 @@ const Hour: React.FC<HourProps> = ({
         isSelected ? "border-2 border-red-500" : "border-2 border-gray-300"
       } transition-all cursor-pointer ${
         isReserved ? (isUserReservation ? "bg-green-500" : "bg-gray-300") : ""
-      } ${isDuplicate ? "bg-red-500" : ""
+      } ${isDuplicate ? "bg-red-300" : ""
       } `}
       style={{ aspectRatio: 1 }}
       onClick={onClick} // クリック時にハンドラを呼び出す

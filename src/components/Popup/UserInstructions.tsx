@@ -28,6 +28,7 @@ const UserInstructions: React.FC<Props> = ({ onClose }) => {
         <h2>予約について</h2>
         <h2>バンドについて</h2>
         <h2>プリセットについて</h2>
+        <h2>学スタ使用料金について</h2>
       </div>
     </div>
   );
