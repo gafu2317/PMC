@@ -13,7 +13,7 @@ import {
 } from "../HamburgerMenu/index";
 import { getPassword } from "../../firebase/userService";
 import Swal from "sweetalert2";
-import {AdminInstruction} from "../Popup";
+import { AdminInstruction } from "../Popup";
 
 interface HamburgerMenuProps {
   members: Member[];
@@ -74,9 +74,9 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
     "deleteReservation",
     "deleteBandData",
   ];
-  const renderForm = () => {
-    if (!selectedAction) return null;
-    switch (selectedAction) {
+  const renderForm = (action: string) => {
+    if (!action) return null;
+    switch (action) {
       case "makePriority":
         return <MakePriority />;
       case "deleteMemberData":
@@ -175,28 +175,30 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
               </div>
               <ul className="py-2">
                 {actions.map((action) => (
-                  <li
-                    key={action}
-                    className={`text-xl border border-gray-20 rounded p-1 mx-4 my-4 hover:bg-gray-200 ${
-                      selectedAction === action ? "bg-gray-300" : ""
-                    }`} // クリックされた項目の背景色を変更
-                    onClick={() => handleMenuClick(action)}
-                  >
-                    {action === "makePriority" && "・優先権の有効化"}
-                    {action === "deleteReservation" && "・予約データの削除"}
-                    {action === "deleteMemberData" && "・部員データの削除"}
-                    {action === "deleteBandData" && "・バンドデータの削除"}
-                    {action === "addFineData" && "・罰金データ追加"}
-                    {action === "checkPaid" && "・支払い確認"}
-                    {action === "changePassword" && "・パスワード変更"}
-                    {action === "calculate" && "・料金計算"}
-                    {action === "liveDay" && "・ライブ日の設定"}
-                  </li>
+                  <div>
+                    <li
+                      key={action}
+                      className={`text-xl border border-gray-20 rounded p-1 mx-4 my-4 hover:bg-gray-200 ${
+                        selectedAction === action ? "bg-gray-300" : ""
+                      }`} // クリックされた項目の背景色を変更
+                      onClick={() => handleMenuClick(action)}
+                    >
+                      {action === "makePriority" && "・優先権の有効化"}
+                      {action === "deleteReservation" && "・予約データの削除"}
+                      {action === "deleteMemberData" && "・部員データの削除"}
+                      {action === "deleteBandData" && "・バンドデータの削除"}
+                      {action === "addFineData" && "・罰金データ追加"}
+                      {action === "checkPaid" && "・支払い確認"}
+                      {action === "changePassword" && "・パスワード変更"}
+                      {action === "calculate" && "・料金計算"}
+                      {action === "liveDay" && "・ライブ日の設定"}
+                    </li>
+                    {/* 選択された項目に応じたフォームを表示 */}
+                    {selectedAction === action && <div className="mt-2">{renderForm(action)}</div>}
+                  </div>
                 ))}
               </ul>
-              {/* 選択された項目に応じたフォームを表示 */}
-              {selectedAction && <div className="mt-2">{renderForm()}</div>}
-              {isShow && <AdminInstruction onClose={()=>setIsShow(false)} />}
+              {isShow && <AdminInstruction onClose={() => setIsShow(false)} />}
             </div>
           )}
         </div>
