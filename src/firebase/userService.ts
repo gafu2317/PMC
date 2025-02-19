@@ -91,6 +91,26 @@ export const addReservations = async (
   }
 };
 
+export const addReservationsAdmin = async (
+  reservatios: { names: string[]; date: Date }[]
+): Promise<void> => {
+  try {
+    const batch = writeBatch(db); //バッチ処理を開始
+    const docRef = collection(db, "reservations"); //reservationsコレクションの参照を取得
+    for (const reservation of reservatios) {
+      const newDocRef = doc(docRef); //新しいドキュメントの参照を取得
+      batch.set(newDocRef, {
+        names: reservation.names,
+        date: Timestamp.fromDate(reservation.date),
+      });
+    }
+    await batch.commit(); //バッチ処理を実行
+    console.log("予約が追加されました。");
+  } catch (error) {
+    console.error("予約の追加に失敗しました:", error);
+  }
+};
+
 // 予約を更新する関数
 export const updateReservation = async (
   id: string,
@@ -123,7 +143,6 @@ export const deleteReservation = async (id: string): Promise<void> => {
     console.error("予約の削除に失敗しました:", error);
   }
 };
-
 
 // 予約情報を取得する関数
 export const getAllReservations = async (): Promise<
@@ -184,7 +203,8 @@ export const getReservationsByDateRange = async (
         (reservation) =>
           reservation.date >= startDate &&
           reservation.date <= endDate.setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
-      );
+      )
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     return reservations;
   } catch (error) {
@@ -201,11 +221,13 @@ export const getAllPeriodReservations = async (): Promise<
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
-    const reservations = reservationsDocs.docs.map((doc) => ({
-      id: doc.id,
-      names: doc.data().names,
-      date: doc.data().date.toDate(),
-    }));
+    const reservations = reservationsDocs.docs
+      .map((doc) => ({
+        id: doc.id,
+        names: doc.data().names,
+        date: doc.data().date.toDate(),
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     return reservations;
   } catch (error) {

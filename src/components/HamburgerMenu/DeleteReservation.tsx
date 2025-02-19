@@ -2,17 +2,13 @@ import React, { useState } from "react";
 import {
   getReservationsByDateRange,
   getAllPeriodReservations,
-  updateReservation,
+  deleteReservation,
 } from "../../firebase/userService";
-import { MemberList } from "../Forms";
-import { Member } from "../../types/type";
 import Swal from "sweetalert2";
 
-interface EditReservationProps {
-  members: Member[];
-}
+interface DeleteReservationDataProps {}
 
-const EditReservation: React.FC<EditReservationProps> = ({members}) => {
+const DeleteReservationData: React.FC<DeleteReservationDataProps> = ({}) => {
   const [startDate, setStartDate] = useState(""); // 開始日を管理
   const [endDate, setEndDate] = useState(""); // 終了日を管理
   const [isAll, setIsAll] = useState(false); //全て選択されているかどうか
@@ -20,15 +16,6 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
     { id: string; names: string[]; date: Date }[]
   >([]); // 予約情報を管理
   const [loading, setLoading] = useState(false); // ローディング状態を管理
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()); // 選択された予約のIDを管理
-    const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
-  const handleAddSelectedMembers = (member: Member) => {
-    setSelectedMembers((prev) =>
-      prev.includes(member)
-        ? prev.filter((m) => m.lineId !== member.lineId)
-        : [...prev, member]
-    );
-  };
   const fetchReservation = async () => {
     if (startDate && endDate) {
       const fetchedReservations = await getReservationsByDateRange(
@@ -44,6 +31,7 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
     setReservations(fetchedReservations);
     setIsAll(true);
   };
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()); // 選択された予約のIDを管理
   const selectAllReservation = () => {
     if (selectedIds.size === reservations.length) {
       setSelectedIds(new Set()); // すべて解除
@@ -63,20 +51,20 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
       return newSelectedIds;
     });
   };
-  const handleUpdateReservation = async () => {
-    if (selectedIds.size === 0) {
-      return;
-    }
-    setLoading(true);
-    const newMembers = selectedMembers.map((member) => member.name);
+  const handleDeleteReservation = async () => {
     for (const id of selectedIds) {
-      await updateReservation(id, newMembers);
+      setLoading(true);
+      await deleteReservation(id);
+      setLoading(false);
+      setReservations((prev) =>
+        prev.filter((reservation) => reservation.id !== id)
+      );
     }
-    setLoading(false);
-    setReservations((prev) =>
-      prev.filter((reservation) => !selectedIds.has(reservation.id))
-    );
-    Swal.fire("予約を変更しました", "", "success");
+    setSelectedIds(new Set());
+    Swal.fire({
+      icon: "success",
+      title: "削除が完了しました",
+    });
   };
   return (
     <div>
@@ -127,9 +115,9 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
                 : "すべて選択"}
             </button>
           </div>
-          <ul className="my-2">
+          <ul className="mt-4">
             {reservations.map((reservation) => (
-              <li key={reservation.id} className="flex items-center mb-1">
+              <li key={reservation.id} className="flex items-center">
                 <input
                   type="checkbox"
                   checked={selectedIds.has(reservation.id)}
@@ -141,24 +129,19 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
                   reservation.date.getMonth() + 1
                 }/${reservation.date.getDate()}, ${reservation.date.getHours()}:${String(
                   reservation.date.getMinutes()
-                ).padStart(2, "0")}-${reservation.names.join(",")}`}
-                <button></button>
+                ).padStart(2, "0")}`}
+                - {reservation.names.join(", ")}
               </li>
             ))}
           </ul>
-          <MemberList 
-          members={members} 
-          selectedMembers={selectedMembers}
-          handleAddSelectedMembers={handleAddSelectedMembers}
-          />
-          <div className="text-xs mt-1">※チェックした予約のメンバーが選択したメンバーに変更されます</div>
+
           <div className="flex justify-end mt-4">
-            {loading && <span>変更中...</span>}
+            {loading && <span>削除中...</span>}
             <button
-              className="bg-blue-500 text-white rounded p-1"
-              onClick={handleUpdateReservation}
+              className="bg-red-500 text-white rounded p-1"
+              onClick={handleDeleteReservation}
             >
-              メンバー変更
+              削除
             </button>
           </div>
         </div>
@@ -167,4 +150,4 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
   );
 };
 
-export default EditReservation;
+export default DeleteReservationData;

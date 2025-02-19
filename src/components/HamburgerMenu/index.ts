@@ -1,5 +1,7 @@
 export {default as DeleteMemberData} from './DeleteMember';
-export {default as DeleteReservationData} from './EditReservation';
+export {default as DeleteReservationData} from './DeleteReservation';
+export {default as EditReservationData} from './EditReservation';
+export {default as CreateReservationData} from './CreateReservation';
 export {default as DeleteBandData} from './DeleteBand';
 export {default as Calculate} from './Calculate';
 export {default as AddFineData} from './AddFineData';

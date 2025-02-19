@@ -3,6 +3,8 @@ import { Member, Band } from "../../types/type";
 import {
   DeleteMemberData,
   DeleteReservationData,
+  EditReservationData,
+  CreateReservationData,
   DeleteBandData,
   Calculate,
   AddFineData,
@@ -72,6 +74,8 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
     "changePassword",
     "deleteMemberData",
     "deleteReservation",
+    "editReservation",
+    "createReservation",
     "deleteBandData",
   ];
   const renderForm = (action: string) => {
@@ -83,6 +87,10 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
         return <DeleteMemberData members={members} />;
       case "deleteReservation":
         return <DeleteReservationData />;
+      case "editReservation":
+        return <EditReservationData members={members}/>;
+      case "createReservation":
+        return <CreateReservationData members={members}/>;
       case "deleteBandData":
         return <DeleteBandData bands={bands} />;
       case "addFineData":
@@ -185,6 +193,8 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
                     >
                       {action === "makePriority" && "・優先権の有効化"}
                       {action === "deleteReservation" && "・予約データの削除"}
+                      {action === "editReservation" && "・予約データの編集"}
+                      {action === "createReservation" && "・予約データの追加"}
                       {action === "deleteMemberData" && "・部員データの削除"}
                       {action === "deleteBandData" && "・バンドデータの削除"}
                       {action === "addFineData" && "・罰金データ追加"}
