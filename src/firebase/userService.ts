@@ -91,6 +91,7 @@ export const addReservations = async (
   }
 };
 
+//管理者メニューで予約を追加する関数
 export const addReservationsAdmin = async (
   reservatios: { names: string[]; date: Date }[]
 ): Promise<void> => {

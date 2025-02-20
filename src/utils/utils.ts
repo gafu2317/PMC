@@ -37,6 +37,26 @@ export const timeSlots = [
   "21:30",
 ];
 
+export const timeSlotsKinjyou = [
+  "9:10",
+  "10:55",
+  "12:25",
+  "13:20",
+  "15:05",
+  "16:45",
+  "18:30",
+];
+
+export const slotsKinjyou = [
+  "1コマ",
+  "2コマ",
+  "昼",
+  "3コマ",
+  "4コマ",
+  "5コマ",
+  "夜",
+];
+
 export function getDayIndex(date: Date): number {
   for (let i = 0; i < weekDays.length; i++) {
     if (
