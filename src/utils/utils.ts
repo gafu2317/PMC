@@ -36,6 +36,20 @@ export const timeSlots = [
   "20:00",
   "21:30",
 ];
+export const slots = [
+  "9:00~10:00",
+  "10:00~11:00",
+  "11:00~12:00",
+  "12:00~13:00",
+  "13:00~14:00",
+  "14:00~15:00",
+  "15:00~16:00",
+  "16:00~17:00",
+  "17:00~18:00",
+  "18:00~19:00",
+  "19:00~20:00",
+  "20:00~21:30",
+];
 
 export const timeSlotsKinjyou = [
   "9:10",
@@ -74,6 +88,16 @@ export function getDayIndex(date: Date): number {
 export function getTimeIndex(date: Date): number {
   for (let i = 0; i < timeSlots.length; i++) {
     const hour = parseInt(timeSlots[i].split(":")[0], 10); // 文字列を数値に変換
+    if (hour === date.getHours()) {
+      const timeIndex = i;
+      return timeIndex;
+    }
+  }
+  return -1;
+}
+export function getTimeIndexKinjyou(date: Date): number {
+  for (let i = 0; i < timeSlotsKinjyou.length; i++) {
+    const hour = parseInt(timeSlotsKinjyou[i].split(":")[0], 10); // 文字列を数値に変換
     if (hour === date.getHours()) {
       const timeIndex = i;
       return timeIndex;

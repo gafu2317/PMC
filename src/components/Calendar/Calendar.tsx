@@ -1,7 +1,14 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { Reservation } from "../../types/type";
-import { weekDays, daysOfWeek, timeSlots , isDuplicate } from "../../utils/utils";
+import {
+  weekDays,
+  daysOfWeek,
+  timeSlots,
+  slotsKinjyou,
+  isDuplicate,
+  timeSlotsKinjyou,
+} from "../../utils/utils";
 import Hour from "./Hour";
 
 interface CalendarProps {
@@ -9,6 +16,7 @@ interface CalendarProps {
   reservations: Reservation[];
   selectedHours: boolean[][];
   onHourClick: (dayIndex: number, timeIndex: number) => void;
+  isKinjyou?: boolean;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -16,6 +24,7 @@ const Calendar: React.FC<CalendarProps> = ({
   reservations,
   selectedHours,
   onHourClick,
+  isKinjyou,
 }) => {
   const [reservedHours, setReservedHours] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false)) // 8日間、12時間の初期状態を設定
@@ -57,45 +66,105 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
     <div>
-      <div className="flex space-x-1">
-        <div className="flex flex-col justify-between">
-          <div className="h-5"></div>
-          {Array.from({ length: timeSlots.length }).map((_, index) => (
-            <div key={index} className="text-center p-1 text-xs rounded">
-              {timeSlots[index]}
-              <br />
-            </div>
-          ))}
+      {isKinjyou ? (
+        <div className="flex space-x-1">
+          {/* <div className="flex flex-col justify-between">
+              <div className="h-8"></div>
+              {Array.from({ length: timeSlotsKinjyou.length }).map(
+                (_, index) => (
+                  <div key={index} className="text-center p-1 text-xs rounded">
+                    {slotsKinjyou[index]}
+                    <br />
+                  </div>
+                )
+              )}
+            </div> */}
+          <div className="grid grid-cols-9 gap-2 mb-4">
+            <div className="text-center p-1 text-xs rounded"></div>
+            {weekDays.map((item, index) => (
+              <div
+                key={index}
+                className="text-center bg-gray-200 p-1 text-xs rounded"
+              >
+                {daysOfWeek[index]}
+                <br />
+                {item.date}
+              </div>
+            ))}
+            {Array.from({ length: timeSlotsKinjyou.length }).map(
+              (_, timeIndex) => (
+                <React.Fragment key={timeIndex}>
+                  <div className="flex items-center justify-center">
+                    <div className="text-xs ">{slotsKinjyou[timeIndex]}</div>
+                  </div>
+                  {Array.from({ length: daysOfWeek.length }).map(
+                    (_, dayIndex) => (
+                      <Hour
+                        isUserReservation={
+                          isUserReservations[dayIndex][timeIndex]
+                        }
+                        isDuplicate={isDuplicates[dayIndex][timeIndex]}
+                        dayIndex={dayIndex}
+                        timeIndex={timeIndex}
+                        key={`hour-${dayIndex}-${timeIndex}`}
+                        isSelected={selectedHours[dayIndex][timeIndex]}
+                        isReserved={reservedHours[dayIndex][timeIndex]}
+                        onClick={() => onHourClick(dayIndex, timeIndex)}
+                      />
+                    )
+                  )}
+                </React.Fragment>
+              )
+            )}
+          </div>
         </div>
-        <div className="grid grid-cols-8 gap-2 mb-4">
-          {weekDays.map((item, index) => (
-            <div
-              key={index}
-              className="text-center bg-gray-200 p-1 text-xs rounded"
-            >
-              {daysOfWeek[index]}
-              <br />
-              {item.date}
-            </div>
-          ))}
-          {Array.from({ length: timeSlots.length - 1 }).map((_, timeIndex) => (
-            <React.Fragment key={timeIndex}>
-              {Array.from({ length: daysOfWeek.length }).map((_, dayIndex) => (
-                <Hour
-                  isUserReservation={isUserReservations[dayIndex][timeIndex]}
-                  isDuplicate={isDuplicates[dayIndex][timeIndex]}
-                  dayIndex={dayIndex}
-                  timeIndex={timeIndex}
-                  key={`hour-${dayIndex}-${timeIndex}`}
-                  isSelected={selectedHours[dayIndex][timeIndex]}
-                  isReserved={reservedHours[dayIndex][timeIndex]}
-                  onClick={() => onHourClick(dayIndex, timeIndex)}
-                />
-              ))}
-            </React.Fragment>
-          ))}
+      ) : (
+        <div className="flex space-x-1">
+          <div className="flex flex-col justify-between">
+            <div className="h-5"></div>
+            {Array.from({ length: timeSlots.length }).map((_, index) => (
+              <div key={index} className="text-center p-1 text-xs rounded">
+                {timeSlots[index]}
+                <br />
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-8 gap-2 mb-4">
+            {weekDays.map((item, index) => (
+              <div
+                key={index}
+                className="text-center bg-gray-200 p-1 text-xs rounded"
+              >
+                {daysOfWeek[index]}
+                <br />
+                {item.date}
+              </div>
+            ))}
+            {Array.from({ length: timeSlots.length - 1 }).map(
+              (_, timeIndex) => (
+                <React.Fragment key={timeIndex}>
+                  {Array.from({ length: daysOfWeek.length }).map(
+                    (_, dayIndex) => (
+                      <Hour
+                        isUserReservation={
+                          isUserReservations[dayIndex][timeIndex]
+                        }
+                        isDuplicate={isDuplicates[dayIndex][timeIndex]}
+                        dayIndex={dayIndex}
+                        timeIndex={timeIndex}
+                        key={`hour-${dayIndex}-${timeIndex}`}
+                        isSelected={selectedHours[dayIndex][timeIndex]}
+                        isReserved={reservedHours[dayIndex][timeIndex]}
+                        onClick={() => onHourClick(dayIndex, timeIndex)}
+                      />
+                    )
+                  )}
+                </React.Fragment>
+              )
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

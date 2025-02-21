@@ -4,13 +4,13 @@ import { Calendar, ReservationDisplay } from "../components/Calendar";
 import { HamburgerMenu, Header, Buttons } from "../components/Layout";
 import { Reservation, Member, Band } from "../types/type";
 import {
-  getAllReservations,
+  getAllReservationsKinjyou,
   getAllUser,
   getAllBands,
 } from "../firebase/userService";
 import { db } from "../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
-import { daysOfWeek, timeSlots } from "../utils/utils";
+import { daysOfWeek, timeSlotsKinjyou } from "../utils/utils";
 import { initLiff } from "../liff/liffService";
 import { PriorityProvider } from "../context/PriorityContext";
 
@@ -56,7 +56,7 @@ function Kinjyou() {
     const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
-        const newReservations = await getAllReservations();
+        const newReservations = await getAllReservationsKinjyou();
         if (newReservations) {
           setReservations(newReservations);
         } else {
@@ -91,7 +91,7 @@ function Kinjyou() {
   //　選択している時間帯を管理(Hourに渡しやすい型)
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
     Array.from({ length: daysOfWeek.length }, () =>
-      Array(timeSlots.length).fill(false)
+      Array(timeSlotsKinjyou.length).fill(false)
     )
   );
   const handleHourClick = (dayIndex: number, timeIndex: number) => {
@@ -106,7 +106,7 @@ function Kinjyou() {
     string[][][]
   >(
     Array.from({ length: daysOfWeek.length }, () =>
-      Array.from({ length: timeSlots.length }, () => [])
+      Array.from({ length: timeSlotsKinjyou.length }, () => [])
     )
   );
   useEffect(() => {
@@ -161,12 +161,14 @@ function Kinjyou() {
               reservations={reservations}
               selectedHours={selectedHours}
               onHourClick={handleHourClick}
+              isKinjyou={true}
             />
             <ReservationDisplay
               reservations={reservations}
               selectedHours={selectedHours}
               selectedReservations={selectedReservations}
               onReservationClick={handleReservationClick}
+              isKinjyou={true}
             />
             <Buttons
               lineId={lineId}

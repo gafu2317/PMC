@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { weekDays, timeSlots , isDuplicate } from "../../utils/utils";
+import { weekDays, timeSlots , slots , slotsKinjyou, isDuplicate } from "../../utils/utils";
 import { Reservation } from "../../types/type";
 
 interface ReservationDisplayProps {
@@ -7,6 +7,7 @@ interface ReservationDisplayProps {
   selectedHours: boolean[][]; // 選択された時間帯
   selectedReservations: string[][][]; // 選択された予約
   onReservationClick: (dayIndex: number, timeIndex: number, id: string) => void; // 予約を選択したときのハンドラ
+  isKinjyou?: boolean; // 金城かどうか
 }
 
 const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
@@ -14,6 +15,7 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
   selectedHours,
   selectedReservations,
   onReservationClick,
+  isKinjyou,
 }) => {
     const [isDuplicates, setIsDuplicates] = useState<boolean[][]>(
       Array.from({ length: 8 }, () => Array(12).fill(false))
@@ -59,7 +61,7 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                       <div
                         className={`bg-gray-100 rounded-sm ${isDuplicates[dayIndex][timeIndex]? "bg-red-300" : ""}`}
                       >
-                        {time}~{timeSlots[timeIndex + 1]}{isDuplicates[dayIndex][timeIndex]?"　　重複してます！":""}
+                        {isKinjyou?(slotsKinjyou[timeIndex]):(slots[timeIndex])}{isDuplicates[dayIndex][timeIndex]?"　　重複してます！":""}
                       </div>
                       {selectedHourReservations.map((team, teamIndex) => {
                         // 予約が選択されているかどうか
