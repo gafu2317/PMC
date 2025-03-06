@@ -71,6 +71,48 @@ export const slotsKinjyou = [
   "夜",
 ];
 
+export function getHour (slot: string): number {
+  switch (slot) {
+    case "1コマ":
+      return 9;
+    case "2コマ":
+      return 10;
+    case "昼":
+      return 12;
+    case "3コマ":
+      return 13;
+    case "4コマ":
+      return 15;
+    case "5コマ":
+      return 16;
+    case "夜":
+      return 18;
+    default:
+      return -1;
+  }
+}
+
+export function getLength (slot: string): number {
+  switch (slot) {
+    case "1コマ":
+      return 0;
+    case "2コマ":
+      return 1;
+    case "昼":
+      return 2;
+    case "3コマ":
+      return 3;
+    case "4コマ":
+      return 4;
+    case "5コマ":
+      return 5;
+    case "夜":
+      return 6;
+    default:
+      return -1;
+  }
+}
+
 export function getDayIndex(date: Date): number {
   for (let i = 0; i < weekDays.length; i++) {
     if (

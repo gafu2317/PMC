@@ -44,7 +44,7 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
           <div key={day.date} className="mt-1">
             {/* 日付を表示 */}
             <h3 className="font-bold">{day.date}</h3>
-            {timeSlots.map((time, timeIndex) => {
+            {timeSlots.map((_, timeIndex) => {
               // 選択された時間帯のみを考慮
               if (selectedHours[dayIndex][timeIndex]) {
                 // 選択されている時間の予約のみを残す

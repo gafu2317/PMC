@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Member, Reservation } from "../../types/type";
 import { v4 as uuidv4 } from "uuid";
 import { weekDays, timeSlots } from "../../utils/utils";
-import { addPresets, addReservations } from "../../firebase/userService";
+import { addPresets, addReservations, addReservationsKinjyou} from "../../firebase/userService";
 import PresetPopup from "./Preset";
 import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
@@ -13,6 +13,7 @@ interface ReservationPopupProps {
   members: Member[]; // 部員の名前
   selectedHours: boolean[][]; // 選択された時間帯
   onClose: () => void; // 閉じるハンドラ
+  isKinjyou?: boolean; // 金城かどうか
 }
 
 const ReservationPopup: React.FC<ReservationPopupProps> = ({
@@ -20,6 +21,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   members,
   selectedHours,
   onClose,
+  isKinjyou,
 }) => {
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
@@ -95,7 +97,9 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
         }
       }
     }
-    addReservations(reservations);
+    isKinjyou
+      ? addReservationsKinjyou(reservations)
+      : addReservations(reservations);
     onClose(); // ポップアップを閉じる
   };
 

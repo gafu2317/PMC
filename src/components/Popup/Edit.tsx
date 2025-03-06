@@ -1,10 +1,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { Reservation, Member } from "../../types/type";
-import { weekDays, timeSlots } from "../../utils/utils";
+import { weekDays, timeSlots, slots, slotsKinjyou, timeSlotsKinjyou } from "../../utils/utils";
 import {
   deleteReservation,
   updateReservation,
+  deleteReservationKinjyou,
+  updateReservationKinjyou,
 } from "../../firebase/userService";
 import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
@@ -16,6 +18,7 @@ interface ReservationPopupProps {
   onClose: () => void;
   selectedReservations: string[][][];
   reservations: Reservation[];
+  isKinjyou?: boolean;
 }
 
 const EditReservationPopup: React.FC<ReservationPopupProps> = ({
@@ -24,6 +27,7 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
   selectedReservations,
   reservations,
   name,
+  isKinjyou,
 }) => {
   const [newReservations, setNewReservations] =
     useState<Reservation[]>(reservations); //　予約の編集で表示する予約情報
@@ -63,7 +67,9 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
               // 予約にメンバーがまだ含まれていない場合、追加する
               if (!reservation.names.includes(member.name)) {
                 reservation.names.push(member.name);
-                updateReservation(reservation.id, reservation.names);
+                isKinjyou
+                  ? updateReservationKinjyou(reservation.id, reservation.names)
+                  : updateReservation(reservation.id, reservation.names);
               }
             }
           });
@@ -95,12 +101,14 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
               reservation.names = reservation.names.filter(
                 (member) => member !== name
               );
-              updateReservation(reservation.id, reservation.names);
+              isKinjyou
+                ? updateReservationKinjyou(reservation.id, reservation.names)
+                : updateReservation(reservation.id, reservation.names);
             } else {
               Swal.fire({
                 icon: "warning",
                 title: "注意",
-                text: "自分のみの予約は削除されませんでした。",
+                text: "自分のみの予約を不参加にはできません。",
                 confirmButtonText: "OK",
               });
             }
@@ -122,7 +130,7 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
       tomorrow.setDate(tomorrow.getDate() + 1); // 明日の日付に設定
       tomorrow.setHours(0, 0, 0, 0); // 明日の午前0時の時間を設定
       const isFutureReservation = prevReservations.some(
-        (reservation) => reservation.date.getTime() >= tomorrow.getTime() // 明日以降の予約をチェック
+        (reservation) => reservation.date.getTime() >= tomorrow.getTime() // 明日以降の予約かどうかチェック
       );
       if (isMyReservation) {
         if (isFutureReservation) {
@@ -130,7 +138,7 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
             (reservation) => !ids.includes(reservation.id)
           );
           ids.forEach((id) => {
-            deleteReservation(id);
+            isKinjyou ? deleteReservationKinjyou(id) : deleteReservation(id);
           });
           return newReservations;
         } else {
@@ -175,14 +183,14 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
           <div className="border border-blue-200 rounded h-32 overflow-y-auto">
             <ul className="list-disc pl-5">
               {weekDays.map((day, dayIndex) => {
-                return timeSlots.map((time, timeIndex) => {
+                return (isKinjyou?timeSlotsKinjyou:timeSlots).map((_, timeIndex) => {
                   const selectedHourReservations =
                     selectedReservations[dayIndex][timeIndex];
                   if (selectedHourReservations.length > 0) {
                     return (
                       <li key={dayIndex + timeIndex}>
                         <div>
-                          {day.date} {time}~{timeSlots[timeIndex + 1]}
+                          {day.date} {isKinjyou?(slotsKinjyou[timeIndex]):(slots[timeIndex])}
                         </div>
                         <ul>
                           {selectedHourReservations.map((teamId, teamIndex) => {

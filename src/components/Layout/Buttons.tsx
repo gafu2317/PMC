@@ -18,6 +18,7 @@ interface ButtonsProps {
   selectedHours: boolean[][];
   selectedReservations: string[][][];
   bands: Band[];
+  isKinjyou?: boolean;
 }
 
 const Buttons: React.FC<ButtonsProps> = ({
@@ -27,6 +28,7 @@ const Buttons: React.FC<ButtonsProps> = ({
   selectedHours,
   selectedReservations,
   bands,
+  isKinjyou,
 }) => {
   //登録画面の表示状態を管理
   const [isRegistrationPopupVisible, setIsRegistrationPopupVisible] =
@@ -105,7 +107,7 @@ const Buttons: React.FC<ButtonsProps> = ({
         className="fixed bottom-24 right-8 p-2 bg-blue-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
         onClick={handleReserve}
       >
-        予約
+        予 約
       </button>
 
       <button
@@ -121,17 +123,19 @@ const Buttons: React.FC<ButtonsProps> = ({
           members={members}
           selectedHours={selectedHours}
           onClose={() => setIsReservationPopupVisible(false)}
+          isKinjyou={isKinjyou}
         />
       )}
 
       {isEditPopupVisible && (
         <EditReservationPopup
-          myLineId={lineId} // lineIdを渡す
-          members={members} // 部員情報を渡す
-          name={getName(lineId)} // 名前を渡す
-          reservations={reservations} // 予約情報を渡す
-          selectedReservations={selectedReservations} // 選択された予約情報を渡す
+          myLineId={lineId}
+          members={members}
+          name={getName(lineId)}
+          reservations={reservations} 
+          selectedReservations={selectedReservations} 
           onClose={() => setIsEditPopupVisible(false)}
+          isKinjyou={isKinjyou}
         />
       )}
 

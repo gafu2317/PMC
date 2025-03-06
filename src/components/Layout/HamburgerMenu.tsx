@@ -20,9 +20,10 @@ import { AdminInstruction } from "../Popup";
 interface HamburgerMenuProps {
   members: Member[];
   bands: Band[];
+  isKinjyou?: boolean;
 }
 
-const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
+const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou }) => {
   const [isOpen, setIsOpen] = useState(false); // メニューの開閉状態を管理
   const [isAuthenticated, setIsAuthenticated] = useState(false); // 認証状態を管理
   const [password, setPassword] = useState(""); // パスワードを管理
@@ -90,7 +91,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members }) => {
       case "editReservation":
         return <EditReservationData members={members}/>;
       case "createReservation":
-        return <CreateReservationData members={members}/>;
+        return <CreateReservationData members={members} isKinjyou={isKinjyou}/>;
       case "deleteBandData":
         return <DeleteBandData bands={bands} />;
       case "addFineData":

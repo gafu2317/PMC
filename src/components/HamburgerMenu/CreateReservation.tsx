@@ -1,21 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { addReservationsAdmin } from "../../firebase/userService";
+import React, { useState } from "react";
+import {
+  addReservationsAdmin,
+  addReservationsAdminKinjyou,
+} from "../../firebase/userService";
 import { Member } from "../../types/type";
 import { MemberList } from "../Forms";
-import { timeSlots } from "../../utils/utils";
+import { timeSlots, slotsKinjyou, getHour, getLength } from "../../utils/utils";
 import Swal from "sweetalert2";
 
 interface CreateReservationProps {
   members: Member[];
+  isKinjyou?: boolean;
 }
 
-const CreateReservation: React.FC<CreateReservationProps> = ({ members }) => {
+const CreateReservation: React.FC<CreateReservationProps> = ({
+  members,
+  isKinjyou,
+}) => {
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
   const [startTime, setStartTime] = useState(timeSlots[0]); // 初期値を最初のスロットに設定
   const [endTime, setEndTime] = useState(timeSlots[1]); // 初期値を2番目のスロットに設定
+  const [startTimeKinjyou, setStartTimeKinjyou] = useState(slotsKinjyou[0]); // 初期値を最初のスロットに設定
+  const [endTimeKinjyou, setEndTimeKinjyou] = useState(slotsKinjyou[1]); // 初期値を2番目のスロットに設定
   const [date, setDate] = useState<Date>(); // 日付を管理
-  const [formattedDate, setFormattedDate] = useState<Date[]>([]); // 日付をフォーマット
+  const [choseKinjyou, setChoseKinjyou] = useState<boolean>(false); // 金城を選んでいるかどうか
   const handleAddSelectedMembers = (member: Member) => {
     setSelectedMembers(
       (prev) =>
@@ -24,6 +33,7 @@ const CreateReservation: React.FC<CreateReservationProps> = ({ members }) => {
           : [...prev, member] // メンバーを追加
     );
   };
+
   const handleSubmit = () => {
     // 選択されたメンバーの名前を取得
     const selectedNames = selectedMembers.map((member) => member.name);
@@ -45,32 +55,67 @@ const CreateReservation: React.FC<CreateReservationProps> = ({ members }) => {
       });
       return;
     }
-    //日付をフォーマットする
-    const startHour = parseInt(startTime.split(":")[0], 10);
-    const endHour = parseInt(endTime.split(":")[0], 10);
-    if (startHour > endHour) {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "終了時刻は開始時刻より後にしてください",
-        confirmButtonText: "OK",
-      });
-      return;
+    let formattedDate: Date[] = [];
+    if (isKinjyou) {
+      // 金城の場合
+      // 日付をフォーマットする
+      const startHour = getHour(startTimeKinjyou);
+      const endHour = getHour(endTimeKinjyou);
+      if (startHour > endHour) {
+        Swal.fire({
+          icon: "warning",
+          title: "エラー",
+          text: "終了時刻は開始時刻より後にしてください",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      formattedDate = Array.from(
+        {
+          length: getLength(endTimeKinjyou) - getLength(startTimeKinjyou) + 1,
+        },
+        (_, index) => {
+          const formatedDate = new Date(date);
+          formatedDate.setHours(
+            getHour(slotsKinjyou[getLength(startTimeKinjyou) + index])
+          );
+          console.log(formatedDate);
+          return formatedDate;
+        }
+      );
+    } else {
+      //名工の場合
+      //日付をフォーマットする
+      const startHour = parseInt(startTime.split(":")[0], 10);
+      const endHour = parseInt(endTime.split(":")[0], 10);
+      if (startHour > endHour) {
+        Swal.fire({
+          icon: "warning",
+          title: "エラー",
+          text: "終了時刻は開始時刻より後にしてください",
+          confirmButtonText: "OK",
+        });
+        return;
+      }
+      formattedDate = Array.from(
+        { length: endHour - startHour },
+        (_, index) => {
+          const formatedDate = new Date(date);
+          formatedDate.setHours(startHour + index);
+          return formatedDate;
+        }
+      );
     }
-    setFormattedDate(
-      Array.from({ length: endHour - startHour }, (_, index) => {
-        const formatedDate = new Date(date);
-        formatedDate.setHours(startHour + index);
-        return formatedDate;
-      })
-    );
     const reservations = formattedDate.map((date) => {
       return {
         names: selectedNames,
         date: date,
       };
     });
-    addReservationsAdmin(reservations);
+    console.log(reservations);
+    isKinjyou
+      ? addReservationsAdminKinjyou(reservations)
+      : addReservationsAdmin(reservations);
     setSelectedMembers([]);
     setStartTime(timeSlots[0]);
     setEndTime(timeSlots[1]);
@@ -89,31 +134,79 @@ const CreateReservation: React.FC<CreateReservationProps> = ({ members }) => {
         type="date"
         onChange={(e) => setDate(new Date(e.target.value))}
       />
-      <div className="flex items-center  mb-2">
-        <select
-          value={startTime}
-          onChange={(e) => setStartTime(e.target.value)}
-          className="border rounded p-1 mr-2"
+      <div>
+        <button
+          className={`rounded p-1 mr-2 mb-2 ${
+            choseKinjyou ? `bg-gray-300` : `bg-blue-500 text-white`
+          }`}
+          onClick={() => setChoseKinjyou(false)}
         >
-          {timeSlots.map((time) => (
-            <option key={time} value={time}>
-              {time}
-            </option>
-          ))}
-        </select>
-        <span> ~ </span>
-        <select
-          value={endTime}
-          onChange={(e) => setEndTime(e.target.value)}
-          className="border rounded p-1 ml-2"
+          名工
+        </button>
+        <button
+          className={`rounded p-1 ${
+            choseKinjyou ? `bg-blue-500 text-white` : `bg-gray-300`
+          }`}
+          onClick={() => setChoseKinjyou(true)}
         >
-          {timeSlots.map((time) => (
-            <option key={time} value={time}>
-              {time}
-            </option>
-          ))}
-        </select>
+          金城
+        </button>
       </div>
+      {choseKinjyou ? (
+        <div className="flex items-center  mb-2">
+          <select
+            value={startTimeKinjyou}
+            onChange={(e) => setStartTimeKinjyou(e.target.value)}
+            className="border rounded p-1 mr-2"
+          >
+            {slotsKinjyou.map((time) => (
+              <option key={time} value={time}>
+                {time}
+              </option>
+            ))}
+          </select>
+          <span> ~ </span>
+          <select
+            value={endTimeKinjyou}
+            onChange={(e) => setEndTimeKinjyou(e.target.value)}
+            className="border rounded p-1 ml-2"
+          >
+            {slotsKinjyou.map((time) => (
+              <option key={time} value={time}>
+                {time}
+              </option>
+            ))}
+          </select>
+          <span className="ml-2 text-xs">※一コマ分の場合は同じものを選択</span>
+        </div>
+      ) : (
+        <div className="flex items-center  mb-2">
+          <select
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            className="border rounded p-1 mr-2"
+          >
+            {timeSlots.map((time) => (
+              <option key={time} value={time}>
+                {time}
+              </option>
+            ))}
+          </select>
+          <span> ~ </span>
+          <select
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            className="border rounded p-1 ml-2"
+          >
+            {timeSlots.map((time) => (
+              <option key={time} value={time}>
+                {time}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <MemberList
         members={members}
         selectedMembers={selectedMembers}

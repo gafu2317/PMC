@@ -205,7 +205,7 @@ export const deleteReservation = async (id: string): Promise<void> => {
 export const deleteReservationKinjyou = async (id: string): Promise<void> => {
   try {
     // reservationsのドキュメントの参照を取得
-    const docRef = doc(db, "reservations", id);
+    const docRef = doc(db, "reservationsKinjyou", id);
 
     // ドキュメントを削除
     await deleteDoc(docRef);

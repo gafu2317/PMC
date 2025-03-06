@@ -53,7 +53,7 @@ function Kinjyou() {
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
   useEffect(() => {
-    const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
+    const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
         const newReservations = await getAllReservationsKinjyou();
@@ -155,7 +155,7 @@ function Kinjyou() {
         <div className="p-5">
           <Header></Header>
           <PriorityProvider>
-            <HamburgerMenu bands={bands} members={members} />
+            <HamburgerMenu bands={bands} members={members} isKinjyou={true}/>
             <Calendar
               name={getName(lineId)}
               reservations={reservations}
@@ -177,6 +177,7 @@ function Kinjyou() {
               selectedHours={selectedHours}
               selectedReservations={selectedReservations}
               bands={bands}
+              isKinjyou={true}
             />
           </PriorityProvider>
           {isRegistrationPopupVisible && (
