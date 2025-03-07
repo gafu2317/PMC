@@ -25,7 +25,8 @@ export const sendMessages = async (
   lineId: string,
   message: string
 ): Promise<void> => {
-  const url = "http://localhost:3000/send-message"; // サーバーのURL
+  const url =
+    "https://pmc-qcc2nany8-gafu2317s-projects.vercel.app/send-message"; // VercelのURL
   const data = { lineId, message }; // サーバーに送信するデータ
 
   try {
