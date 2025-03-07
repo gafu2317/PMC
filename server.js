@@ -9,11 +9,11 @@ dotenv.config();
 const app = express();
 app.use(
   cors({
-    origin: "*", // 全てのオリジンを許可
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // 許可するHTTPメソッド
-    credentials: true, // クッキーなどの資格情報を含める場合
+    origin: "https://pmc-theta.vercel.app", // 許可するオリジン
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
   })
-); // CORSを有効にする
+);
 app.use(bodyParser.json());
 console.log("Server started");
 // const token = import.meta.env.VITE_LINE_ACCESS_TOKEN; // 環境変数からトークンを取得

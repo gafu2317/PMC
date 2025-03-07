@@ -25,10 +25,9 @@ export const sendMessages = async (
   lineId: string,
   message: string
 ): Promise<void> => {
-  const url =
-    "https://pmc-qcc2nany8-gafu2317s-projects.vercel.app/send-message"; // VercelのURL
+  const url = "https://https://pmc-theta.vercel.app/send-message"; // VercelのURL
   const data = { lineId, message }; // サーバーに送信するデータ
-
+  console.log("Sending message to:", url, "with data:", data);
   try {
     await axios.post(url, data);
     console.log("通知成功");
