@@ -7,7 +7,7 @@ import {
 } from "../../components/Popup";
 import { Member, Band, Reservation } from "../../types/type";
 import Swal from "sweetalert2";
-import { sendMessages } from "../../liff/liffService";
+// import { sendMessages } from "../../liff/liffService";
 import { usePriority } from "../../context/PriorityContext";
 import { isReservationExist } from "../../utils/utils";
 
@@ -85,18 +85,18 @@ const Buttons: React.FC<ButtonsProps> = ({
     return member ? member.name : "名前が登録されていません";
   };
 
-  const handleNotification = () => {
-    sendMessages("Uaad36f829cb1c10a72df296f112a16dd", "通知テスト");
-  };
+  // const handleNotification = () => {
+  //   sendMessages("Uaad36f829cb1c10a72df296f112a16dd", "通知テスト");
+  // };
 
   return (
     <div>
-      <button
+      {/* <button
         className="fixed bottom-56 right-8 p-2 bg-gray-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
         onClick={handleNotification}
       >
         通知
-      </button>
+      </button> */}
       <button
         className="fixed bottom-40 right-8 p-2 bg-red-500 text-white rounded-full w-14 h-14 flex items-center justify-center whitespace-nowrap "
         onClick={() => setIsBandPopupVisible(true)}
