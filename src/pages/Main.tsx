@@ -7,10 +7,10 @@ const Main = () => {
       <nav>
         <ul>
           <li>
-            <Link to="/meikou">名工ページへ</Link>
+            <Link to="/Meikou">名工ページへ</Link>
           </li>
           <li>
-            <Link to="/kinjyou">金城ページへ</Link>
+            <Link to="/Kinjyou">金城ページへ</Link>
           </li>
         </ul>
       </nav>
