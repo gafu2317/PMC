@@ -9,7 +9,10 @@ dotenv.config();
 const app = express();
 app.use(
   cors({
-    origin: "https://pmc-theta.vercel.app", // 許可するオリジン
+    origin: [
+      "https://pmc-theta.vercel.app",
+      "https://pmc-gafu2317s-projects.vercel.app",
+    ], // 許可するオリジン
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
