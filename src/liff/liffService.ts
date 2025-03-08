@@ -25,7 +25,7 @@ export const sendMessages = async (
   lineId: string,
   message: string
 ): Promise<void> => {
-  const url = "https://pmc-theta.vercel.app/send-message"; // VercelのURL
+  const url = "https://pmc-theta.vercel.app/api/send-message"; // VercelのURL
   const data = { lineId, message }; // サーバーに送信するデータ
   console.log("Sending message to:", url, "with data:", data);
   try {
