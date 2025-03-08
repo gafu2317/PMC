@@ -1,18 +1,18 @@
 // App.tsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-router-dom";
 import Meikou from "./pages/Meikou";
 import Kinjyou from "./pages/Kinjyou";
 import Main from "./pages/Main";
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/Meikou" element={<Meikou />} />
         <Route path="/Kinjyou" element={<Kinjyou />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
 export default App;
