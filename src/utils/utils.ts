@@ -62,28 +62,28 @@ export const timeSlotsKinjyou = [
 ];
 
 export const slotsKinjyou = [
-  "1コマ",
-  "2コマ",
+  "1限",
+  "2限",
   "昼",
-  "3コマ",
-  "4コマ",
-  "5コマ",
+  "3限",
+  "4限",
+  "5限",
   "夜",
 ];
 
 export function getHour (slot: string): number {
   switch (slot) {
-    case "1コマ":
+    case "1限":
       return 9;
-    case "2コマ":
+    case "2限":
       return 10;
     case "昼":
       return 12;
-    case "3コマ":
+    case "3限":
       return 13;
-    case "4コマ":
+    case "4限":
       return 15;
-    case "5コマ":
+    case "5限":
       return 16;
     case "夜":
       return 18;
@@ -94,17 +94,17 @@ export function getHour (slot: string): number {
 
 export function getLength (slot: string): number {
   switch (slot) {
-    case "1コマ":
+    case "1限":
       return 0;
-    case "2コマ":
+    case "2限":
       return 1;
     case "昼":
       return 2;
-    case "3コマ":
+    case "3限":
       return 3;
-    case "4コマ":
+    case "4限":
       return 4;
-    case "5コマ":
+    case "5限":
       return 5;
     case "夜":
       return 6;

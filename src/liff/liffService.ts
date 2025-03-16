@@ -9,7 +9,7 @@ export const initLiff = async (): Promise<string | null> => {
       const profile = await liff.getProfile();
       return profile.userId; // これがlineIdです
     } else {
-      return "Uaad36f829cb1c10a72df296f112a16dd";
+      // return "Uaad36f829cb1c10a72df296f112a16dd";
       liff.login(); // ログインしていない場合はログインを促す
       return null;
     }
