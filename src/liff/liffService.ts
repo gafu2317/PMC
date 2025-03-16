@@ -5,20 +5,33 @@ import axios from "axios";
 export const initLiff = async (): Promise<string | null> => {
   try {
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
+
     if (liff.isLoggedIn()) {
       const profile = await liff.getProfile();
       return profile.userId; // これがlineIdです
     } else {
-      // return "Uaad36f829cb1c10a72df296f112a16dd";
-      liff.login(); // ログインしていない場合はログインを促す
-      return null;
+      return "Uaad36f829cb1c10a72df296f112a16dd"; // テスト用
+      // ログインしていない場合はログインを促す
+      liff.login();
+      // ログイン成功後に再度この関数を呼び出す
+      return new Promise((resolve) => {
+        liff.ready
+          .then(async () => {
+            const profile = await liff.getProfile();
+            resolve(profile.userId); // ログイン後のlineIdを返す
+          })
+          .catch((error) => {
+            console.error("Error during LIFF ready:", error);
+            resolve(null);
+          });
+      });
     }
   } catch (error) {
-    
     console.error("LIFF initialization failed:", error);
     return null;
   }
 };
+
 
 export const testLindId: string = "Uaad36f829cb1c10a72df296f112a16dd";
 
