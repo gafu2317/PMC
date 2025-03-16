@@ -2,8 +2,12 @@ import React from "react";
 import { useState } from "react";
 import { Member, Reservation } from "../../types/type";
 import { v4 as uuidv4 } from "uuid";
-import { weekDays, timeSlots } from "../../utils/utils";
-import { addPresets, addReservations, addReservationsKinjyou} from "../../firebase/userService";
+import { weekDays, timeSlots, timeSlotsKinjyou } from "../../utils/utils";
+import {
+  addPresets,
+  addReservations,
+  addReservationsKinjyou,
+} from "../../firebase/userService";
 import PresetPopup from "./Preset";
 import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
@@ -85,15 +89,27 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           const year = weekDays[dayIndex].year;
           const month = weekDays[dayIndex].month;
           const day = weekDays[dayIndex].day;
-          const time = timeSlots[timeIndex];
-          const [hour, minute] = time.split(":").map(Number);
-          reservations.push({
-            id: uuidv4(),
-            names: selectedNames,
-            date: new Date(year, month - 1, day, hour, minute),
-            dayIndex,
-            timeIndex,
-          });
+          if (isKinjyou) {
+            const time = timeSlotsKinjyou[timeIndex];
+            const [hour, minute] = time.split(":").map(Number);
+            reservations.push({
+              id: uuidv4(),
+              names: selectedNames,
+              date: new Date(year, month - 1, day, hour, minute),
+              dayIndex,
+              timeIndex,
+            });
+          } else {
+            const time = timeSlots[timeIndex];
+            const [hour, minute] = time.split(":").map(Number);
+            reservations.push({
+              id: uuidv4(),
+              names: selectedNames,
+              date: new Date(year, month - 1, day, hour, minute),
+              dayIndex,
+              timeIndex,
+            });
+          }
         }
       }
     }

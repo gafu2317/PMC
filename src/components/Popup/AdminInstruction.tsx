@@ -25,7 +25,9 @@ const AdminInstruction: React.FC<Props> = ({ onClose }) => {
             &times;
           </button>
         </div>
-        <h2 className="text-lg font-semibold text-gray-700 mt-6">1. ライブ前</h2>
+        <h2 className="text-lg font-semibold text-gray-700 mt-6">
+          1. ライブ前
+        </h2>
         <ul className="list-disc list-inside ml-5">
           <li>公式Lineから予約をしてもらう</li>
           <li>
@@ -49,7 +51,9 @@ const AdminInstruction: React.FC<Props> = ({ onClose }) => {
           </li>
         </ul>
 
-        <h2 className="text-lg font-semibold text-gray-700 mt-6">3. 部会の時</h2>
+        <h2 className="text-lg font-semibold text-gray-700 mt-6">
+          3. 部会の時
+        </h2>
         <ul className="list-disc list-inside ml-5">
           <li>優先権を有効にする</li>
           <li>料金回収</li>
@@ -81,6 +85,9 @@ const AdminInstruction: React.FC<Props> = ({ onClose }) => {
             →予約削除から削除し、削除した分の使用料を罰金として追加する
           </li>
         </ul>
+        <h2 className="text-lg font-semibold text-gray-700 mt-6">
+          6. 詳しい使い方は引き継ぎ資料を参照
+        </h2>
       </div>
     </div>
   );

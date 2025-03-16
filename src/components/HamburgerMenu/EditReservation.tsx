@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import {
   getReservationsByDateRange,
+  getReservationsByDateRangeKnjyou,
   getAllPeriodReservations,
+  getAllPeriodReservationsKinjyou,
   updateReservation,
+  updateReservationKinjyou,
 } from "../../firebase/userService";
 import { MemberList } from "../Forms";
 import { Member } from "../../types/type";
@@ -12,16 +15,19 @@ interface EditReservationProps {
   members: Member[];
 }
 
-const EditReservation: React.FC<EditReservationProps> = ({members}) => {
+const EditReservation: React.FC<EditReservationProps> = ({ members }) => {
   const [startDate, setStartDate] = useState(""); // 開始日を管理
   const [endDate, setEndDate] = useState(""); // 終了日を管理
   const [isAll, setIsAll] = useState(false); //全て選択されているかどうか
   const [reservations, setReservations] = useState<
     { id: string; names: string[]; date: Date }[]
   >([]); // 予約情報を管理
+  const [reservationsKinjyou, setReservationsKinjyou] = useState<
+    { id: string; names: string[]; date: Date }[]
+  >([]); // 金城の予約情報を管理
   const [loading, setLoading] = useState(false); // ローディング状態を管理
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()); // 選択された予約のIDを管理
-    const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
   const handleAddSelectedMembers = (member: Member) => {
     setSelectedMembers((prev) =>
       prev.includes(member)
@@ -35,21 +41,32 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
         new Date(startDate),
         new Date(endDate)
       );
+      const fetchedReservationsKinjyou = await getReservationsByDateRangeKnjyou(
+        new Date(startDate),
+        new Date(endDate)
+      );
       setReservations(fetchedReservations);
+      setReservationsKinjyou(fetchedReservationsKinjyou);
       setIsAll(false);
     }
   };
   const fetchAllReservation = async () => {
     const fetchedReservations = await getAllPeriodReservations();
+    const fetchedReservationsKinjyou = await getAllPeriodReservationsKinjyou();
     setReservations(fetchedReservations);
+    setReservationsKinjyou(fetchedReservationsKinjyou);
     setIsAll(true);
   };
   const selectAllReservation = () => {
-    if (selectedIds.size === reservations.length) {
+    if (selectedIds.size === reservations.length + reservationsKinjyou.length) {
       setSelectedIds(new Set()); // すべて解除
     } else {
       const allIds = new Set(reservations.map((reservation) => reservation.id));
-      setSelectedIds(allIds); // すべて選択
+      const allIdsKinjyou = new Set(
+        reservationsKinjyou.map((reservation) => reservation.id)
+      );
+      const combinedIds = new Set([...allIds, ...allIdsKinjyou]);
+      setSelectedIds(combinedIds); // すべて選択
     }
   };
   const toggleSelectReservation = (id: string) => {
@@ -71,11 +88,14 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
     const newMembers = selectedMembers.map((member) => member.name);
     for (const id of selectedIds) {
       await updateReservation(id, newMembers);
+      await updateReservationKinjyou(id, newMembers);
     }
     setLoading(false);
-    setReservations((prev) =>
-      prev.filter((reservation) => !selectedIds.has(reservation.id))
-    );
+    if(isAll) {
+      fetchAllReservation();
+    } else {
+      fetchReservation();
+    }
     Swal.fire("予約を変更しました", "", "success");
   };
   return (
@@ -104,7 +124,8 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
         </button>
         <button
           className={` rounded p-1 ${
-            isAll || (!isAll && reservations.length === 0)
+            isAll ||
+            (!isAll && reservations.length + reservationsKinjyou.length === 0)
               ? "bg-gray-300"
               : "bg-gray-400"
           }`}
@@ -115,19 +136,21 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
       </div>
 
       {/* 取得した予約を表示 */}
-      {reservations.length > 0 && (
+      {(reservations.length || reservationsKinjyou.length) > 0 && (
         <div>
           <div className="flex justify-between mt-2">
             <button
               className="bg-blue-500 text-white rounded p-1 "
               onClick={selectAllReservation}
             >
-              {selectedIds.size === reservations.length
+              {selectedIds.size ===
+              reservations.length + reservationsKinjyou.length
                 ? "すべて解除"
                 : "すべて選択"}
             </button>
           </div>
           <ul className="my-2">
+            <p className="text-lg mb-1">名工の予約</p>
             {reservations.map((reservation) => (
               <li key={reservation.id} className="flex items-center mb-1">
                 <input
@@ -145,13 +168,32 @@ const EditReservation: React.FC<EditReservationProps> = ({members}) => {
                 <button></button>
               </li>
             ))}
+            <p className="text-lg mb-1">金城の予約</p>
+            {reservationsKinjyou.map((reservation) => (
+              <li key={reservation.id} className="flex items-center mb-1">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(reservation.id)}
+                  onChange={() => toggleSelectReservation(reservation.id)}
+                  className="mr-2"
+                />
+                {/* 日付と時間を表示 */}
+                {`${
+                  reservation.date.getMonth() + 1
+                }/${reservation.date.getDate()}, ${reservation.date.getHours()}:${String(
+                  reservation.date.getMinutes()
+                ).padStart(2, "0")}-${reservation.names.join(",")}`}
+              </li>
+            ))}
           </ul>
-          <MemberList 
-          members={members} 
-          selectedMembers={selectedMembers}
-          handleAddSelectedMembers={handleAddSelectedMembers}
+          <MemberList
+            members={members}
+            selectedMembers={selectedMembers}
+            handleAddSelectedMembers={handleAddSelectedMembers}
           />
-          <div className="text-xs mt-1">※チェックした予約のメンバーが選択したメンバーに変更されます</div>
+          <div className="text-xs mt-1">
+            ※チェックした予約のメンバーが選択したメンバーに変更されます
+          </div>
           <div className="flex justify-end mt-4">
             {loading && <span>変更中...</span>}
             <button

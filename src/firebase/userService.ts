@@ -319,7 +319,6 @@ export const getReservationsByDateRange = async (
 
     return reservations;
   } catch (error) {
-    console.error("予約の取得に失敗しました:", error);
     return [];
   }
 };
@@ -347,7 +346,6 @@ export const getReservationsByDateRangeKnjyou = async (
 
     return reservations;
   } catch (error) {
-    console.error("予約の取得に失敗しました:", error);
     return [];
   }
 };
@@ -370,7 +368,6 @@ export const getAllPeriodReservations = async (): Promise<
 
     return reservations;
   } catch (error) {
-    console.error("予約の取得に失敗しました:", error);
     return [];
   }
 };
@@ -392,7 +389,6 @@ export const getAllPeriodReservationsKinjyou = async (): Promise<
 
     return reservations;
   } catch (error) {
-    console.error("予約の取得に失敗しました:", error);
     return [];
   }
 };
