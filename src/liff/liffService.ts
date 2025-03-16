@@ -14,6 +14,7 @@ export const initLiff = async (): Promise<string | null> => {
       return null;
     }
   } catch (error) {
+    
     console.error("LIFF initialization failed:", error);
     return null;
   }
