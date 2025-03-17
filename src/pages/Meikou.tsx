@@ -35,21 +35,21 @@ function Meikou() {
     return () => unsubscribe();
   }, []);
 
-  //lineIdを取得
+  // lineIdを取得
   const [lineId, setLineId] = useState<string | null>(null);
   useEffect(() => {
-    if (members.length > 0) {
-      const fetchLineId = async () => {
-        setLineId(await initLiff());
-        if (lineId && !members.some((member) => member.lineId === lineId)) {
-          setIsRegistrationPopupVisible(true); //未登録なら登録画面を出す
-        } else {
-          setIsRegistrationPopupVisible(false);
-        }
-      };
-      fetchLineId();
-    }
-  }, [members, lineId]);
+    const fetchLineId = async () => {
+      const fetchedLineId = await initLiff();
+      setLineId(fetchedLineId);
+
+      // membersが空でも登録画面を表示
+      setIsRegistrationPopupVisible(
+        !members.some((member) => member.lineId === fetchedLineId)
+      );
+    };
+
+    fetchLineId();
+  }, [members]); // members の変更を監視
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
