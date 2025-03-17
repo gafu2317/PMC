@@ -70,12 +70,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
       });
       return;
     }
-    // プリセットに登録する場合
-    if (isPreset) {
-      // presetsの状態が更新されてからaddPresetsを呼び出す
-      const newPreset = selectedMembers.map((member) => member.lineId);
-      addPresets(myLineId, newPreset);
-    }
     // IDの配列を名前の配列に変換
     const reservations: Reservation[] = [];
     // 予約情報を生成
@@ -92,20 +86,42 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           if (isKinjyou) {
             const time = timeSlotsKinjyou[timeIndex];
             const [hour, minute] = time.split(":").map(Number);
+            const date = new Date(year, month - 1, day, hour, minute);
+            //過去の予約はできない
+            if (date < new Date()) {
+              Swal.fire({
+                icon: "warning",
+                title: "エラー",
+                text: "過去の日時は選択できません",
+                confirmButtonText: "OK",
+              });
+              return;
+            }
             reservations.push({
               id: uuidv4(),
               names: selectedNames,
-              date: new Date(year, month - 1, day, hour, minute),
+              date: date,
               dayIndex,
               timeIndex,
             });
           } else {
             const time = timeSlots[timeIndex];
             const [hour, minute] = time.split(":").map(Number);
+            const date = new Date(year, month - 1, day, hour, minute);
+            //過去の予約はできない
+            if (date < new Date()) {
+              Swal.fire({
+                icon: "warning",
+                title: "エラー",
+                text: "過去の日時は選択できません",
+                confirmButtonText: "OK",
+              });
+              return;
+            }
             reservations.push({
               id: uuidv4(),
               names: selectedNames,
-              date: new Date(year, month - 1, day, hour, minute),
+              date: date,
               dayIndex,
               timeIndex,
             });
@@ -113,8 +129,15 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
         }
       }
     }
+    // プリセットに登録する場合
+    if (isPreset) {
+      // presetsの状態が更新されてからaddPresetsを呼び出す
+      const newPreset = selectedMembers.map((member) => member.lineId);
+      addPresets(myLineId, newPreset);
+    }
+    //予約を追加
     isKinjyou
-      ? addReservationsKinjyou(reservations)
+    ? addReservationsKinjyou(reservations)
       : addReservations(reservations);
     onClose(); // ポップアップを閉じる
   };
