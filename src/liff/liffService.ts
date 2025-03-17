@@ -10,7 +10,7 @@ export const initLiff = async (): Promise<string | null> => {
       const profile = await liff.getProfile();
       return profile.userId; // これがlineIdです
     } else {
-      // return "Uaad36f829cb1c10a72df296f112a16dd"; // テスト用
+      return "Uaad36f829cb1c10a72df296f112a16dd"; // テスト用
       // ログインしていない場合はログインを促す
       liff.login();
       // ログイン成功後に再度この関数を呼び出す
