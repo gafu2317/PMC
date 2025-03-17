@@ -97,6 +97,15 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
               });
               return;
             }
+            //当日予約の場合は警告を出す
+            if (date.getDate() === new Date().getDate()) {
+              Swal.fire({
+                icon: "warning",
+                title: "注意",
+                text: "当日の予約取り消せませんが大丈夫ですか？",
+                confirmButtonText: "OK",
+              });
+            }
             reservations.push({
               id: uuidv4(),
               names: selectedNames,
@@ -117,6 +126,15 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 confirmButtonText: "OK",
               });
               return;
+            }
+            //当日予約の場合は警告を出す
+            if (date.getDate() === new Date().getDate()) {
+              Swal.fire({
+                icon: "warning",
+                title: "注意",
+                text: "当日の予約取り消せませんが大丈夫ですか？",
+                confirmButtonText: "OK",
+              });
             }
             reservations.push({
               id: uuidv4(),
