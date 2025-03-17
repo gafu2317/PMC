@@ -11,26 +11,17 @@ export const initLiff = async (): Promise<string | null> => {
       return profile.userId; // これがlineIdです
     } else {
       // return "Uaad36f829cb1c10a72df296f112a16dd"; // テスト用
-      // ログインしていない場合はログインを促す
+      // ログインを促す
       liff.login();
-      // ログイン成功後に再度この関数を呼び出す
-      return new Promise((resolve) => {
-        liff.ready
-          .then(async () => {
-            const profile = await liff.getProfile();
-            resolve(profile.userId); // ログイン後のlineIdを返す
-          })
-          .catch((error) => {
-            console.error("Error during LIFF ready:", error);
-            resolve(null);
-          });
-      });
+      window.location.reload(); // ログイン後にページをリロード
+      return null; // ここで関数を終了
     }
   } catch (error) {
     console.error("LIFF initialization failed:", error);
     return null;
   }
 };
+
 
 
 export const testLindId: string = "Uaad36f829cb1c10a72df296f112a16dd";
