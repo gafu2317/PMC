@@ -4,7 +4,27 @@ import axios from "axios";
 
 export const initLiff = async (): Promise<string | null> => {
   try {
-    await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
+    await liff
+      .init({ liffId: import.meta.env.VITE_LIFF_ID })
+      .then(() => {
+        // URLパラメータの取得
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const redirectPage = urlParams.get("redirect");
+
+        // リダイレクト処理
+        if (redirectPage === "Meikou") {
+          window.location.href = "https://pmc-lilac.vercel.app/Meikou";
+        } else if (redirectPage === "Kinjyou") {
+          window.location.href = "https://pmc-lilac.vercel.app/Kinjyou";
+        } else {
+          // デフォルトの処理（必要に応じて）
+          window.location.href = "https://pmc-lilac.vercel.app/default";
+        }
+      })
+      .catch((err) => {
+        console.error("LIFF Initialization failed:", err);
+      });
 
     if (liff.isLoggedIn()) {
       try {
@@ -12,18 +32,15 @@ export const initLiff = async (): Promise<string | null> => {
         return profile.userId; // これがlineIdです
       } catch (error) {
         console.error("Error getting profile:", error);
-        window.alert("プロフィールの取得に失敗しました。"); 
         return null; // プロフィール取得エラー時はnullを返す
       }
     } else {
       // ログインを促す
       liff.login();
-      window.alert("ログインしてください。");
       return null; // ログインが必要な場合はnullを返す
     }
   } catch (error) {
     console.error("LIFF initialization failed:", error);
-    window.alert("LIFFの初期化に失敗しました。");
     return null; // 初期化エラーの際もnullを返す
   }
 };
