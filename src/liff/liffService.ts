@@ -7,32 +7,24 @@ export const initLiff = async (): Promise<string | null> => {
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
 
     if (liff.isLoggedIn()) {
-      const profile = await liff.getProfile();
-      console.log("lineId", profile.userId);
-      return profile.userId; // これがlineIdです
+      try {
+        const profile = await liff.getProfile();
+        return profile.userId; // これがlineIdです
+      } catch (error) {
+        console.error("Error getting profile:", error);
+        return null; // プロフィール取得エラー時はnullを返す
+      }
     } else {
-      return "未ログイン";
       // ログインを促す
       liff.login();
-      // ログイン後に再度この関数を呼び出す
-      return new Promise((resolve) => {
-        liff.ready
-          .then(async () => {
-            const profile = await liff.getProfile();
-            console.log("lineId", profile.userId);
-            resolve(profile.userId); // ログイン後のlineIdを返す
-          })
-          .catch((error) => {
-            console.error("Error during LIFF ready:", error);
-            resolve(null);
-          });
-      });
+      return null; // ログインが必要な場合はnullを返す
     }
   } catch (error) {
     console.error("LIFF initialization failed:", error);
-    return null;
+    return null; // 初期化エラーの際もnullを返す
   }
 };
+
 
 
 export const testLindId: string = "Uaad36f829cb1c10a72df296f112a16dd";

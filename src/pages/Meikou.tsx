@@ -193,6 +193,11 @@ function Meikou() {
           <div>ロード中...</div>
         </div>
       )}
+      {lineId === null && (
+        <div className="flex justify-center items-center h-screen">
+          <div>LINE IDが取得できませんでした。</div>
+        </div>
+      )}
     </div>
   );
 }

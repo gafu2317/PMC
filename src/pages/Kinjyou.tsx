@@ -155,7 +155,7 @@ function Kinjyou() {
         <div className="p-5">
           <Header></Header>
           <PriorityProvider>
-            <HamburgerMenu bands={bands} members={members} isKinjyou={true}/>
+            <HamburgerMenu bands={bands} members={members} isKinjyou={true} />
             <Calendar
               name={getName(lineId)}
               reservations={reservations}
@@ -192,6 +192,11 @@ function Kinjyou() {
       {!lineId && (
         <div className="flex justify-center items-center h-screen">
           <div>ロード中...</div>
+        </div>
+      )}
+      {lineId === null && (
+        <div className="flex justify-center items-center h-screen">
+          <div>LINE IDが取得できませんでした。</div>
         </div>
       )}
     </div>
