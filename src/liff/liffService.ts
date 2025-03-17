@@ -8,6 +8,7 @@ export const initLiff = async (): Promise<string | null> => {
 
     if (liff.isLoggedIn()) {
       const profile = await liff.getProfile();
+      console.log("lineId", profile.userId);
       return profile.userId; // これがlineIdです
     } else {
       // ログインを促す
@@ -17,6 +18,7 @@ export const initLiff = async (): Promise<string | null> => {
         liff.ready
           .then(async () => {
             const profile = await liff.getProfile();
+            console.log("lineId", profile.userId);
             resolve(profile.userId); // ログイン後のlineIdを返す
           })
           .catch((error) => {
