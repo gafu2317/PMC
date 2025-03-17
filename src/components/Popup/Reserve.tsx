@@ -97,7 +97,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
               });
               return;
             }
-            //当日予約の場合は警告を出す
+            // 当日予約の場合は警告を出す
             if (date.getDate() === new Date().getDate()) {
               Swal.fire({
                 title: "確認",
@@ -107,18 +107,30 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 confirmButtonText: "OK",
                 cancelButtonText: "キャンセル",
               }).then((result) => {
-                if (result.isDismissed) {
-                  return;
+                if (result.isConfirmed) {
+                  // OKボタンが押された場合
+                  reservations.push({
+                    id: uuidv4(),
+                    names: selectedNames,
+                    date: date,
+                    dayIndex,
+                    timeIndex,
+                  });
+                } else {
+                  // キャンセルボタンが押された場合は何もしない
+                  return; // ここで処理を終了
                 }
               });
+            } else {
+              // 当日予約でない場合はそのまま追加
+              reservations.push({
+                id: uuidv4(),
+                names: selectedNames,
+                date: date,
+                dayIndex,
+                timeIndex,
+              });
             }
-            reservations.push({
-              id: uuidv4(),
-              names: selectedNames,
-              date: date,
-              dayIndex,
-              timeIndex,
-            });
           } else {
             const time = timeSlots[timeIndex];
             const [hour, minute] = time.split(":").map(Number);
@@ -133,7 +145,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
               });
               return;
             }
-            //当日予約の場合は警告を出す
+            // 当日予約の場合は警告を出す
             if (date.getDate() === new Date().getDate()) {
               Swal.fire({
                 title: "確認",
@@ -143,18 +155,30 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
                 confirmButtonText: "OK",
                 cancelButtonText: "キャンセル",
               }).then((result) => {
-                if (result.isDismissed) {
-                  return;
+                if (result.isConfirmed) {
+                  // OKボタンが押された場合
+                  reservations.push({
+                    id: uuidv4(),
+                    names: selectedNames,
+                    date: date,
+                    dayIndex,
+                    timeIndex,
+                  });
+                } else {
+                  // キャンセルボタンが押された場合は何もしない
+                  return; // ここで処理を終了
                 }
               });
+            } else {
+              // 当日予約でない場合はそのまま追加
+              reservations.push({
+                id: uuidv4(),
+                names: selectedNames,
+                date: date,
+                dayIndex,
+                timeIndex,
+              });
             }
-            reservations.push({
-              id: uuidv4(),
-              names: selectedNames,
-              date: date,
-              dayIndex,
-              timeIndex,
-            });
           }
         }
       }
