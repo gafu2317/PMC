@@ -11,6 +11,7 @@ export const initLiff = async (): Promise<string | null> => {
       console.log("lineId", profile.userId);
       return profile.userId; // これがlineIdです
     } else {
+      return "未ログイン";
       // ログインを促す
       liff.login();
       // ログイン後に再度この関数を呼び出す
