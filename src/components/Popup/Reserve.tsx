@@ -100,10 +100,16 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             //当日予約の場合は警告を出す
             if (date.getDate() === new Date().getDate()) {
               Swal.fire({
+                title: "確認",
+                text: "当日予約は取り消せませんが大丈夫ですか？",
                 icon: "warning",
-                title: "注意",
-                text: "当日の予約取り消せませんが大丈夫ですか？",
+                showCancelButton: true,
                 confirmButtonText: "OK",
+                cancelButtonText: "キャンセル",
+              }).then((result) => {
+                if (result.isDismissed) {
+                  return;
+                }
               });
             }
             reservations.push({
@@ -130,10 +136,16 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             //当日予約の場合は警告を出す
             if (date.getDate() === new Date().getDate()) {
               Swal.fire({
+                title: "確認",
+                text: "当日予約は取り消せませんが大丈夫ですか？",
                 icon: "warning",
-                title: "注意",
-                text: "当日の予約取り消せませんが大丈夫ですか？",
+                showCancelButton: true,
                 confirmButtonText: "OK",
+                cancelButtonText: "キャンセル",
+              }).then((result) => {
+                if (result.isDismissed) {
+                  return;
+                }
               });
             }
             reservations.push({
@@ -155,7 +167,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     }
     //予約を追加
     isKinjyou
-    ? addReservationsKinjyou(reservations)
+      ? addReservationsKinjyou(reservations)
       : addReservations(reservations);
     onClose(); // ポップアップを閉じる
   };
