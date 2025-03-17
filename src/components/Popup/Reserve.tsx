@@ -11,6 +11,7 @@ import {
 import PresetPopup from "./Preset";
 import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
+import e from "express";
 
 interface ReservationPopupProps {
   myLineId: string; // lineId
@@ -72,6 +73,14 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     }
     // IDの配列を名前の配列に変換
     const reservations: Reservation[] = [];
+    const now = new Date();
+    const endOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59
+    );
     // 予約情報を生成
     for (let dayIndex = 0; dayIndex < selectedHours.length; dayIndex++) {
       for (
@@ -87,8 +96,9 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             const time = timeSlotsKinjyou[timeIndex];
             const [hour, minute] = time.split(":").map(Number);
             const date = new Date(year, month - 1, day, hour, minute);
+
             //過去の予約はできない
-            if (date < new Date()) {
+            if (date < endOfDay) {
               Swal.fire({
                 icon: "warning",
                 title: "エラー",
@@ -109,7 +119,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             const [hour, minute] = time.split(":").map(Number);
             const date = new Date(year, month - 1, day, hour, minute);
             //過去の予約はできない
-            if (date < new Date()) {
+            if (date < endOfDay) {
               Swal.fire({
                 icon: "warning",
                 title: "エラー",
@@ -137,7 +147,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     }
     //予約を追加
     isKinjyou
-    ? addReservationsKinjyou(reservations)
+      ? addReservationsKinjyou(reservations)
       : addReservations(reservations);
     onClose(); // ポップアップを閉じる
   };
