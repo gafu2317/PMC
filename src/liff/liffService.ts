@@ -12,15 +12,18 @@ export const initLiff = async (): Promise<string | null> => {
         return profile.userId; // これがlineIdです
       } catch (error) {
         console.error("Error getting profile:", error);
+        window.alert("プロフィールの取得に失敗しました。"); 
         return null; // プロフィール取得エラー時はnullを返す
       }
     } else {
       // ログインを促す
       liff.login();
+      window.alert("ログインしてください。");
       return null; // ログインが必要な場合はnullを返す
     }
   } catch (error) {
     console.error("LIFF initialization failed:", error);
+    window.alert("LIFFの初期化に失敗しました。");
     return null; // 初期化エラーの際もnullを返す
   }
 };
