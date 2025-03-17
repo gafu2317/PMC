@@ -154,6 +154,7 @@ function Meikou() {
     <div>
       {lineId && (
         <div className="p-5">
+          <p>{lineId}</p>
           <Header></Header>
           <PriorityProvider>
             <HamburgerMenu bands={bands} members={members} />
