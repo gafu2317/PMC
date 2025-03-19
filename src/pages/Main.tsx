@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLineId } from "../context/LineIdContext"; // 修正: LineIdConstext -> LineIdContext
 import { initLiff } from "../liff/liffService";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const Main = () => {
   const { setLineId } = useLineId();
