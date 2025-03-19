@@ -48,7 +48,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     setIsPreset((prev) => !prev);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // 選択されたメンバーの名前を取得
     const selectedNames = selectedMembers.map((member) => member.name);
     const myName = members.find((member) => member.lineId === myLineId)?.name;
@@ -83,130 +83,63 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           const year = weekDays[dayIndex].year;
           const month = weekDays[dayIndex].month;
           const day = weekDays[dayIndex].day;
-          if (isKinjyou) {
-            const time = timeSlotsKinjyou[timeIndex];
-            const [hour, minute] = time.split(":").map(Number);
-            const date = new Date(year, month - 1, day, hour, minute);
-            //過去の予約はできない
-            if (date < new Date()) {
-              Swal.fire({
-                icon: "warning",
-                title: "エラー",
-                text: "過去の日時は選択できません",
-                confirmButtonText: "OK",
-              });
-              return;
-            }
-            // // 当日予約の場合は警告を出す
-            // if (date.getDate() === new Date().getDate()) {
-            //   Swal.fire({
-            //     title: "確認",
-            //     text: "当日予約は取り消せませんが大丈夫ですか？",
-            //     icon: "warning",
-            //     showCancelButton: true,
-            //     confirmButtonText: "OK",
-            //     cancelButtonText: "キャンセル",
-            //   }).then((result) => {
-            //     if (result.isConfirmed) {
-            //       // OKボタンが押された場合
-            //       reservations.push({
-            //         id: uuidv4(),
-            //         names: selectedNames,
-            //         date: date,
-            //         dayIndex,
-            //         timeIndex,
-            //       });
-            //     } else {
-            //       // キャンセルボタンが押された場合は何もしない
-            //       return; // ここで処理を終了
-            //     }
-            //   });
-            // } else {
-            //   // 当日予約でない場合はそのまま追加
-            //   reservations.push({
-            //     id: uuidv4(),
-            //     names: selectedNames,
-            //     date: date,
-            //     dayIndex,
-            //     timeIndex,
-            //   });
-            // }
-            reservations.push({
-              id: uuidv4(),
-              names: selectedNames,
-              date: date,
-              dayIndex,
-              timeIndex,
+          const timeSlotsArray = isKinjyou ? timeSlotsKinjyou : timeSlots;
+          const time = timeSlotsArray[timeIndex];
+          const [hour, minute] = time.split(":").map((str) => parseInt(str));
+          const date = new Date(year, month - 1, day, hour, minute);
+          // 過去の日時は予約できない
+          if (date < new Date()) {
+            Swal.fire({
+              icon: "warning",
+              title: "エラー",
+              text: "過去の日時は予約できません",
+              confirmButtonText: "OK",
             });
-          } else {
-            const time = timeSlots[timeIndex];
-            const [hour, minute] = time.split(":").map(Number);
-            const date = new Date(year, month - 1, day, hour, minute);
-            //過去の予約はできない
-            if (date < new Date()) {
-              Swal.fire({
-                icon: "warning",
-                title: "エラー",
-                text: "過去の日時は選択できません",
-                confirmButtonText: "OK",
+            return;
+          }
+          // 当日の予約は警告を出して、OKを押すと予約し、キャンセルを押すと予約しない
+          if (day === new Date().getDate()) {
+            const result = await Swal.fire({
+              icon: "warning",
+              title: "警告",
+              text: "当日の予約はキャンセルができません。予約しますか？",
+              showCancelButton: true,
+              confirmButtonText: "予約する",
+              cancelButtonText: "キャンセル",
+            });
+
+            if (result.isConfirmed) {
+              reservations.push({
+                id: uuidv4(),
+                names: selectedNames,
+                date: date,
+                dayIndex: dayIndex,
+                timeIndex: timeIndex,
               });
-              return;
             }
-            // // 当日予約の場合は警告を出す
-            // if (date.getDate() === new Date().getDate()) {
-            //   Swal.fire({
-            //     title: "確認",
-            //     text: "当日予約は取り消せませんが大丈夫ですか？",
-            //     icon: "warning",
-            //     showCancelButton: true,
-            //     confirmButtonText: "OK",
-            //     cancelButtonText: "キャンセル",
-            //   }).then((result) => {
-            //     if (result.isConfirmed) {
-            //       // OKボタンが押された場合
-            //       reservations.push({
-            //         id: uuidv4(),
-            //         names: selectedNames,
-            //         date: date,
-            //         dayIndex,
-            //         timeIndex,
-            //       });
-            //     } else {
-            //       // キャンセルボタンが押された場合は何もしない
-            //       return; // ここで処理を終了
-            //     }
-            //   });
-            // } else {
-            //   // 当日予約でない場合はそのまま追加
-            //   reservations.push({
-            //     id: uuidv4(),
-            //     names: selectedNames,
-            //     date: date,
-            //     dayIndex,
-            //     timeIndex,
-            //   });
-            // }
+          } else {
+            // 当日でない場合はそのまま予約を追加
             reservations.push({
               id: uuidv4(),
               names: selectedNames,
               date: date,
-              dayIndex,
-              timeIndex,
+              dayIndex: dayIndex,
+              timeIndex: timeIndex,
             });
           }
         }
       }
     }
-    // プリセットに登録する場合
+    // プリセットに登録場合
     if (isPreset) {
       // presetsの状態が更新されてからaddPresetsを呼び出す
       const newPreset = selectedMembers.map((member) => member.lineId);
       addPresets(myLineId, newPreset);
     }
     //予約を追加
-    isKinjyou
+    await (isKinjyou
       ? addReservationsKinjyou(reservations)
-      : addReservations(reservations);
+      : addReservations(reservations));
     onClose(); // ポップアップを閉じる
   };
 

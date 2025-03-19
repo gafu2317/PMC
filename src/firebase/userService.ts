@@ -53,7 +53,7 @@ export const deleteUser = async (lineId: string): Promise<void> => {
 };
 
 // ユーザーの情報を取得する関数
-export const getAllUser = async (): Promise<Member[] | undefined> => {
+export const getAllUser = async (): Promise<Member[]> => {
   try {
     const userColRef = collection(db, "users"); //usersコレクションの参照を取得
     const userDocs = await getDocs(userColRef); //コレクション内の全てのドキュメントを取得
@@ -67,6 +67,7 @@ export const getAllUser = async (): Promise<Member[] | undefined> => {
     return users;
   } catch (error) {
     console.error("ユーザーの取得に失敗しました:", error);
+    return [];
   }
 };
 

@@ -18,6 +18,7 @@ import { PriorityProvider } from "../context/PriorityContext";
 function Meikou() {
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
+  const [lineId, setLineId] = useState<string | null>(null);
   useEffect(() => {
     const collectionRef = collection(db, "users"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
@@ -25,6 +26,15 @@ function Meikou() {
         const newMembers = await getAllUser();
         if (newMembers) {
           setMembers(newMembers);
+          const fetchLineId = async () => {
+            const fetchedLineId = await initLiff();
+            setLineId(fetchedLineId);
+            // membersが空でも登録画面を表示
+            setIsRegistrationPopupVisible(
+              !newMembers.some((member) => member.lineId === fetchedLineId)
+            );
+          };
+          fetchLineId();
         } else {
           console.warn("部員情報が取得できませんでした。");
         }
@@ -35,21 +45,19 @@ function Meikou() {
     return () => unsubscribe();
   }, []);
 
-  // lineIdを取得
-  const [lineId, setLineId] = useState<string | null>(null);
-  useEffect(() => {
-    const fetchLineId = async () => {
-      const fetchedLineId = await initLiff();
-      setLineId(fetchedLineId);
+  // // lineIdを取得
+  // useEffect(() => {
+  //   const fetchLineId = async () => {
+  //     const fetchedLineId = await initLiff();
+  //     setLineId(fetchedLineId);
+  //     // membersが空でも登録画面を表示
+  //     setIsRegistrationPopupVisible(
+  //       !members.some((member) => member.lineId === fetchedLineId)
+  //     );
+  //   };
 
-      // membersが空でも登録画面を表示
-      setIsRegistrationPopupVisible(
-        !members.some((member) => member.lineId === fetchedLineId)
-      );
-    };
-
-    fetchLineId();
-  }, [members]); // members の変更を監視
+  //   fetchLineId();
+  // }, [members]); //membersの取得前にlineIdを取得するとmembersが空になるのでmembersを依存に追加
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
