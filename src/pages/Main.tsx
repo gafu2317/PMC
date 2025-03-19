@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { useLineId } from "../context/LineIdConstext";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLineId } from "../context/LineIdContext"; // 修正: LineIdConstext -> LineIdContext
 import { initLiff } from "../liff/liffService";
 import React, { useEffect, useState } from "react";
 
@@ -7,6 +7,8 @@ const Main = () => {
   const { setLineId } = useLineId();
   const [loading, setLoading] = useState(true); // ローディング状態を管理
   const [error, setError] = useState<string | null>(null); // エラーメッセージを管理
+  const location = useLocation(); // 現在のURLを取得
+  const navigate = useNavigate(); // ページ遷移のためのフック
 
   useEffect(() => {
     const fetchLineId = async () => {
@@ -23,6 +25,19 @@ const Main = () => {
     fetchLineId();
   }, [setLineId]); // setLineIdを依存配列に追加
 
+  useEffect(() => {
+    const queryString = location.search; // URLのクエリパラメータを取得
+    const urlParams = new URLSearchParams(queryString);
+    const redirectPage = urlParams.get("redirect"); // redirectパラメータを取得
+
+    // リダイレクト処理
+    if (redirectPage === "Meikou") {
+      navigate("/Meikou");
+    } else if (redirectPage === "Kinjyou") {
+      navigate("/Kinjyou");
+    }
+  }, [location, navigate]); // locationとnavigateを依存配列に追加
+
   if (loading) {
     return <p>LINE IDを取得中...</p>; // ローディング中のメッセージ
   }
@@ -30,6 +45,7 @@ const Main = () => {
   if (error) {
     return <p>{error}</p>; // エラーメッセージの表示
   }
+
   return (
     <div>
       <nav>

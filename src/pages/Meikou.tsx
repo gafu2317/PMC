@@ -13,7 +13,7 @@ import { db } from "../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlots } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
-import {useLineId} from "../context/LineIdConstext";
+import {useLineId} from "../context/LineIdContext";
 
 function Meikou() {
   //部員を管理
