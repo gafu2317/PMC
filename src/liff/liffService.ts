@@ -4,27 +4,21 @@ import axios from "axios";
 
 export const initLiff = async (): Promise<string | null> => {
   try {
-    await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
-
     // URLパラメータの取得
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     const redirectPage = urlParams.get("redirect");
+    // クエリパラメータをローカルストレージに保存
+    if (redirectPage) {
+      localStorage.setItem("redirectPage", redirectPage);
+    }
+    await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
 
     // ログインしているか確認
     if (liff.isLoggedIn()) {
       const profile = await liff.getProfile();
-      // ログイン後にリダイレクト処理を行う
-      if (redirectPage) {
-        // ログイン後のリダイレクト
-        window.location.href = `https://pmc-lilac.vercel.app/${redirectPage}`;
-      }
       return profile.userId; // これがlineIdです
     } else {
-      // クエリパラメータをローカルストレージに保存
-      if (queryString) {
-        localStorage.setItem("redirectQuery", queryString);
-      }
       // ログインを促す
       liff.login();
       return null; // ログインが必要な場合はnullを返す

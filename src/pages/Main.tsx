@@ -15,15 +15,11 @@ const Main = () => {
         setLineId(lineId); // Contextに設定
         if (lineId) {
           // ログイン後にクエリパラメータをチェック
-          const savedQuery = localStorage.getItem("redirectQuery");
-          window.alert(savedQuery);
-          if (savedQuery) {
-            const urlParams = new URLSearchParams(savedQuery);
-            const redirectPage = urlParams.get("redirect");
-            if (redirectPage) {
-              window.location.href = `https://pmc-lilac.vercel.app/${redirectPage}`;
-            }
-            localStorage.removeItem("redirectQuery"); // 使用後は削除
+          const redirectPage = localStorage.getItem("redirectPage");
+          window.alert(redirectPage);
+          if (redirectPage) {
+            window.location.href = `https://pmc-lilac.vercel.app/${redirectPage}`;
+            localStorage.removeItem("redirectPage"); // 使用後は削除
           }
         }
       } catch (err) {
