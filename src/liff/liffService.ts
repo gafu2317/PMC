@@ -17,10 +17,7 @@ export const initLiff = async (): Promise<string | null> => {
           window.location.href = "https://pmc-lilac.vercel.app/Meikou";
         } else if (redirectPage === "Kinjyou") {
           window.location.href = "https://pmc-lilac.vercel.app/Kinjyou";
-        } else {
-          // デフォルトの処理（必要に応じて）
-          window.location.href = "https://pmc-lilac.vercel.app/default";
-        }
+        } 
       })
       .catch((err) => {
         console.error("LIFF Initialization failed:", err);
