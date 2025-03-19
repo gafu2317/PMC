@@ -32,7 +32,7 @@ export const initLiff = async (): Promise<string | null> => {
         return null; // プロフィール取得エラー時はnullを返す
       }
     } else {
-      return "Uaad36f829cb1c10a72df296f112a16dd"; //テスト用のlineId
+      // return "Uaad36f829cb1c10a72df296f112a16dd"; //テスト用のlineId
       // ログインを促す
       liff.login();
       return null; // ログインが必要な場合はnullを返す
