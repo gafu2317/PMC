@@ -16,6 +16,7 @@ const Main = () => {
         if (lineId) {
           // ログイン後にクエリパラメータをチェック
           const savedQuery = localStorage.getItem("redirectQuery");
+          window.alert(savedQuery);
           if (savedQuery) {
             const urlParams = new URLSearchParams(savedQuery);
             const redirectPage = urlParams.get("redirect");
@@ -55,7 +56,6 @@ const Main = () => {
           </li>
         </ul>
       </nav>
-      {/* 他のコンポーネントや内容をここに追加 */}
     </div>
   );
 };
