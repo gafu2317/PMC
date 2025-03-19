@@ -11,12 +11,13 @@ import {
 import { db } from "../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlotsKinjyou } from "../utils/utils";
-import { initLiff } from "../liff/liffService";
 import { PriorityProvider } from "../context/PriorityContext";
+import { useLineId } from "../context/LineIdConstext";
 
 function Kinjyou() {
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
+  const { lineId } = useLineId();
   useEffect(() => {
     const collectionRef = collection(db, "users"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
@@ -24,6 +25,12 @@ function Kinjyou() {
         const newMembers = await getAllUser();
         if (newMembers) {
           setMembers(newMembers);
+          if (lineId) {
+            // membersが空でも登録画面を表示
+            setIsRegistrationPopupVisible(
+              !newMembers.some((member) => member.lineId === lineId)
+            );
+          }
         } else {
           console.warn("部員情報が取得できませんでした。");
         }
@@ -33,22 +40,6 @@ function Kinjyou() {
     });
     return () => unsubscribe();
   }, []);
-
-  // lineIdを取得
-  const [lineId, setLineId] = useState<string | null>(null);
-  useEffect(() => {
-    const fetchLineId = async () => {
-      const fetchedLineId = await initLiff();
-      setLineId(fetchedLineId);
-
-      // membersが空でも登録画面を表示
-      setIsRegistrationPopupVisible(
-        !members.some((member) => member.lineId === fetchedLineId)
-      );
-    };
-
-    fetchLineId();
-  }, [members]); // members の変更を監視
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);

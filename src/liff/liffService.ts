@@ -6,25 +6,25 @@ export const initLiff = async (): Promise<string | null> => {
   try {
     await liff
       .init({ liffId: import.meta.env.VITE_LIFF_ID })
-      // .then(() => {
-      //   // URLパラメータの取得
-      //   const queryString = window.location.search;
-      //   const urlParams = new URLSearchParams(queryString);
-      //   const redirectPage = urlParams.get("redirect");
+      .then(() => {
+        // URLパラメータの取得
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const redirectPage = urlParams.get("redirect");
 
-      //   // リダイレクト処理
-      //   if (redirectPage === "Meikou") {
-      //     window.location.href = "https://pmc-lilac.vercel.app/Meikou";
-      //   } else if (redirectPage === "Kinjyou") {
-      //     window.location.href = "https://pmc-lilac.vercel.app/Kinjyou";
-      //   } else {
-      //     // デフォルトの処理（必要に応じて）
-      //     window.location.href = "https://pmc-lilac.vercel.app/default";
-      //   }
-      // })
-      // .catch((err) => {
-      //   console.error("LIFF Initialization failed:", err);
-      // });
+        // リダイレクト処理
+        if (redirectPage === "Meikou") {
+          window.location.href = "https://pmc-lilac.vercel.app/Meikou";
+        } else if (redirectPage === "Kinjyou") {
+          window.location.href = "https://pmc-lilac.vercel.app/Kinjyou";
+        } else {
+          // デフォルトの処理（必要に応じて）
+          window.location.href = "https://pmc-lilac.vercel.app/default";
+        }
+      })
+      .catch((err) => {
+        console.error("LIFF Initialization failed:", err);
+      });
 
     if (liff.isLoggedIn()) {
       try {
