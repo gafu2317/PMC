@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Meikou from "./pages/Meikou";
 import Kinjyou from "./pages/Kinjyou";
 import Main from "./pages/Main";
-import { LineIdProvider } from "./context/LineIdConstext";
+import { LineIdProvider } from "./context/LineIdContext";
 
 function App() {
   return (
