@@ -12,7 +12,7 @@ import { db } from "../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlotsKinjyou } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
-import { useLineId } from "../context/LineIdConstext";
+import { useLineId } from "../context/LineIdContext";
 
 function Kinjyou() {
   //部員を管理
