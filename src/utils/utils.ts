@@ -7,7 +7,7 @@ const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1; // 月曜日�
 export const weekDays = Array.from({ length: 8 }, (_, index) => {
   const date = new Date(today);
   // 今日の日付-今日の月曜日からの日数 = 今週の月曜日
-  // 今週の月曜日　+ index + 1 = 今週の日付の配列
+  // 今週の月曜日　+ index = 今週の日付の配列
   date.setDate(today.getDate() - currentDay + index);
   // 月/日の形式で返す(割り算ではない)
   return {

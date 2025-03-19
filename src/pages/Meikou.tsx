@@ -113,7 +113,7 @@ function Meikou() {
         })
       )
     );
-  }, [selectedHours]);
+  }, [selectedHours, setSelectedReservations]);
   const handleReservationClick = (
     dayIndex: number,
     timeIndex: number,
