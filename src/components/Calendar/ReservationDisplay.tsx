@@ -26,36 +26,26 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
   const [isDuplicates, setIsDuplicates] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false))
   );
-  const [hasReservations, setHasReservations] = Array(weekDays.length).fill(
-    false
-  );
-  // 重複しているかどうかを判定
   useEffect(() => {
     setIsDuplicates(isDuplicate(reservations));
   }, [reservations]);
-  // 予約があるかどうかを判定
-  useEffect(() => {
-    const newHasReservations = weekDays.map((_, dayIndex) => {
-      return timeSlots.some((_, timeIndex) => {
-        return (
-          selectedHours[dayIndex][timeIndex] &&
-          reservations.some(
-            (reservation) =>
-              reservation.dayIndex === dayIndex &&
-              reservation.timeIndex === timeIndex
-          )
-        );
-      });
-    });
-    setHasReservations(newHasReservations);
-  }, [selectedHours, reservations]);
-
-
   return (
     <div>
       {weekDays.map((day, dayIndex) => {
+        // 時間が選択されているかつ予約があるかどうか
+        const hasReservations = timeSlots.some((_, timeIndex) => {
+          return (
+            selectedHours[dayIndex][timeIndex] &&
+            reservations.some(
+              (reservation) =>
+                reservation.dayIndex === dayIndex &&
+                reservation.timeIndex === timeIndex
+            )
+          );
+        });
         // 予約がない場合は何も表示しない
         if (!hasReservations) return null;
+
         return (
           <div key={day.date} className="mt-1">
             {/* 日付を表示 */}
@@ -94,7 +84,7 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                           // チームを表示
                           <li
                             key={teamIndex}
-                            className={`px-1 rounded hover:bg-blue-100 ${
+                            className={`px-1 rounded ${
                               isSelected ? "bg-blue-100" : ""
                             }`}
                             onClick={(e) => {
