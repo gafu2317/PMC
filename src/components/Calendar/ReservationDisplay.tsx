@@ -1,5 +1,11 @@
-import React, {useEffect, useState} from "react";
-import { weekDays, timeSlots , slots , slotsKinjyou, isDuplicate } from "../../utils/utils";
+import React, { useEffect, useState } from "react";
+import {
+  weekDays,
+  timeSlots,
+  slots,
+  slotsKinjyou,
+  isDuplicate,
+} from "../../utils/utils";
 import { Reservation } from "../../types/type";
 
 interface ReservationDisplayProps {
@@ -17,29 +23,38 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
   onReservationClick,
   isKinjyou,
 }) => {
-    const [isDuplicates, setIsDuplicates] = useState<boolean[][]>(
-      Array.from({ length: 8 }, () => Array(12).fill(false))
-    );
-    useEffect(() => {
-      setIsDuplicates(isDuplicate(reservations));
-    }, [reservations]);
+  const [isDuplicates, setIsDuplicates] = useState<boolean[][]>(
+    Array.from({ length: 8 }, () => Array(12).fill(false))
+  );
+  const [hasReservations, setHasReservations] = Array(weekDays.length).fill(
+    false
+  );
+  // 重複しているかどうかを判定
+  useEffect(() => {
+    setIsDuplicates(isDuplicate(reservations));
+  }, [reservations]);
+  // 予約があるかどうかを判定
+  useEffect(() => {
+    const newHasReservations = weekDays.map((_, dayIndex) => {
+      return timeSlots.some((_, timeIndex) => {
+        return (
+          selectedHours[dayIndex][timeIndex] &&
+          reservations.some(
+            (reservation) =>
+              reservation.dayIndex === dayIndex &&
+              reservation.timeIndex === timeIndex
+          )
+        );
+      });
+    });
+    setHasReservations(newHasReservations);
+  }, [selectedHours, reservations]);
+
   return (
     <div>
       {weekDays.map((day, dayIndex) => {
-        // 時間が選択されているかつ予約があるかどうか
-        const hasReservations = timeSlots.some((_, timeIndex) => {
-          return (
-            selectedHours[dayIndex][timeIndex] &&
-            reservations.some(
-              (reservation) =>
-                reservation.dayIndex === dayIndex &&
-                reservation.timeIndex === timeIndex
-            )
-          );
-        });
         // 予約がない場合は何も表示しない
         if (!hasReservations) return null;
-
         return (
           <div key={day.date} className="mt-1">
             {/* 日付を表示 */}
@@ -59,9 +74,14 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                     <div key={timeIndex}>
                       {/* 時間を表示 */}
                       <div
-                        className={`bg-gray-100 rounded-sm ${isDuplicates[dayIndex][timeIndex]? "bg-red-300" : ""}`}
+                        className={`bg-gray-100 rounded-sm ${
+                          isDuplicates[dayIndex][timeIndex] ? "bg-red-300" : ""
+                        }`}
                       >
-                        {isKinjyou?(slotsKinjyou[timeIndex]):(slots[timeIndex])}{isDuplicates[dayIndex][timeIndex]?"　　重複してます！":""}
+                        {isKinjyou ? slotsKinjyou[timeIndex] : slots[timeIndex]}
+                        {isDuplicates[dayIndex][timeIndex]
+                          ? "　　重複してます！"
+                          : ""}
                       </div>
                       {selectedHourReservations.map((team, teamIndex) => {
                         // 予約が選択されているかどうか
