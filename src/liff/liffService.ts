@@ -4,14 +4,6 @@ import axios from "axios";
 
 export const initLiff = async (): Promise<string | null> => {
   try {
-    // URLパラメータの取得
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const redirectPage = urlParams.get("redirect");
-    // クエリパラメータをローカルストレージに保存
-    if (redirectPage) {
-      localStorage.setItem("redirectPage", redirectPage);
-    }
     await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
 
     // ログインしているか確認
