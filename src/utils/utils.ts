@@ -1,14 +1,15 @@
 import { Reservation } from "../types/type";
 
-const today = new Date();
-const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1; // 月曜日を0とする
+let baseDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+const currentDay = baseDate.getDay() === 0 ? 6 : baseDate.getDay() - 1; // 月曜日を0とする
+
 
 //今週の日付の配列
 export const weekDays = Array.from({ length: 8 }, (_, index) => {
-  const date = new Date(today);
+  const date = new Date(baseDate);
   // 今日の日付-今日の月曜日からの日数 = 今週の月曜日
   // 今週の月曜日　+ index = 今週の日付の配列
-  date.setDate(today.getDate() - currentDay + index);
+  date.setDate(baseDate.getDate() - currentDay + index);
   // 月/日の形式で返す(割り算ではない)
   return {
     date: `${date.getMonth() + 1}/${date.getDate()}`,
