@@ -11,6 +11,7 @@ import {
 import PresetPopup from "./Preset";
 import { MemberList } from "../Forms";
 import Swal from "sweetalert2";
+import { useBooking } from "../../context/BookingContext";
 
 interface ReservationPopupProps {
   myLineId: string; // lineId
@@ -28,6 +29,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   isKinjyou,
 }) => {
   const weekDays = useWeekDays();
+  const {isTwoWeekBookingEnabled} = useBooking();
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
   const handleAddSelectedMembers = (member: Member) => {
@@ -120,7 +122,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             }
           } else {
             const weekDays = getWeekDays(new Date());
-            if(day > weekDays[7].day){
+            if(!isTwoWeekBookingEnabled && day > weekDays[7].day){
               Swal.fire({
                 icon: "warning",
                 title: "エラー",

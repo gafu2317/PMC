@@ -27,13 +27,13 @@ const Header = () => {
       </div>
       <div className="flex justify-around">
         <button
-          className="mt-2 bg-blue-500 text-white rounded-md p-1"
+          className="mt-2 bg-blue-500 text-white rounded-md px-1"
           onClick={() => setBaseDate(new Date())}
         >
           今週を表示
         </button>
         <button
-          className="mt-2 bg-blue-500 text-white rounded-md p-1"
+          className="mt-2 bg-blue-500 text-white rounded-md px-1"
           onClick={() =>
             setBaseDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
           }
