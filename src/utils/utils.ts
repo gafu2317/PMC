@@ -1,5 +1,5 @@
 import { Reservation } from "../types/type";
-import EventEmitter from "events";
+import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
 
 export const emitter = new EventEmitter();
