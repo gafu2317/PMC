@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { Member, Reservation } from "../../types/type";
 import { v4 as uuidv4 } from "uuid";
-import { useWeekDays, timeSlots, timeSlotsKinjyou } from "../../utils/utils";
+import { useWeekDays, timeSlots, timeSlotsKinjyou, getWeekDays } from "../../utils/utils";
 import {
   addPresets,
   addReservations,
@@ -119,6 +119,16 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
               });
             }
           } else {
+            const weekDays = getWeekDays(new Date());
+            if(day > weekDays[7].day){
+              Swal.fire({
+                icon: "warning",
+                title: "エラー",
+                text: "今週の予約しかできません",
+                confirmButtonText: "OK",
+              });
+              return;
+            }
             // 当日でない場合はそのまま予約を追加
             reservations.push({
               id: uuidv4(),

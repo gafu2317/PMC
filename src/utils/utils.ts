@@ -16,7 +16,7 @@ export const setBaseDate = (newDate: Date) => {
 };
 
 //今週の日付の配列
-const getWeekDays = () => {
+export const getWeekDays = (baseDate:Date) => {
   return Array.from({ length: 8 }, (_, index) => {
     const date = new Date(baseDate);
     // 今日の日付-今日の月曜日からの日数 = 今週の月曜日
@@ -33,11 +33,11 @@ const getWeekDays = () => {
 };
 
 export const useWeekDays = () => {
-  const [weekDays, setWeekDays] = useState(getWeekDays());
+  const [weekDays, setWeekDays] = useState(getWeekDays(baseDate));
 
   useEffect(() => {
     const handleBaseDateChange = () => {
-      setWeekDays(getWeekDays());
+      setWeekDays(getWeekDays(baseDate));
     };
 
     emitter.on("baseDateChanged", handleBaseDateChange);
