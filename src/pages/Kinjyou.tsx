@@ -16,6 +16,7 @@ import { useLineId } from "../context/LineIdContext";
 import { useWeekDays } from "../utils/utils";
 
 function Kinjyou() {
+  const weekDays = useWeekDays();
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
   const { lineId } = useLineId();
@@ -42,15 +43,13 @@ function Kinjyou() {
     return () => unsubscribe();
   }, []);
 
-  const weekDays = useWeekDays();
-
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
   useEffect(() => {
     const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
-        const newReservations = await getAllReservationsKinjyou();
+        const newReservations = await getAllReservationsKinjyou(weekDays);
         if (newReservations) {
           setReservations(newReservations);
         } else {
@@ -183,14 +182,15 @@ function Kinjyou() {
           )}
         </div>
       )}
+      {lineId === null && (
+        <div className="flex flex-col justify-center items-center h-screen">
+          <div>LINE IDが取得できませんでした。</div>
+          <div>もう一度開き直してください</div>
+        </div>
+      )}
       {!lineId && (
         <div className="flex justify-center items-center h-screen">
           <div>ロード中...</div>
-        </div>
-      )}
-      {lineId === null && (
-        <div className="flex justify-center items-center h-screen">
-          <div>LINE IDが取得できませんでした。</div>
         </div>
       )}
     </div>

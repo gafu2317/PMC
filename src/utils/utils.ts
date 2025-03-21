@@ -137,8 +137,15 @@ export function getLength(slot: string): number {
   }
 }
 
-export function getDayIndex(date: Date): number {
-  const weekDays = useWeekDays();
+export function getDayIndex(
+  weekDays: {
+    date: string; // "月/日" の形式
+    day: number; // 日
+    month: number; // 月
+    year: number; // 年
+  }[],
+  date: Date
+): number {
   for (let i = 0; i < weekDays.length; i++) {
     if (
       weekDays[i].day === date.getDate() &&

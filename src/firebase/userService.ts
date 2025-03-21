@@ -218,7 +218,12 @@ export const deleteReservationKinjyou = async (id: string): Promise<void> => {
 };
 
 // 予約情報を取得する関数
-export const getAllReservations = async (): Promise<
+export const getAllReservations = async ( weekDays: {
+    date: string; // "月/日" の形式
+    day: number; // 日
+    month: number; // 月
+    year: number; // 年
+  }[]): Promise<
   Reservation[] | undefined
 > => {
   try {
@@ -243,7 +248,7 @@ export const getAllReservations = async (): Promise<
         id: doc.id,
         names: doc.data().names,
         date: doc.data().date.toDate(),
-        dayIndex: getDayIndex(doc.data().date.toDate()),
+        dayIndex: getDayIndex(weekDays, doc.data().date.toDate()),
         timeIndex: getTimeIndex(doc.data().date.toDate()),
       }))
       .filter(
@@ -257,9 +262,14 @@ export const getAllReservations = async (): Promise<
   }
 };
 // 予約情報を取得する関数(未完成)
-export const getAllReservationsKinjyou = async (): Promise<
-  Reservation[] | undefined
-> => {
+export const getAllReservationsKinjyou = async (
+  weekDays: {
+    date: string; // "月/日" の形式
+    day: number; // 日
+    month: number; // 月
+    year: number; // 年
+  }[]
+): Promise<Reservation[] | undefined> => {
   try {
     const reservationsColRef = collection(db, "reservationsKinjyou"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
@@ -282,7 +292,7 @@ export const getAllReservationsKinjyou = async (): Promise<
         id: doc.id,
         names: doc.data().names,
         date: doc.data().date.toDate(),
-        dayIndex: getDayIndex(doc.data().date.toDate()),
+        dayIndex: getDayIndex(weekDays, doc.data().date.toDate()),
         timeIndex: getTimeIndexKinjyou(doc.data().date.toDate()),
       }))
       .filter(

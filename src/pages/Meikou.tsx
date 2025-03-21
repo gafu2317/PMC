@@ -17,6 +17,7 @@ import { useLineId } from "../context/LineIdContext";
 import { useWeekDays } from "../utils/utils";
 
 function Meikou() {
+  const weekDays = useWeekDays();
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
   const { lineId } = useLineId();
@@ -43,7 +44,6 @@ function Meikou() {
     return () => unsubscribe();
   }, [lineId]); // lineIdの変更を監視
 
-  const weekDays = useWeekDays();
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -51,7 +51,7 @@ function Meikou() {
     const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
-        const newReservations = await getAllReservations();
+        const newReservations = await getAllReservations(weekDays);
         if (newReservations) {
           setReservations(newReservations);
         } else {
@@ -183,7 +183,7 @@ function Meikou() {
         </div>
       )}
       {lineId === null && (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex flex-col justify-center items-center h-screen">
           <div>LINE IDが取得できませんでした。</div>
           <div>もう一度開き直してください</div>
         </div>
