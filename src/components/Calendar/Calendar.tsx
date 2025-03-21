@@ -85,7 +85,11 @@ const Calendar: React.FC<CalendarProps> = ({
             {weekDays.map((item, index) => (
               <div
                 key={index}
-                className="text-center bg-gray-200 p-1 text-xs rounded"
+                className={`text-center p-1 text-xs rounded ${
+                  new Date().getDate() === item.day
+                    ? "bg-yellow-200"
+                    : "bg-gray-200"
+                }`}
               >
                 {daysOfWeek[index]}
                 <br />
@@ -134,7 +138,11 @@ const Calendar: React.FC<CalendarProps> = ({
             {weekDays.map((item, index) => (
               <div
                 key={index}
-                className="text-center bg-gray-200 p-1 text-xs rounded"
+                className={`text-center p-1 text-xs rounded ${
+                  new Date().getDate() === item.day
+                    ? "bg-yellow-200"
+                    : "bg-gray-200"
+                }`}
               >
                 {daysOfWeek[index]}
                 <br />
