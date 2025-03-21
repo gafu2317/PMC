@@ -32,8 +32,6 @@ const Main = () => {
     fetchLineId();
   }, [setLineId, navigate, location.search]);
 
-
-
   if (loading) {
     return <p>LINE IDを取得中...</p>; // ローディング中のメッセージ
   }

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 export const emitter = new EventEmitter();
 
 let baseDate = new Date();
-// Date.now() + 7 * 24 * 60 * 60 * 1000;
+
 const currentDay = baseDate.getDay() === 0 ? 6 : baseDate.getDay() - 1; // 月曜日を0とする
 
 export const getBaseDate = () => baseDate;
