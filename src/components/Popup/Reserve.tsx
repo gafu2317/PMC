@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { Member, Reservation } from "../../types/type";
 import { v4 as uuidv4 } from "uuid";
-import { weekDays, timeSlots, timeSlotsKinjyou } from "../../utils/utils";
+import { useWeekDays, timeSlots, timeSlotsKinjyou } from "../../utils/utils";
 import {
   addPresets,
   addReservations,
@@ -27,6 +27,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   onClose,
   isKinjyou,
 }) => {
+  const weekDays = useWeekDays();
   // 選択されたメンバーを管理
   const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
   const handleAddSelectedMembers = (member: Member) => {

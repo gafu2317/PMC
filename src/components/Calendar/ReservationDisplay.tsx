@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  weekDays,
+  useWeekDays,
   timeSlots,
   slots,
   slotsKinjyou,
@@ -23,6 +23,7 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
   onReservationClick,
   isKinjyou,
 }) => {
+  const weekDays = useWeekDays();
   const [isDuplicates, setIsDuplicates] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false))
   );

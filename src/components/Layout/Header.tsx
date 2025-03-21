@@ -1,4 +1,4 @@
-// import { useState } from "react";
+import { setBaseDate } from "../../utils/utils";
 // import { UserInstructions } from "../Popup";
 
 const Header = () => {
@@ -24,6 +24,16 @@ const Header = () => {
         >
           ?
         </button> */}
+      </div>
+      <div>
+        <button onClick={() => setBaseDate(new Date())}>今週を表示</button>
+        <button
+          onClick={() =>
+            setBaseDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))
+          }
+        >
+          来週を表示
+        </button>
       </div>
       {/* {isShow && <UserInstructions onClose={()=>setIsShow(false)} />} */}
     </div>

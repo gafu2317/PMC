@@ -13,6 +13,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlotsKinjyou } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
 import { useLineId } from "../context/LineIdContext";
+import { useWeekDays } from "../utils/utils";
 
 function Kinjyou() {
   //部員を管理
@@ -41,6 +42,8 @@ function Kinjyou() {
     return () => unsubscribe();
   }, []);
 
+  const weekDays = useWeekDays();
+
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
   useEffect(() => {
@@ -58,7 +61,7 @@ function Kinjyou() {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [weekDays]);
 
   //バンドを管理
   const [bands, setBands] = useState<Band[]>([]);

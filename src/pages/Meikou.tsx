@@ -13,12 +13,14 @@ import { db } from "../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import { daysOfWeek, timeSlots } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
-import {useLineId} from "../context/LineIdContext";
+import { useLineId } from "../context/LineIdContext";
+import { useWeekDays } from "../utils/utils";
+import { emitter } from "../utils/utils";
 
 function Meikou() {
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
-  const {lineId} = useLineId();
+  const { lineId } = useLineId();
   useEffect(() => {
     const collectionRef = collection(db, "users"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
@@ -42,6 +44,8 @@ function Meikou() {
     return () => unsubscribe();
   }, [lineId]); // lineIdの変更を監視
 
+  const weekDays = useWeekDays();
+
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
   useEffect(() => {
@@ -59,7 +63,7 @@ function Meikou() {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [weekDays]);
 
   //バンドを管理
   const [bands, setBands] = useState<Band[]>([]);
@@ -179,14 +183,15 @@ function Meikou() {
           )}
         </div>
       )}
-      {!lineId && (
-        <div className="flex justify-center items-center h-screen">
-          <div>ロード中...</div>
-        </div>
-      )}
       {lineId === null && (
         <div className="flex justify-center items-center h-screen">
           <div>LINE IDが取得できませんでした。</div>
+          <div>もう一度開き直してください</div>
+        </div>
+      )}
+      {!lineId && (
+        <div className="flex justify-center items-center h-screen">
+          <div>ロード中...</div>
         </div>
       )}
     </div>

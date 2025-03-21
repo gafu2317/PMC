@@ -1,23 +1,54 @@
 import { Reservation } from "../types/type";
+import EventEmitter from "events";
+import { useEffect, useState } from "react";
 
-let baseDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+export const emitter = new EventEmitter();
+
+let baseDate = new Date();
+// Date.now() + 7 * 24 * 60 * 60 * 1000;
 const currentDay = baseDate.getDay() === 0 ? 6 : baseDate.getDay() - 1; // 月曜日を0とする
 
+export const getBaseDate = () => baseDate;
+
+export const setBaseDate = (newDate: Date) => {
+  baseDate = newDate;
+  emitter.emit("baseDateChanged");
+};
 
 //今週の日付の配列
-export const weekDays = Array.from({ length: 8 }, (_, index) => {
-  const date = new Date(baseDate);
-  // 今日の日付-今日の月曜日からの日数 = 今週の月曜日
-  // 今週の月曜日　+ index = 今週の日付の配列
-  date.setDate(baseDate.getDate() - currentDay + index);
-  // 月/日の形式で返す(割り算ではない)
-  return {
-    date: `${date.getMonth() + 1}/${date.getDate()}`,
-    day: date.getDate(),
-    month: date.getMonth() + 1,
-    year: date.getFullYear(),
-  };
-});
+const getWeekDays = () => {
+  return Array.from({ length: 8 }, (_, index) => {
+    const date = new Date(baseDate);
+    // 今日の日付-今日の月曜日からの日数 = 今週の月曜日
+    // 今週の月曜日　+ index = 今週の日付の配列
+    date.setDate(baseDate.getDate() - currentDay + index);
+    // 月/日の形式で返す(割り算ではない)
+    return {
+      date: `${date.getMonth() + 1}/${date.getDate()}`,
+      day: date.getDate(),
+      month: date.getMonth() + 1,
+      year: date.getFullYear(),
+    };
+  });
+};
+
+export const useWeekDays = () => {
+  const [weekDays, setWeekDays] = useState(getWeekDays());
+
+  useEffect(() => {
+    const handleBaseDateChange = () => {
+      setWeekDays(getWeekDays());
+    };
+
+    emitter.on("baseDateChanged", handleBaseDateChange);
+
+    return () => {
+      emitter.off("baseDateChanged", handleBaseDateChange);
+    };
+  }, []);
+
+  return weekDays;
+};
 
 //dayの配列
 export const daysOfWeek = ["月", "火", "水", "木", "金", "土", "日", "月"];
@@ -62,17 +93,9 @@ export const timeSlotsKinjyou = [
   "18:30",
 ];
 
-export const slotsKinjyou = [
-  "1限",
-  "2限",
-  "昼",
-  "3限",
-  "4限",
-  "5限",
-  "夜",
-];
+export const slotsKinjyou = ["1限", "2限", "昼", "3限", "4限", "5限", "夜"];
 
-export function getHour (slot: string): number {
+export function getHour(slot: string): number {
   switch (slot) {
     case "1限":
       return 9;
@@ -93,7 +116,7 @@ export function getHour (slot: string): number {
   }
 }
 
-export function getLength (slot: string): number {
+export function getLength(slot: string): number {
   switch (slot) {
     case "1限":
       return 0;
@@ -115,6 +138,7 @@ export function getLength (slot: string): number {
 }
 
 export function getDayIndex(date: Date): number {
+  const weekDays = useWeekDays();
   for (let i = 0; i < weekDays.length; i++) {
     if (
       weekDays[i].day === date.getDate() &&

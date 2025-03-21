@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { Reservation } from "../../types/type";
 import {
-  weekDays,
+  useWeekDays,
   daysOfWeek,
   timeSlots,
   slotsKinjyou,
@@ -26,6 +26,7 @@ const Calendar: React.FC<CalendarProps> = ({
   onHourClick,
   isKinjyou,
 }) => {
+  const weekDays = useWeekDays();
   const [reservedHours, setReservedHours] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false)) // 8日間、12時間の初期状態を設定
   );

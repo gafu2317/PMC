@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { Reservation, Member } from "../../types/type";
-import { weekDays, timeSlots, slots, slotsKinjyou, timeSlotsKinjyou } from "../../utils/utils";
+import { useWeekDays, timeSlots, slots, slotsKinjyou, timeSlotsKinjyou } from "../../utils/utils";
 import {
   deleteReservation,
   updateReservation,
@@ -29,6 +29,7 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
   name,
   isKinjyou,
 }) => {
+  const weekDays = useWeekDays();
   const [newReservations, setNewReservations] =
     useState<Reservation[]>(reservations); //　予約の編集で表示する予約情報
   const [ids, setIds] = useState<string[]>([]); //予約の編集で表示する予約のID
