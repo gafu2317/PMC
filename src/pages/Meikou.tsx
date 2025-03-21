@@ -15,12 +15,19 @@ import { daysOfWeek, timeSlots } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
 import { useLineId } from "../context/LineIdContext";
 import { useWeekDays } from "../utils/utils";
+import { useNavigate } from "react-router-dom";
 
 function Meikou() {
   const weekDays = useWeekDays();
+  const navigate = useNavigate();
+  const { lineId } = useLineId();
+  useEffect(() => {
+    if(lineId === null) {
+      navigate("/?redirect=Meikou");
+    }
+  }, [lineId, navigate]);
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
-  const { lineId } = useLineId();
   useEffect(() => {
     const collectionRef = collection(db, "users"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(collectionRef, async () => {
