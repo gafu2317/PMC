@@ -15,7 +15,6 @@ import { daysOfWeek, timeSlots } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
 import { useLineId } from "../context/LineIdContext";
 import { useWeekDays } from "../utils/utils";
-import { emitter } from "../utils/utils";
 
 function Meikou() {
   //部員を管理
