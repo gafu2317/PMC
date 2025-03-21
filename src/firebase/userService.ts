@@ -230,18 +230,18 @@ export const getAllReservations = async ( weekDays: {
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); // 一年前の日付を計算
+    // const oneYearAgo = new Date();
+    // oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); // 一年前の日付を計算
 
-    const oldReservations = reservationsDocs.docs.filter((doc) => {
-      const reservationDate = doc.data().date.toDate(); // Firestoreの日付をJavaScriptのDateオブジェクトに変換
-      return reservationDate < oneYearAgo; // 一年前より古い予約をフィルタリング
-    });
+    // const oldReservations = reservationsDocs.docs.filter((doc) => {
+    //   const reservationDate = doc.data().date.toDate(); // Firestoreの日付をJavaScriptのDateオブジェクトに変換
+    //   return reservationDate < oneYearAgo; // 一年前より古い予約をフィルタリング
+    // });
 
-    // 古い予約を削除
-    for (const oldDoc of oldReservations) {
-      await deleteReservation(oldDoc.id);
-    }
+    // // 古い予約を削除
+    // for (const oldDoc of oldReservations) {
+    //   await deleteReservation(oldDoc.id);
+    // }
 
     const reservations = reservationsDocs.docs
       .map((doc) => ({
@@ -274,18 +274,18 @@ export const getAllReservationsKinjyou = async (
     const reservationsColRef = collection(db, "reservationsKinjyou"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); // 一年前の日付を計算
+    // const oneYearAgo = new Date();
+    // oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); // 一年前の日付を計算
 
-    const oldReservations = reservationsDocs.docs.filter((doc) => {
-      const reservationDate = doc.data().date.toDate(); // Firestoreの日付をJavaScriptのDateオブジェクトに変換
-      return reservationDate < oneYearAgo; // 一年前より古い予約をフィルタリング
-    });
+    // const oldReservations = reservationsDocs.docs.filter((doc) => {
+    //   const reservationDate = doc.data().date.toDate(); // Firestoreの日付をJavaScriptのDateオブジェクトに変換
+    //   return reservationDate < oneYearAgo; // 一年前より古い予約をフィルタリング
+    // });
 
-    // 古い予約を削除
-    for (const oldDoc of oldReservations) {
-      await deleteReservation(oldDoc.id);
-    }
+    // // 古い予約を削除
+    // for (const oldDoc of oldReservations) {
+    //   await deleteReservation(oldDoc.id);
+    // }
 
     const reservations = reservationsDocs.docs
       .map((doc) => ({
