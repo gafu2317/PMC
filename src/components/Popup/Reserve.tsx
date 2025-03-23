@@ -18,7 +18,7 @@ interface ReservationPopupProps {
   members: Member[]; // 部員の名前
   selectedHours: boolean[][]; // 選択された時間帯
   onClose: () => void; // 閉じるハンドラ
-  isKinjyou?: boolean; // 金城かどうか
+  isKinjyou: boolean; // 金城かどうか
 }
 
 const ReservationPopup: React.FC<ReservationPopupProps> = ({

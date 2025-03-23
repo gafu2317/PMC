@@ -13,7 +13,7 @@ interface ReservationDisplayProps {
   selectedHours: boolean[][]; // 選択された時間帯
   selectedReservations: string[][][]; // 選択された予約
   onReservationClick: (dayIndex: number, timeIndex: number, id: string) => void; // 予約を選択したときのハンドラ
-  isKinjyou?: boolean; // 金城かどうか
+  isKinjyou: boolean; // 金城かどうか
 }
 
 const ReservationDisplay: React.FC<ReservationDisplayProps> = ({

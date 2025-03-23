@@ -1,12 +1,12 @@
 // Hour.tsx
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   timeSlots,
   timeSlotsKinjyou,
   timeEndSlots,
   timeEndSlotsKinjyou,
+  useWeekDays,
 } from "../../utils/utils";
-import { getWeekDays } from "../../utils/utils";
 import Swal from "sweetalert2";
 import { db } from "../../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -20,7 +20,7 @@ interface HourProps {
   isSelected: boolean; // クリックフラグ
   isReserved: boolean; // 予約フラグ
   onClick: () => void; // クリック時のハンドラ
-  isKinjyou?: boolean; // 金城フラグ
+  isKinjyou: boolean; // 金城フラグ
 }
 
 const Hour: React.FC<HourProps> = ({
@@ -33,8 +33,9 @@ const Hour: React.FC<HourProps> = ({
   onClick,
   isKinjyou,
 }) => {
+  const weekDays = useWeekDays();
   const [banPeriods, setBanPeriods] = useState<
-    { startDate: Date; endDate: Date }[]
+    { startDate: Date; endDate: Date; isKinjyou: Boolean }[]
   >([]);
   useEffect(() => {
     const collectionRef = collection(db, "setting");
@@ -51,10 +52,8 @@ const Hour: React.FC<HourProps> = ({
       }
     });
     return () => unsubscribe();
-  }
-  , []);
+  }, []);
 
-  const weekDays = getWeekDays(new Date());
   const reserveDate = weekDays[dayIndex]; //日付
   const reserveStartTime = isKinjyou
     ? timeSlotsKinjyou[timeIndex]
@@ -80,7 +79,8 @@ const Hour: React.FC<HourProps> = ({
   const isBan = banPeriods.some((period) => {
     return (
       reserveDateStartTime < period.endDate &&
-      reserveDateEndTime > period.startDate
+      reserveDateEndTime > period.startDate &&
+      period.isKinjyou === isKinjyou
     );
   });
 
@@ -98,13 +98,17 @@ const Hour: React.FC<HourProps> = ({
   };
   return (
     <div
-      className={`flex items-center justify-center  ${
-        isSelected ? "border-2 border-red-500" : "border-2 border-gray-300"
-      } transition-all cursor-pointer ${
-        isReserved ? (isUserReservation ? "bg-green-500" : "bg-gray-300") : ""
-      } ${isDuplicate ? "bg-red-300" : ""} ${
-        isBan ? "bg-black" : ""
-      }`}
+      className={`flex items-center justify-center border-2 transition-all cursor-pointer ${
+        isSelected ? "border-red-500" : "border-gray-300"
+      } ${
+        isBan
+          ? "bg-black"
+          : isReserved
+          ? isUserReservation
+            ? "bg-green-500"
+            : "bg-gray-300"
+          : ""
+      } ${isDuplicate ? "bg-red-300" : ""}`}
       style={{ aspectRatio: 1 }}
       onClick={handleClick} // クリック時にハンドラを呼び出す
     ></div>

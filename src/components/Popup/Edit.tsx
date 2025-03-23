@@ -18,7 +18,7 @@ interface ReservationPopupProps {
   onClose: () => void;
   selectedReservations: string[][][];
   reservations: Reservation[];
-  isKinjyou?: boolean;
+  isKinjyou: boolean;
 }
 
 const EditReservationPopup: React.FC<ReservationPopupProps> = ({

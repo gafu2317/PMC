@@ -22,7 +22,7 @@ import { AdminInstruction } from "../Popup";
 interface HamburgerMenuProps {
   members: Member[];
   bands: Band[];
-  isKinjyou?: boolean;
+  isKinjyou: boolean;
 }
 
 const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou }) => {

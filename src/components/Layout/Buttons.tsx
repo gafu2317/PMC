@@ -18,7 +18,7 @@ interface ButtonsProps {
   selectedHours: boolean[][];
   selectedReservations: string[][][];
   bands: Band[];
-  isKinjyou?: boolean;
+  isKinjyou: boolean;
 }
 
 const Buttons: React.FC<ButtonsProps> = ({

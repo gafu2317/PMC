@@ -158,18 +158,20 @@ function Meikou() {
           {/* <p>{lineId}</p> */}
           <Header></Header>
           <PriorityProvider>
-            <HamburgerMenu bands={bands} members={members} />
+            <HamburgerMenu bands={bands} members={members} isKinjyou={false} />
             <Calendar
               name={getName(lineId)}
               reservations={reservations}
               selectedHours={selectedHours}
               onHourClick={handleHourClick}
+              isKinjyou={false}
             />
             <ReservationDisplay
               reservations={reservations}
               selectedHours={selectedHours}
               selectedReservations={selectedReservations}
               onReservationClick={handleReservationClick}
+              isKinjyou={false}
             />
             <Buttons
               lineId={lineId}
@@ -178,6 +180,7 @@ function Meikou() {
               selectedHours={selectedHours}
               selectedReservations={selectedReservations}
               bands={bands}
+              isKinjyou={false}
             />
           </PriorityProvider>
           {isRegistrationPopupVisible && (

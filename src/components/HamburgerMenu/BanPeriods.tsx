@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect } from "react";
 import {
   setReservationBanPeriod,
   getReservationBanPeriod,
@@ -6,25 +6,16 @@ import {
 } from "../../firebase/userService";
 import { db } from "../../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
-import { Reservation } from "../../types/type";
 
+interface BanPeriodsProps {}
 
-
-const BanPeriods = () => {
+const BanPeriods: React.FC<BanPeriodsProps> = () => {
   const [newStartDate, setNewStartDate] = useState<Date | null>(null);
   const [newEndDate, setNewEndDate] = useState<Date | null>(null);
+  const [newIsKinjyou, setNewIsKinjyou] = useState<boolean | null>(null);
   const [banPeriods, setBanPeriods] = useState<
-    { startDate: Date; endDate: Date }[]
+    { startDate: Date; endDate: Date; isKinjyou: boolean }[]
   >([]);
-  const handleStartDateChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const localDate = new Date(e.target.value); // 入力されたローカル日時を取得
-    setNewStartDate(localDate); // ローカルタイムのまま保存
-  };
-
-  const handleEndDateChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const localDate = new Date(e.target.value); // 入力されたローカル日時を取得
-    setNewEndDate(localDate); // ローカルタイムのまま保存
-  };
   useEffect(() => {
     const collectionRef = collection(db, "setting");
     const unsubscribe = onSnapshot(collectionRef, async () => {
@@ -42,18 +33,27 @@ const BanPeriods = () => {
     return () => unsubscribe();
   }, []);
   const handleSet = async () => {
-    if (!newStartDate || !newEndDate) return;
+    if (!newStartDate || !newEndDate || newIsKinjyou === null) {
+      console.error("日時を入力してください。");
+      console.log(newStartDate, newEndDate, newIsKinjyou);
+      return;
+    }
     if (newStartDate >= newEndDate) {
       console.error("終了日時は開始日時より後にしてください。");
       return;
     }
     //
-    await setReservationBanPeriod(newStartDate, newEndDate);
+    await setReservationBanPeriod(newStartDate, newEndDate, newIsKinjyou);
     setNewStartDate(null);
     setNewEndDate(null);
+    setNewIsKinjyou(null);
   };
-  const handleDelete = async (startDate: Date, endDate: Date) => {
-    await deleteReservationBanPeriod(startDate, endDate);
+  const handleDelete = async (
+    startDate: Date,
+    endDate: Date,
+    isKinjyou: boolean
+  ) => {
+    await deleteReservationBanPeriod(startDate, endDate, isKinjyou);
   };
   // 日付を "yyyy-MM-ddTHH:mm" 形式に変換するヘルパー関数
   const formatDateForInput = (date: Date | null): string => {
@@ -71,41 +71,55 @@ const BanPeriods = () => {
         <h2 className="mb-2 text-lg">予約禁止期間</h2>
       </div>
       <ul className="mb-2">
-        {banPeriods.map((period, index) => (
-          <li key={index} className="flex justify-between items-center mb-2">
-            <div>
+        {banPeriods.length === 0 ? (
+          <li className="text-center">なし</li>
+        ) : (
+          banPeriods.map((period, index) => (
+            <li key={index} className="flex justify-between items-center mb-2">
               <div>
-                {period.startDate.toLocaleString("ja-JP", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false, // 24時間形式
-                })}
+                <div className="font-bold">
+                  {period.isKinjyou ? "金城" : "名工"}
+                </div>
+                <div>
+                  {period.startDate.toLocaleString("ja-JP", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false, // 24時間形式
+                  })}
+                </div>
+                <div>
+                  〜{" "}
+                  {period.endDate.toLocaleString("ja-JP", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false, // 24時間形式
+                  })}
+                </div>
               </div>
-              <div>
-                〜{" "}
-                {period.endDate.toLocaleString("ja-JP", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false, // 24時間形式
-                })}
-              </div>
-            </div>
-            <button
-              className="text-red-500 border border-red-500 rounded p-1"
-              onClick={() => handleDelete(period.startDate, period.endDate)}
-            >
-              削除
-            </button>
-          </li>
-        ))}
+              <button
+                className="text-red-500 border border-red-500 rounded p-1"
+                onClick={() =>
+                  handleDelete(
+                    period.startDate,
+                    period.endDate,
+                    period.isKinjyou
+                  )
+                }
+              >
+                削除
+              </button>
+            </li>
+          ))
+        )}
       </ul>
-      <h2 className="flex justify-center items-center mb-2 text-lg">
+
+      <h2 className="flex justify-center items-center my-2 text-lg">
         予約禁止期間を設定
       </h2>
       <div className="mb-2">
@@ -115,7 +129,7 @@ const BanPeriods = () => {
             className="border rounded p-1 w-full"
             type="datetime-local"
             value={formatDateForInput(newStartDate)}
-            onChange={handleStartDateChange}
+            onChange={(e) => setNewStartDate(new Date(e.target.value))}
           />
         </div>
         <div className="mb-2">
@@ -124,8 +138,28 @@ const BanPeriods = () => {
             className="border rounded p-1 w-full"
             type="datetime-local"
             value={formatDateForInput(newEndDate)}
-            onChange={handleEndDateChange}
+            onChange={(e) => setNewEndDate(new Date(e.target.value))}
           />
+        </div>
+        <div className="mb-2 flex justify-around">
+          <div>
+            <label>名工学スタ:</label>
+            <input
+              className="border rounded p-1 ml-2"
+              type="checkbox"
+              checked={newIsKinjyou === null ? false : !newIsKinjyou} // nullの場合はチェックなし
+              onChange={(e) => setNewIsKinjyou(!e.target.checked)}
+            />
+          </div>
+          <div>
+            <label>金城学スタ:</label>
+            <input
+              className="border rounded p-1 ml-2"
+              type="checkbox"
+              checked={newIsKinjyou === null ? false : newIsKinjyou} // nullの場合はチェックなし
+              onChange={(e) => setNewIsKinjyou(e.target.checked)}
+            />
+          </div>
         </div>
       </div>
       <div className="flex justify-end">

@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 
 interface CreateReservationProps {
   members: Member[];
-  isKinjyou?: boolean;
+  isKinjyou: boolean;
 }
 
 const CreateReservation: React.FC<CreateReservationProps> = ({

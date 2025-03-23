@@ -16,7 +16,7 @@ interface CalendarProps {
   reservations: Reservation[];
   selectedHours: boolean[][];
   onHourClick: (dayIndex: number, timeIndex: number) => void;
-  isKinjyou?: boolean;
+  isKinjyou: boolean;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -115,6 +115,7 @@ const Calendar: React.FC<CalendarProps> = ({
                         isSelected={selectedHours[dayIndex][timeIndex]}
                         isReserved={reservedHours[dayIndex][timeIndex]}
                         onClick={() => onHourClick(dayIndex, timeIndex)}
+                        isKinjyou={isKinjyou}
                       />
                     )
                   )}

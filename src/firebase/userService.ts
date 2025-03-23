@@ -693,7 +693,8 @@ export const getLiveDay2 = async (): Promise<Date | undefined> => {
 // 予約禁止期間を設定する関数
 export const setReservationBanPeriod = async (
   startDate: Date,
-  endDate: Date
+  endDate: Date, 
+  isKinjyou: boolean
 ): Promise<void> => {
   try {
     const docRef = doc(db, "setting", "reservationBanPeriod");
@@ -703,7 +704,7 @@ export const setReservationBanPeriod = async (
     const existingBanPeriods = banPeriodDocSnap.data()?.periods || []; // 既存の禁止期間を配列として取得
 
     // 新しい禁止期間を追加
-    existingBanPeriods.push({ startDate, endDate });
+    existingBanPeriods.push({ startDate, endDate, isKinjyou });
 
     // ドキュメントが存在しない場合は新規作成
     if (!banPeriodDocSnap.exists()) {
@@ -725,6 +726,7 @@ export const getReservationBanPeriod = async (): Promise<
   | {
       startDate: Date;
       endDate: Date;
+      isKinjyou: boolean;
     }[]
   | undefined
 > => {
@@ -737,6 +739,7 @@ export const getReservationBanPeriod = async (): Promise<
     const banPeriods = banPeriodsData.map((period: any) => ({
       startDate: period.startDate.toDate(),
       endDate: period.endDate.toDate(),
+      isKinjyou: period.isKinjyou,
     }));
 
     return banPeriods; // 配列を返す
@@ -748,7 +751,8 @@ export const getReservationBanPeriod = async (): Promise<
 // 予約禁止期間を削除する関数
 export const deleteReservationBanPeriod = async (
   startDate: Date,
-  endDate: Date
+  endDate: Date, 
+  isKinjyou: boolean
 ): Promise<void> => {
   try {
     const docRef = doc(db, "setting", "reservationBanPeriod");
@@ -761,7 +765,8 @@ export const deleteReservationBanPeriod = async (
       const periodEnd = period.endDate.toDate(); // Firestore の Timestamp から Date に変換
       return !(
         periodStart.getTime() === startDate.getTime() &&
-        periodEnd.getTime() === endDate.getTime()
+        periodEnd.getTime() === endDate.getTime()&&
+        period.isKinjyou === isKinjyou
       );
     });
 
