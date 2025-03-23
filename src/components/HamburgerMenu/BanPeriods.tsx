@@ -3,9 +3,14 @@ import {
   setReservationBanPeriod,
   getReservationBanPeriod,
   deleteReservationBanPeriod,
+  getAllPeriodReservations,
+  getAllPeriodReservationsKinjyou,
 } from "../../firebase/userService";
 import { db } from "../../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
+import { Reservation } from "../../types/type";
+import { useWeekDays } from "../../utils/utils";
+import Swal from "sweetalert2";
 
 interface BanPeriodsProps {}
 
@@ -16,6 +21,44 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
   const [banPeriods, setBanPeriods] = useState<
     { startDate: Date; endDate: Date; isKinjyou: boolean }[]
   >([]);
+  const [reservations, setReservations] = useState<
+    { id: string; names: string[]; date: Date }[]
+  >([]);
+  const [reservationsKinjyou, setReservationsKinjyou] = useState<
+    { id: string; names: string[]; date: Date }[]
+  >([]);
+  useEffect(() => {
+    const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
+    const unsubscribe = onSnapshot(collectionRef, async () => {
+      try {
+        const newReservations = await getAllPeriodReservationsKinjyou();
+        if (newReservations) {
+          setReservationsKinjyou(newReservations);
+        } else {
+          console.warn("予約情報が取得できませんでした。");
+        }
+      } catch (error) {
+        console.error("予約情報の取得に失敗しました:", error);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+  useEffect(() => {
+    const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
+    const unsubscribe = onSnapshot(collectionRef, async () => {
+      try {
+        const newReservations = await getAllPeriodReservations();
+        if (newReservations) {
+          setReservations(newReservations);
+        } else {
+          console.warn("予約情報が取得できませんでした。");
+        }
+      } catch (error) {
+        console.error("予約情報の取得に失敗しました:", error);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   useEffect(() => {
     const collectionRef = collection(db, "setting");
     const unsubscribe = onSnapshot(collectionRef, async () => {
@@ -32,17 +75,26 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
     });
     return () => unsubscribe();
   }, []);
+  // 日付を "yyyy-MM-ddTHH:mm" 形式に変換するヘルパー関数
+  const formatDateForInput = (date: Date | null): string => {
+    if (!date) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // 月は0から始まるため +1
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`; // フォーマットを整形
+  };
   const handleSet = async () => {
     if (!newStartDate || !newEndDate || newIsKinjyou === null) {
-      console.error("日時を入力してください。");
-      console.log(newStartDate, newEndDate, newIsKinjyou);
+      Swal.fire("エラー", "日時を入力してください。", "error");
       return;
     }
     if (newStartDate >= newEndDate) {
-      console.error("終了日時は開始日時より後にしてください。");
+      Swal.fire("エラー", "終了日時は開始日時より後にしてください。", "error");
       return;
     }
-    //
+    
     await setReservationBanPeriod(newStartDate, newEndDate, newIsKinjyou);
     setNewStartDate(null);
     setNewEndDate(null);
@@ -54,16 +106,6 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
     isKinjyou: boolean
   ) => {
     await deleteReservationBanPeriod(startDate, endDate, isKinjyou);
-  };
-  // 日付を "yyyy-MM-ddTHH:mm" 形式に変換するヘルパー関数
-  const formatDateForInput = (date: Date | null): string => {
-    if (!date) return "";
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // 月は0から始まるため +1
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`; // フォーマットを整形
   };
   return (
     <div>

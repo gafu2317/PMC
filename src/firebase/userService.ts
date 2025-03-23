@@ -230,19 +230,6 @@ export const getAllReservations = async (
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
-    // const oneYearAgo = new Date();
-    // oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); // 一年前の日付を計算
-
-    // const oldReservations = reservationsDocs.docs.filter((doc) => {
-    //   const reservationDate = doc.data().date.toDate(); // Firestoreの日付をJavaScriptのDateオブジェクトに変換
-    //   return reservationDate < oneYearAgo; // 一年前より古い予約をフィルタリング
-    // });
-
-    // // 古い予約を削除
-    // for (const oldDoc of oldReservations) {
-    //   await deleteReservation(oldDoc.id);
-    // }
-
     const reservations = reservationsDocs.docs
       .map((doc) => ({
         id: doc.id,
@@ -261,7 +248,7 @@ export const getAllReservations = async (
     console.error("予約の取得に失敗しました:", error);
   }
 };
-// 予約情報を取得する関数(未完成)
+// 予約情報を取得する関数
 export const getAllReservationsKinjyou = async (
   weekDays: {
     date: string; // "月/日" の形式
@@ -273,19 +260,6 @@ export const getAllReservationsKinjyou = async (
   try {
     const reservationsColRef = collection(db, "reservationsKinjyou"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
-
-    // const oneYearAgo = new Date();
-    // oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1); // 一年前の日付を計算
-
-    // const oldReservations = reservationsDocs.docs.filter((doc) => {
-    //   const reservationDate = doc.data().date.toDate(); // Firestoreの日付をJavaScriptのDateオブジェクトに変換
-    //   return reservationDate < oneYearAgo; // 一年前より古い予約をフィルタリング
-    // });
-
-    // // 古い予約を削除
-    // for (const oldDoc of oldReservations) {
-    //   await deleteReservation(oldDoc.id);
-    // }
 
     const reservations = reservationsDocs.docs
       .map((doc) => ({
@@ -306,7 +280,7 @@ export const getAllReservationsKinjyou = async (
   }
 };
 
-//指定した期間の予約を取得する関数
+//指定した期間の予約を取得する関数(dayIndexとtimeIndexなし)
 export const getReservationsByDateRange = async (
   startDate: Date,
   endDate: Date
@@ -333,7 +307,7 @@ export const getReservationsByDateRange = async (
     return [];
   }
 };
-//指定した期間の予約を取得する関数
+//指定した期間の予約を取得する関数(dayIndexとtimeIndexなし)
 export const getReservationsByDateRangeKnjyou = async (
   startDate: Date,
   endDate: Date
@@ -361,7 +335,7 @@ export const getReservationsByDateRangeKnjyou = async (
   }
 };
 
-//全ての期間の予約を取得する関数
+//全ての期間の予約を取得する関数(dayIndexとtimeIndexなし)
 export const getAllPeriodReservations = async (): Promise<
   { id: string; names: string[]; date: Date }[]
 > => {
@@ -382,7 +356,7 @@ export const getAllPeriodReservations = async (): Promise<
     return [];
   }
 };
-//全ての期間の予約を取得する関数
+//全ての期間の予約を取得する関数(dayIndexとtimeIndexなし)
 export const getAllPeriodReservationsKinjyou = async (): Promise<
   { id: string; names: string[]; date: Date }[]
 > => {

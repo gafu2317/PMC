@@ -4,6 +4,8 @@ import {
   timeSlots,
   slots,
   slotsKinjyou,
+  timeSlotsKinjyou,
+  timeEndSlotsKinjyou,
   isDuplicate,
 } from "../../utils/utils";
 import { Reservation } from "../../types/type";
@@ -70,7 +72,7 @@ const ReservationDisplay: React.FC<ReservationDisplayProps> = ({
                           isDuplicates[dayIndex][timeIndex] ? "bg-red-300" : ""
                         }`}
                       >
-                        {isKinjyou ? slotsKinjyou[timeIndex] : slots[timeIndex]}
+                        {isKinjyou ? slotsKinjyou[timeIndex] +"　"+ timeSlotsKinjyou[timeIndex]+"~"+timeEndSlotsKinjyou[timeIndex] : slots[timeIndex]}
                         {isDuplicates[dayIndex][timeIndex]
                           ? "　　重複してます！"
                           : ""}
