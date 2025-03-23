@@ -218,14 +218,14 @@ export const deleteReservationKinjyou = async (id: string): Promise<void> => {
 };
 
 // 予約情報を取得する関数
-export const getAllReservations = async ( weekDays: {
+export const getAllReservations = async (
+  weekDays: {
     date: string; // "月/日" の形式
     day: number; // 日
     month: number; // 月
     year: number; // 年
-  }[]): Promise<
-  Reservation[] | undefined
-> => {
+  }[]
+): Promise<Reservation[] | undefined> => {
   try {
     const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
@@ -689,3 +689,88 @@ export const getLiveDay2 = async (): Promise<Date | undefined> => {
     console.error("ライブの日付の取得に失敗しました:", error);
   }
 };
+
+// 予約禁止期間を設定する関数
+export const setReservationBanPeriod = async (
+  startDate: Date,
+  endDate: Date
+): Promise<void> => {
+  try {
+    const docRef = doc(db, "setting", "reservationBanPeriod");
+
+    // 現在の禁止期間を取得
+    const banPeriodDocSnap = await getDoc(docRef);
+    const existingBanPeriods = banPeriodDocSnap.data()?.periods || []; // 既存の禁止期間を配列として取得
+
+    // 新しい禁止期間を追加
+    existingBanPeriods.push({ startDate, endDate });
+
+    // ドキュメントが存在しない場合は新規作成
+    if (!banPeriodDocSnap.exists()) {
+      await setDoc(docRef, { periods: existingBanPeriods });
+    } else {
+      // Firestore に更新
+      await updateDoc(docRef, {
+        periods: existingBanPeriods,
+      });
+    }
+    console.log("予約禁止期間が設定されました。");
+  } catch (error) {
+    console.error("予約禁止期間の設定に失敗しました:", error);
+  }
+};
+
+// 予約禁止期間を取得する関数
+export const getReservationBanPeriod = async (): Promise<
+  | {
+      startDate: Date;
+      endDate: Date;
+    }[]
+  | undefined
+> => {
+  try {
+    const banPeriodDocRef = doc(db, "setting", "reservationBanPeriod");
+    const banPeriodDocSnap = await getDoc(banPeriodDocRef);
+    
+    // すべての禁止期間を取得
+    const banPeriodsData = banPeriodDocSnap.data()?.periods || [];
+    const banPeriods = banPeriodsData.map((period: any) => ({
+      startDate: period.startDate.toDate(),
+      endDate: period.endDate.toDate(),
+    }));
+
+    return banPeriods; // 配列を返す
+  } catch (error) {
+    console.error("予約禁止期間の取得に失敗しました:", error);
+  }
+};
+
+// 予約禁止期間を削除する関数
+export const deleteReservationBanPeriod = async (
+  startDate: Date,
+  endDate: Date
+): Promise<void> => {
+  try {
+    const docRef = doc(db, "setting", "reservationBanPeriod");
+    const banPeriodDocSnap = await getDoc(docRef);
+    const existingBanPeriods = banPeriodDocSnap.data()?.periods || []; // 既存の禁止期間を配列として取得
+
+    // 指定された禁止期間を削除
+    const updatedBanPeriods = existingBanPeriods.filter((period: any) => {
+      const periodStart = period.startDate.toDate(); // Firestore の Timestamp から Date に変換
+      const periodEnd = period.endDate.toDate(); // Firestore の Timestamp から Date に変換
+      return !(
+        periodStart.getTime() === startDate.getTime() &&
+        periodEnd.getTime() === endDate.getTime()
+      );
+    });
+
+    // Firestore に更新
+    await updateDoc(docRef, {
+      periods: updatedBanPeriods,
+    });
+    console.log("予約禁止期間が削除されました。");
+  } catch (error) {
+    console.error("予約禁止期間の削除に失敗しました:", error);
+  }
+}

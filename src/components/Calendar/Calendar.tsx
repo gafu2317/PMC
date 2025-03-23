@@ -165,6 +165,7 @@ const Calendar: React.FC<CalendarProps> = ({
                         isSelected={selectedHours[dayIndex][timeIndex]}
                         isReserved={reservedHours[dayIndex][timeIndex]}
                         onClick={() => onHourClick(dayIndex, timeIndex)}
+                        isKinjyou={isKinjyou}
                       />
                     )
                   )}

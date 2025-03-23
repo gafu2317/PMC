@@ -10,3 +10,4 @@ export {default as ChangePassword} from './ChangePassword';
 export {default as MakePriority} from './MakePriority';
 export {default as LiveDay} from './LiveDay';
 export {default as TwoWeekBooking} from './TwoWeekBooking';
+export {default as BanPeriods} from './BanPeriods';
