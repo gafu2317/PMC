@@ -122,7 +122,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             }
           } else {
             const weekDays = getWeekDays(new Date());
-            if(!isTwoWeekBookingEnabled && day > weekDays[7].day){
+            const lastDateOfWeek = new Date(weekDays[7].year, weekDays[7].month - 1, weekDays[7].day);
+            if(!isTwoWeekBookingEnabled && date > lastDateOfWeek){
               Swal.fire({
                 icon: "warning",
                 title: "エラー",
@@ -131,7 +132,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
               });
               return;
             }
-            // 当日でない場合はそのまま予約を追加
             reservations.push({
               id: uuidv4(),
               names: selectedNames,
