@@ -1,6 +1,6 @@
 // BookingContext.tsx
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { setPriorityFlag } from "../firebase/userService";
+import { setTwoWeeksFlag } from "../firebase/userService";
 import { onSnapshot, doc } from "firebase/firestore"; 
 import { db } from "../firebase/firebase";
 
@@ -33,7 +33,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const toggleTwoWeekBooking = async () => {
     const newTwoWeekBookingState = !isTwoWeekBookingEnabled;
-    await setPriorityFlag(newTwoWeekBookingState);
+    await setTwoWeeksFlag(newTwoWeekBookingState);
     setIsTwoWeekBookingEnabled((prev) => !prev);
   };
 
