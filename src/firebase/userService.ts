@@ -667,7 +667,7 @@ export const getLiveDay2 = async (): Promise<Date | undefined> => {
 // 予約禁止期間を設定する関数
 export const setReservationBanPeriod = async (
   startDate: Date,
-  endDate: Date, 
+  endDate: Date,
   isKinjyou: boolean
 ): Promise<void> => {
   try {
@@ -707,7 +707,7 @@ export const getReservationBanPeriod = async (): Promise<
   try {
     const banPeriodDocRef = doc(db, "setting", "reservationBanPeriod");
     const banPeriodDocSnap = await getDoc(banPeriodDocRef);
-    
+
     // すべての禁止期間を取得
     const banPeriodsData = banPeriodDocSnap.data()?.periods || [];
     const banPeriods = banPeriodsData.map((period: any) => ({
@@ -725,7 +725,7 @@ export const getReservationBanPeriod = async (): Promise<
 // 予約禁止期間を削除する関数
 export const deleteReservationBanPeriod = async (
   startDate: Date,
-  endDate: Date, 
+  endDate: Date,
   isKinjyou: boolean
 ): Promise<void> => {
   try {
@@ -739,7 +739,7 @@ export const deleteReservationBanPeriod = async (
       const periodEnd = period.endDate.toDate(); // Firestore の Timestamp から Date に変換
       return !(
         periodStart.getTime() === startDate.getTime() &&
-        periodEnd.getTime() === endDate.getTime()&&
+        periodEnd.getTime() === endDate.getTime() &&
         period.isKinjyou === isKinjyou
       );
     });
@@ -752,4 +752,26 @@ export const deleteReservationBanPeriod = async (
   } catch (error) {
     console.error("予約禁止期間の削除に失敗しました:", error);
   }
-}
+};
+
+//優先権フラグを設定する関数
+export const setPriorityFlag = async (priorityFlag: boolean): Promise<void> => {
+  try {
+    const docRef = doc(db, "setting", "priorityFlag");
+    await updateDoc(docRef, { priorityFlag });
+    console.log("優先権フラグが設定されました。");
+  } catch (error) {
+    console.error("優先権フラグの設定に失敗しました:", error);
+  }
+};
+
+//優先権フラグを取得する関数
+export const getPriorityFlag = async (): Promise<boolean | undefined> => {
+  try {
+    const priorityFlagDocRef = doc(db, "setting", "priorityFlag");
+    const priorityFlagDocSnap = await getDoc(priorityFlagDocRef);
+    return priorityFlagDocSnap.data()?.priorityFlag;
+  } catch (error) {
+    console.error("優先権フラグの取得に失敗しました:", error);
+  }
+};

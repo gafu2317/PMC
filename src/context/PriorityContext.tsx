@@ -1,6 +1,7 @@
 // PriorityContext.tsx
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import Swal from "sweetalert2";
+import { setPriorityFlag, getPriorityFlag } from "../firebase/userService"; // ここで関数をインポート
 
 // Contextの作成
 const PriorityContext = createContext<
@@ -17,14 +18,25 @@ export const PriorityProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isPriority, setIsPriority] = useState<boolean>(false);
 
-  const togglePriority = () => {
+  // 初期状態をFirestoreから取得
+  useEffect(() => {
+    const fetchPriorityFlag = async () => {
+      const priorityFlag = await getPriorityFlag();
+      setIsPriority(!!priorityFlag); // undefinedの場合はfalseに変換
+    };
+    fetchPriorityFlag();
+  }, []);
+
+  const togglePriority = async () => {
+    const newPriorityState = !isPriority; // 状態を反転
+    await setPriorityFlag(newPriorityState); // Firestoreに新しい状態を設定
     Swal.fire({
       icon: "success",
-      title: isPriority ? "無効にしました" : "有効にしました",
+      title: newPriorityState ? "有効にしました" : "無効にしました",
       showConfirmButton: false,
       timer: 1500,
     });
-    setIsPriority((prev) => !prev);
+    setIsPriority(newPriorityState); // 状態を更新
   };
 
   return (
