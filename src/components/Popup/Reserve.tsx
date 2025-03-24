@@ -123,7 +123,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           } else {
             const weekDays = getWeekDays(new Date());
             const lastDateOfWeek = new Date(weekDays[7].year, weekDays[7].month - 1, weekDays[7].day);
-            if(!isTwoWeekBookingEnabled && date > lastDateOfWeek){
+            if(!isTwoWeekBookingEnabled && date >= lastDateOfWeek){
               Swal.fire({
                 icon: "warning",
                 title: "エラー",
