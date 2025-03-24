@@ -1,7 +1,7 @@
 // PriorityContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { setPriorityFlag } from "../firebase/userService"; // ここで関数をインポート
-import { onSnapshot, doc } from "firebase/firestore"; // FirestoreのonSnapshotをインポート
+import { setPriorityFlag } from "../firebase/userService"; 
+import { onSnapshot, doc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
 

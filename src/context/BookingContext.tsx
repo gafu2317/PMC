@@ -1,5 +1,8 @@
 // BookingContext.tsx
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { setPriorityFlag } from "../firebase/userService";
+import { onSnapshot, doc } from "firebase/firestore"; 
+import { db } from "../firebase/firebase";
 
 interface BookingContextType {
   isTwoWeekBookingEnabled: boolean;
@@ -13,7 +16,24 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [isTwoWeekBookingEnabled, setIsTwoWeekBookingEnabled] = useState(false);
 
-  const toggleTwoWeekBooking = () => {
+  //初期状態をfirestoreから取得
+  useEffect(() => {
+    const docRef = doc(db, "setting", "twoWeekBookingFlag");
+
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const twoWeekBookingFlag = docSnap.data()?.twoWeekBookingFlag;
+        setIsTwoWeekBookingEnabled(!!twoWeekBookingFlag);
+      }
+    });
+
+    return () => unsubscribe();
+  }
+  , []);
+
+  const toggleTwoWeekBooking = async () => {
+    const newTwoWeekBookingState = !isTwoWeekBookingEnabled;
+    await setPriorityFlag(newTwoWeekBookingState);
     setIsTwoWeekBookingEnabled((prev) => !prev);
   };
 
