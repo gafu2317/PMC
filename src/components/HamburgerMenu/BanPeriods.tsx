@@ -3,14 +3,20 @@ import {
   setReservationBanPeriod,
   getReservationBanPeriod,
   deleteReservationBanPeriod,
-  getAllPeriodReservations,
-  getAllPeriodReservationsKinjyou,
+  // getAllPeriodReservations,
+  // getAllPeriodReservationsKinjyou,
 } from "../../firebase/userService";
 import { db } from "../../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
-import { Reservation } from "../../types/type";
-import { useWeekDays } from "../../utils/utils";
 import Swal from "sweetalert2";
+// import {
+//   timeSlots,
+//   timeEndSlots,
+//   timeSlotsKinjyou,
+//   timeEndSlotsKinjyou,
+//   getTimeIndex,
+//   getTimeIndexKinjyou,
+// } from "../../utils/utils";
 
 interface BanPeriodsProps {}
 
@@ -21,44 +27,94 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
   const [banPeriods, setBanPeriods] = useState<
     { startDate: Date; endDate: Date; isKinjyou: boolean }[]
   >([]);
-  const [reservations, setReservations] = useState<
-    { id: string; names: string[]; date: Date }[]
-  >([]);
-  const [reservationsKinjyou, setReservationsKinjyou] = useState<
-    { id: string; names: string[]; date: Date }[]
-  >([]);
-  useEffect(() => {
-    const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const newReservations = await getAllPeriodReservationsKinjyou();
-        if (newReservations) {
-          setReservationsKinjyou(newReservations);
-        } else {
-          console.warn("予約情報が取得できませんでした。");
-        }
-      } catch (error) {
-        console.error("予約情報の取得に失敗しました:", error);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-  useEffect(() => {
-    const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const newReservations = await getAllPeriodReservations();
-        if (newReservations) {
-          setReservations(newReservations);
-        } else {
-          console.warn("予約情報が取得できませんでした。");
-        }
-      } catch (error) {
-        console.error("予約情報の取得に失敗しました:", error);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  // const [reservations, setReservations] = useState<
+  //   { id: string; names: string[]; startDate: Date; endDate: Date }[]
+  // >([]);
+  // const [reservationsKinjyou, setReservationsKinjyou] = useState<
+  //   { id: string; names: string[]; startDate: Date; endDate: Date }[]
+  // >([]);
+  // useEffect(() => {
+  //   const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
+  //   const unsubscribe = onSnapshot(collectionRef, async () => {
+  //     try {
+  //       const newReservations = await getAllPeriodReservationsKinjyou();
+  //       if (newReservations) {
+  //         const newArray = newReservations.map((reservation) => {
+  //           const timeIndex = getTimeIndex(reservation.date);
+  //           const startTime = timeSlots[timeIndex];
+  //           const endTime = timeEndSlots[timeIndex];
+  //           const startDate = new Date(
+  //             reservation.date.getFullYear(),
+  //             reservation.date.getMonth(),
+  //             reservation.date.getDate(),
+  //             parseInt(startTime.split(":")[0], 10),
+  //             parseInt(startTime.split(":")[1], 10)
+  //           );
+  //           const endDate = new Date(
+  //             reservation.date.getFullYear(),
+  //             reservation.date.getMonth(),
+  //             reservation.date.getDate(),
+  //             parseInt(endTime.split(":")[0], 10),
+  //             parseInt(endTime.split(":")[1], 10)
+  //           );
+  //           return{
+  //             id: reservation.id,
+  //             names: reservation.names,
+  //             startDate: startDate,
+  //             endDate: endDate,
+  //           };
+  //         });
+  //         setReservations(newArray);
+  //       } else {
+  //         console.warn("予約情報が取得できませんでした。");
+  //       }
+  //     } catch (error) {
+  //       console.error("予約情報の取得に失敗しました:", error);
+  //     }
+  //   });
+  //   return () => unsubscribe();
+  // }, []);
+  // useEffect(() => {
+  //   const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
+  //   const unsubscribe = onSnapshot(collectionRef, async () => {
+  //     try {
+  //       const newReservations = await getAllPeriodReservations();
+  //       if (newReservations) {
+  //         const newArray = newReservations.map((reservation) => {
+  //           const timeIndex = getTimeIndexKinjyou(reservation.date);
+  //           const startTime = timeSlotsKinjyou[timeIndex];
+  //           const endTime = timeEndSlotsKinjyou[timeIndex];
+  //           const startDate = new Date(
+  //             reservation.date.getFullYear(),
+  //             reservation.date.getMonth(),
+  //             reservation.date.getDate(),
+  //             parseInt(startTime.split(":")[0], 10),
+  //             parseInt(startTime.split(":")[1], 10)
+  //           );
+  //           const endDate = new Date(
+  //             reservation.date.getFullYear(),
+  //             reservation.date.getMonth(),
+  //             reservation.date.getDate(),
+  //             parseInt(endTime.split(":")[0], 10),
+  //             parseInt(endTime.split(":")[1], 10)
+  //           );
+  //           return{
+  //             id: reservation.id,
+  //             names: reservation.names,
+  //             startDate: startDate,
+  //             endDate: endDate,
+  //           };
+  //         });
+  //         setReservationsKinjyou(newArray);
+  //       } else {
+  //         console.warn("予約情報が取得できませんでした。");
+  //       }
+  //     } catch (error) {
+  //       console.error("予約情報の取得に失敗しました:", error);
+  //     }
+  //   });
+  //   return () => unsubscribe();
+  // }, []);
   useEffect(() => {
     const collectionRef = collection(db, "setting");
     const unsubscribe = onSnapshot(collectionRef, async () => {
@@ -94,7 +150,7 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
       Swal.fire("エラー", "終了日時は開始日時より後にしてください。", "error");
       return;
     }
-    
+
     await setReservationBanPeriod(newStartDate, newEndDate, newIsKinjyou);
     setNewStartDate(null);
     setNewEndDate(null);
