@@ -90,6 +90,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           const time = timeSlotsArray[timeIndex];
           const [hour, minute] = time.split(":").map((str) => parseInt(str));
           const date = new Date(year, month - 1, day, hour, minute);
+          //予約日のみ（時間は含まない）
+          const dateOnly = new Date(year, month - 1, day);
           // 過去の日時は予約できない
           if (date < new Date()) {
             Swal.fire({
@@ -123,7 +125,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           } else {
             const weekDays = getWeekDays(new Date());
             const lastDateOfWeek = new Date(weekDays[7].year, weekDays[7].month - 1, weekDays[7].day);
-            if(!isTwoWeekBookingEnabled && date > lastDateOfWeek){
+            if(!isTwoWeekBookingEnabled && dateOnly > lastDateOfWeek){
               Swal.fire({
                 icon: "warning",
                 title: "エラー",
