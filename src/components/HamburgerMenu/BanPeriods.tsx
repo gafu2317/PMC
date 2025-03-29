@@ -3,20 +3,21 @@ import {
   setReservationBanPeriod,
   getReservationBanPeriod,
   deleteReservationBanPeriod,
-  // getAllPeriodReservations,
-  // getAllPeriodReservationsKinjyou,
+  getAllPeriodReservations,
+  getAllPeriodReservationsKinjyou,
+  deleteReservation,
 } from "../../firebase/userService";
 import { db } from "../../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
 import Swal from "sweetalert2";
-// import {
-//   timeSlots,
-//   timeEndSlots,
-//   timeSlotsKinjyou,
-//   timeEndSlotsKinjyou,
-//   getTimeIndex,
-//   getTimeIndexKinjyou,
-// } from "../../utils/utils";
+import {
+  timeSlots,
+  timeEndSlots,
+  timeSlotsKinjyou,
+  timeEndSlotsKinjyou,
+  getTimeIndex,
+  getTimeIndexKinjyou,
+} from "../../utils/utils";
 
 interface BanPeriodsProps {}
 
@@ -27,94 +28,94 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
   const [banPeriods, setBanPeriods] = useState<
     { startDate: Date; endDate: Date; isKinjyou: boolean }[]
   >([]);
-  // const [reservations, setReservations] = useState<
-  //   { id: string; names: string[]; startDate: Date; endDate: Date }[]
-  // >([]);
-  // const [reservationsKinjyou, setReservationsKinjyou] = useState<
-  //   { id: string; names: string[]; startDate: Date; endDate: Date }[]
-  // >([]);
-  // useEffect(() => {
-  //   const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
-  //   const unsubscribe = onSnapshot(collectionRef, async () => {
-  //     try {
-  //       const newReservations = await getAllPeriodReservationsKinjyou();
-  //       if (newReservations) {
-  //         const newArray = newReservations.map((reservation) => {
-  //           const timeIndex = getTimeIndex(reservation.date);
-  //           const startTime = timeSlots[timeIndex];
-  //           const endTime = timeEndSlots[timeIndex];
-  //           const startDate = new Date(
-  //             reservation.date.getFullYear(),
-  //             reservation.date.getMonth(),
-  //             reservation.date.getDate(),
-  //             parseInt(startTime.split(":")[0], 10),
-  //             parseInt(startTime.split(":")[1], 10)
-  //           );
-  //           const endDate = new Date(
-  //             reservation.date.getFullYear(),
-  //             reservation.date.getMonth(),
-  //             reservation.date.getDate(),
-  //             parseInt(endTime.split(":")[0], 10),
-  //             parseInt(endTime.split(":")[1], 10)
-  //           );
-  //           return{
-  //             id: reservation.id,
-  //             names: reservation.names,
-  //             startDate: startDate,
-  //             endDate: endDate,
-  //           };
-  //         });
-  //         setReservations(newArray);
-  //       } else {
-  //         console.warn("予約情報が取得できませんでした。");
-  //       }
-  //     } catch (error) {
-  //       console.error("予約情報の取得に失敗しました:", error);
-  //     }
-  //   });
-  //   return () => unsubscribe();
-  // }, []);
-  // useEffect(() => {
-  //   const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
-  //   const unsubscribe = onSnapshot(collectionRef, async () => {
-  //     try {
-  //       const newReservations = await getAllPeriodReservations();
-  //       if (newReservations) {
-  //         const newArray = newReservations.map((reservation) => {
-  //           const timeIndex = getTimeIndexKinjyou(reservation.date);
-  //           const startTime = timeSlotsKinjyou[timeIndex];
-  //           const endTime = timeEndSlotsKinjyou[timeIndex];
-  //           const startDate = new Date(
-  //             reservation.date.getFullYear(),
-  //             reservation.date.getMonth(),
-  //             reservation.date.getDate(),
-  //             parseInt(startTime.split(":")[0], 10),
-  //             parseInt(startTime.split(":")[1], 10)
-  //           );
-  //           const endDate = new Date(
-  //             reservation.date.getFullYear(),
-  //             reservation.date.getMonth(),
-  //             reservation.date.getDate(),
-  //             parseInt(endTime.split(":")[0], 10),
-  //             parseInt(endTime.split(":")[1], 10)
-  //           );
-  //           return{
-  //             id: reservation.id,
-  //             names: reservation.names,
-  //             startDate: startDate,
-  //             endDate: endDate,
-  //           };
-  //         });
-  //         setReservationsKinjyou(newArray);
-  //       } else {
-  //         console.warn("予約情報が取得できませんでした。");
-  //       }
-  //     } catch (error) {
-  //       console.error("予約情報の取得に失敗しました:", error);
-  //     }
-  //   });
-  //   return () => unsubscribe();
-  // }, []);
+  const [reservations, setReservations] = useState<
+    { id: string; names: string[]; startDate: Date; endDate: Date }[]
+  >([]);
+  const [reservationsKinjyou, setReservationsKinjyou] = useState<
+    { id: string; names: string[]; startDate: Date; endDate: Date }[]
+  >([]);
+  useEffect(() => {
+    const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
+    const unsubscribe = onSnapshot(collectionRef, async () => {
+      try {
+        const newReservations = await getAllPeriodReservations();
+        if (newReservations.length > 0) {
+          const newArray = newReservations.map((reservation) => {
+            const timeIndex = getTimeIndex(reservation.date);
+            const startTime = timeSlots[timeIndex];
+            const endTime = timeEndSlots[timeIndex];
+            const startDate = new Date(
+              reservation.date.getFullYear(),
+              reservation.date.getMonth(),
+              reservation.date.getDate(),
+              parseInt(startTime.split(":")[0], 10),
+              parseInt(startTime.split(":")[1], 10)
+            );
+            const endDate = new Date(
+              reservation.date.getFullYear(),
+              reservation.date.getMonth(),
+              reservation.date.getDate(),
+              parseInt(endTime.split(":")[0], 10),
+              parseInt(endTime.split(":")[1], 10)
+            );
+            return {
+              id: reservation.id,
+              names: reservation.names,
+              startDate: startDate,
+              endDate: endDate,
+            };
+          });
+          setReservations(newArray);
+        } else {
+          console.warn("予約情報が取得できませんでした。");
+        }
+      } catch (error) {
+        console.error("予約情報の取得に失敗しました:", error);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+  useEffect(() => {
+    const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
+    const unsubscribe = onSnapshot(collectionRef, async () => {
+      try {
+        const newReservations = await getAllPeriodReservationsKinjyou();
+        if (newReservations.length > 0) {
+          const newArray = newReservations.map((reservation) => {
+            const timeIndex = getTimeIndexKinjyou(reservation.date);
+            const startTime = timeSlotsKinjyou[timeIndex];
+            const endTime = timeEndSlotsKinjyou[timeIndex];
+            const startDate = new Date(
+              reservation.date.getFullYear(),
+              reservation.date.getMonth(),
+              reservation.date.getDate(),
+              parseInt(startTime.split(":")[0], 10),
+              parseInt(startTime.split(":")[1], 10)
+            );
+            const endDate = new Date(
+              reservation.date.getFullYear(),
+              reservation.date.getMonth(),
+              reservation.date.getDate(),
+              parseInt(endTime.split(":")[0], 10),
+              parseInt(endTime.split(":")[1], 10)
+            );
+            return {
+              id: reservation.id,
+              names: reservation.names,
+              startDate: startDate,
+              endDate: endDate,
+            };
+          });
+          setReservationsKinjyou(newArray);
+        } else {
+          console.warn("予約情報が取得できませんでした。");
+        }
+      } catch (error) {
+        console.error("予約情報の取得に失敗しました:", error);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   useEffect(() => {
     const collectionRef = collection(db, "setting");
     const unsubscribe = onSnapshot(collectionRef, async () => {
@@ -149,6 +150,41 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
     if (newStartDate >= newEndDate) {
       Swal.fire("エラー", "終了日時は開始日時より後にしてください。", "error");
       return;
+    }
+
+    // 使用する予約リストを選択
+    const overlappingReservations = newIsKinjyou
+      ? reservationsKinjyou.filter(
+          (reservation) =>
+            reservation.startDate < newEndDate &&
+            reservation.endDate > newStartDate
+        )
+      : reservations.filter(
+          (reservation) =>
+            reservation.startDate < newEndDate &&
+            reservation.endDate > newStartDate
+        );
+
+    if (overlappingReservations.length > 0) {
+      // 予約がある場合、確認ダイアログを表示
+      const result = await Swal.fire({
+        title: "確認",
+        text: "この期間に予約があります。予約を削除しますか？",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "はい",
+        cancelButtonText: "いいえ",
+      });
+
+      if (result.isConfirmed) {
+        // 確認された場合、予約を削除する
+        for (const reservation of overlappingReservations) {
+          await deleteReservation(reservation.id); // 予約を削除
+        }
+      } else {
+        // 削除しない場合、処理を中止
+        return;
+      }
     }
 
     await setReservationBanPeriod(newStartDate, newEndDate, newIsKinjyou);
@@ -246,7 +282,7 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
               className="border rounded p-1 ml-2"
               type="checkbox"
               checked={newIsKinjyou === null ? false : !newIsKinjyou} // nullの場合はチェックなし
-              onChange={(e) => setNewIsKinjyou(!e.target.checked)}
+              onChange={(e) => setNewIsKinjyou(newIsKinjyou===null ? !e.target.checked : null)} // nullの場合はnullにする
             />
           </div>
           <div>
@@ -255,7 +291,7 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
               className="border rounded p-1 ml-2"
               type="checkbox"
               checked={newIsKinjyou === null ? false : newIsKinjyou} // nullの場合はチェックなし
-              onChange={(e) => setNewIsKinjyou(e.target.checked)}
+              onChange={(e) => setNewIsKinjyou(newIsKinjyou===null ? e.target.checked : null)} // nullの場合はnullにする
             />
           </div>
         </div>
