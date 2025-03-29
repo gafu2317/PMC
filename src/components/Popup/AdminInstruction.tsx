@@ -72,7 +72,15 @@ const AdminInstruction: React.FC<Props> = ({ onClose }) => {
         </ul>
 
         <h2 className="text-lg font-semibold text-gray-700 mt-6">
-          5. トラブル発生時
+          5. 学スタライブ等で学スタ予約を禁止したい時
+        </h2>
+        <ul className="list-disc list-inside ml-5">
+          <li>学スタを予約禁止にする期間を入力する</li>
+          <li>もしその期間に予約があれば削除される(確認メッセージあり)</li>
+          
+        </ul>
+        <h2 className="text-lg font-semibold text-gray-700 mt-6">
+          6. トラブル発生時
         </h2>
         <ul className="list-disc list-inside ml-5">
           <li>
@@ -86,7 +94,7 @@ const AdminInstruction: React.FC<Props> = ({ onClose }) => {
           </li>
         </ul>
         <h2 className="text-lg font-semibold text-gray-700 mt-6">
-          6. 詳しい使い方は引き継ぎ資料を参照
+          7. 詳しい使い方は引き継ぎ資料を参照
         </h2>
       </div>
     </div>
