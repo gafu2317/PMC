@@ -381,22 +381,36 @@ export const getAllPeriodReservationsKinjyou = async (): Promise<
 //　プリセットをユーザーデータに追加する関数(二次元配列のフィールドを持つには二次元配列ごと渡さないといけないっぽい？)
 export const addPresets = async (
   lineId: string,
-  presetMemberLineIds: string[]
+  presetMemberLineIds: string[],
+  presetName?: string
 ): Promise<void> => {
   try {
     const docRef = doc(db, "users", lineId);
     const docSnap = await getDoc(docRef);
-    const presetObj = { members: presetMemberLineIds }; // 新しいプリセットオブジェクト
+    // ユニークなIDを生成
+    const presetId = `${Date.now()}-${Math.random()}`;
+    // プリセットオブジェクトの定義
+    const presetObj: { id: string; membersLineIds: string[]; name?: string } = {
+      id: presetId, // IDを追加
+      membersLineIds: presetMemberLineIds,
+    };
+    // presetNameが存在する場合にのみ追加
+    if (presetName) {
+      presetObj.name = presetName;
+    }
+
     // ドキュメントが存在する場合
     if (docSnap.exists()) {
       const existingPresets = docSnap.data().presets || []; // presetsがない場合は空配列を使用
       // 新しいプリセットの重複チェック
       const isDuplicate = existingPresets.some(
-        (existingPreset: { members: string[] }) =>
-          existingPreset.members.length === presetObj.members.length &&
-          existingPreset.members.every((member) =>
-            presetObj.members.includes(member)
-          )
+        (existingPreset: { membersLineIds: string[]; name?: string }) =>
+          existingPreset.membersLineIds.length ===
+            presetObj.membersLineIds.length &&
+          existingPreset.membersLineIds.every((memberLineIds) =>
+            presetObj.membersLineIds.includes(memberLineIds)
+          ) &&
+          existingPreset.name === presetObj.name
       );
       if (!isDuplicate) {
         // 重複がなければプリセットを追加
@@ -424,7 +438,7 @@ export const addPresets = async (
 // プリセットを削除する関数
 export const deletePresets = async (
   lineId: string,
-  presetMemberLineIds: string[]
+  presetId: string
 ): Promise<void> => {
   //presetと一致するものを削除
   try {
@@ -433,11 +447,7 @@ export const deletePresets = async (
     if (docSnap.exists()) {
       const existingPresets = docSnap.data().presets || [];
       const newPresets = existingPresets.filter(
-        (existingPreset: { members: string[] }) =>
-          existingPreset.members.length !== presetMemberLineIds.length ||
-          !existingPreset.members.every((member) =>
-            presetMemberLineIds.includes(member)
-          )
+        (existingPreset: { id: string }) => existingPreset.id !== presetId // IDでフィルタリング
       );
       await setDoc(docRef, { presets: newPresets }, { merge: true });
       console.log("プリセットが削除されました。");
@@ -452,16 +462,28 @@ export const deletePresets = async (
 // プリセットを取得する関数
 export const getPresets = async (
   lineId: string
-): Promise<string[][] | undefined> => {
+): Promise<
+  { name?: string; membersLineIds: string[]; presetId: string }[] | undefined
+> => {
   try {
     const userDocRef = doc(db, "users", lineId); // usersドキュメントの参照を取得
     const userDocSnap = await getDoc(userDocRef); // ドキュメントのスナップショットを取得
 
     if (userDocSnap.exists()) {
       const presetObj = userDocSnap.data()?.presets; // データを取得し、presetsを取得
+
+      // プリセットをオブジェクトの配列に変換
       const presets = presetObj.map(
-        (preset: { members: string[] }) => preset.members
-      ); // プリセットを二次元配列に変換
+        (preset: {
+          membersLineIds: string[];
+          name?: string;
+          presetId: string;
+        }) => ({
+          name: preset.name,
+          membersLineIds: preset.membersLineIds,
+          presetId: preset.presetId,
+        })
+      );
       return presets;
     } else {
       console.log("指定されたユーザーのドキュメントは存在しません。");
@@ -472,6 +494,7 @@ export const getPresets = async (
     return undefined; // エラー時にundefinedを返す
   }
 };
+
 
 //バンドを追加する関数
 export const addBand = async (

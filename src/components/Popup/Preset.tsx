@@ -17,33 +17,40 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
   onClose,
   setSelectedMembers,
 }) => {
-  const [presetsLineId, setPresetsLineId] = useState<string[][] | undefined>(
-    undefined
-  );
-  const [presets, setPresets] = useState<string[][] | undefined>(undefined); // presetsの状態
+  const [presets, setPresets] = useState<
+    | {
+        name?: string;
+        membersLineId: string[];
+        membersName: string[];
+        presetId: string;
+      }[]
+    | undefined
+  >(undefined); // presetsの状態
+
   useEffect(() => {
     const fetchPresets = async () => {
       const data = await getPresets(myLineId); // プリセットを非同期に取得
       if (data) {
-        setPresetsLineId(data); // 取得したデータをセット
         // nameを格納するための新しい配列を作成
-        const namePresets = data.map((row) =>
-          row.map((lineId) => {
+        const namePresets = data.map((row) => ({
+          name: row.name, // presetのnameも取得
+          membersLineId: row.membersLineIds, // lineIdを取得
+          membersName: row.membersLineIds.map((lineId) => {
             const member = members.find((member) => member.lineId === lineId);
-            return member ? member.name : "データなし"; // memberが見つからない場合はlineIdをそのまま返す
-          })
-        );
-        setPresets(namePresets); // nameを含む新しいデータをセット
+            return member ? member.name : "データなし"; // memberが見つからない場合は"データなし"を返す
+          }),
+          presetId: row.presetId, // presetIdを取得
+        }));
+
+        setPresets(namePresets); //
       }
     };
     fetchPresets(); // プリセットを取得
-  }, [presetsLineId, presets]); // myLineIdやmembersが変更されたときに再実行
+  }, [myLineId, members]); // myLineIdやmembersが変更されたときに再実行
   //setPresetsLineIdとsetPresetsからpresetを削除
-  const deletePreset = (index: number) => {
-    if (presetsLineId) {
-      deletePresets(myLineId, presetsLineId[index]);
-      const newPresetsLineId = presetsLineId?.filter((_, i) => i !== index);
-      setPresetsLineId(newPresetsLineId);
+  const deletePreset = async (index: number) => {
+    if (presets) {
+      await deletePresets(myLineId, presets[index].presetId); // firebaseから削除
       const newPresets = presets?.filter((_, i) => i !== index);
       setPresets(newPresets);
     }
@@ -53,8 +60,10 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
   const handleChange = (index: number) => {
     // 現在選択されているインデックスと新しいインデックスを比較
     if (selectedIndex === index) {
+      console.log("selectedIndex", index);
       setSelectedIndex(null); // 選択を解除
     } else {
+      console.log("selectedIndex", index);
       setSelectedIndex(index); // 新しいインデックスを設定
     }
   };
@@ -63,22 +72,24 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
     if (
       selectedIndex !== null &&
       selectedIndex !== undefined &&
-      presetsLineId
+      presets
     ) {
       //lineIdからmemberの配列に変換
-      const selectedMembers = presetsLineId[selectedIndex].map((lineId) => {
-        const member = members.find((member) => member.lineId === lineId);
-        if (!member) {
-          Swal.fire({
-            icon: "warning",
-            title: "エラー",
-            text: "メンバーが見つかりませんでした、プリセットを削除してください",
-            confirmButtonText: "OK",
-          });
-          throw new Error("メンバーが見つかりませんでした");
+      const selectedMembers = presets[selectedIndex].membersLineId.map(
+        (lineId) => {
+          const member = members.find((member) => member.lineId === lineId);
+          if (!member) {
+            Swal.fire({
+              icon: "warning",
+              title: "エラー",
+              text: "メンバーが見つかりませんでした、プリセットを削除してください",
+              confirmButtonText: "OK",
+            });
+            throw new Error("メンバーが見つかりませんでした");
+          }
+          return member;
         }
-        return member;
-      });
+      );
       setSelectedMembers(selectedMembers); // 選択されたメンバーを設定
       onClose(); // ポップアップを閉じる
     } else {
@@ -116,28 +127,31 @@ const PresetPopup: React.FC<PresetPopupProps> = ({
           ) : (
             presets.map((preset, index) => (
               <div
-                key={index}
+                key={preset.presetId}
                 className="flex items-center justify-between p-1 hover:bg-blue-100 rounded"
               >
                 <label
-                  htmlFor={`${preset}-${index}`}
+                  htmlFor={`${preset.presetId}-${index}`} // IDに名前を使用
                   className="cursor-pointer user-select-none"
                 >
                   <input
                     type="checkbox"
-                    id={`${preset}-${index}`}
+                    id={`${preset.presetId}-${index}`} // IDに名前を使用
                     name="preset"
-                    value={preset.toString()}
                     checked={selectedIndex === index}
                     onChange={() => handleChange(index)}
                     className="appearance-none h-3 w-3 border border-blue-200 rounded-full checked:bg-blue-500 checked:border-transparent focus:outline-none cursor-pointer flex-shrink-0"
                   />
-                  <span className="ml-2 ">{preset.join("、")}</span>
+                  <span className="ml-2">
+                    {preset.name ? `${preset.name}：` : ""}{" "}
+                    {preset.membersName.join("、")}
+                  </span>{" "}
+                  {/* 名前とメンバーを表示 */}
                 </label>
-                {presetsLineId !== undefined && (
+                {presets !== undefined && (
                   <div className="flex items-center justify-center w-4 h-4 bg-red-500 rounded-full flex-shrink-0">
                     <button
-                      className="text-white text-xs "
+                      className="text-white text-xs"
                       onClick={() => deletePreset(index)}
                     >
                       &times;

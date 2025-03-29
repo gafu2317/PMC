@@ -29,9 +29,17 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
   isKinjyou,
 }) => {
   const weekDays = useWeekDays();
-  const {isTwoWeekBookingEnabled} = useBooking();
+  const { isTwoWeekBookingEnabled } = useBooking();
   // 選択されたメンバーを管理
-  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]); // 選択されたメンバーをMembersの配列で管理
+  const [selectedMembers, setSelectedMembers] = useState<Member[]>([]);
+  //プリセットポップアップの状態
+  const [isPresetPopup, setIsPresetPopup] = useState<boolean>(false);
+  // プリセットに登録するかどうか
+  const [isPreset, setIsPreset] = useState<boolean>(false);
+  //プリセットの名前
+  const [presetName, setPresetName] = useState<string | null>(null);
+
+  // 選択されたメンバーをMembersの配列で管理
   const handleAddSelectedMembers = (member: Member) => {
     setSelectedMembers(
       (prev) =>
@@ -40,12 +48,6 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           : [...prev, member] // メンバーを追加
     );
   };
-
-  //プリセットポップアップの状態
-  const [isPresetPopup, setIsPresetPopup] = useState<boolean>(false);
-
-  // プリセットに登録するかどうか
-  const [isPreset, setIsPreset] = useState<boolean>(false);
   // ハンドラ
   const handleIsAddPreset = () => {
     setIsPreset((prev) => !prev);
@@ -124,8 +126,12 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             }
           } else {
             const weekDays = getWeekDays(new Date());
-            const lastDateOfWeek = new Date(weekDays[7].year, weekDays[7].month - 1, weekDays[7].day);
-            if(!isTwoWeekBookingEnabled && dateOnly > lastDateOfWeek){
+            const lastDateOfWeek = new Date(
+              weekDays[7].year,
+              weekDays[7].month - 1,
+              weekDays[7].day
+            );
+            if (!isTwoWeekBookingEnabled && dateOnly > lastDateOfWeek) {
               Swal.fire({
                 icon: "warning",
                 title: "エラー",
@@ -147,9 +153,12 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
     }
     // プリセットに登録場合
     if (isPreset) {
-      // presetsの状態が更新されてからaddPresetsを呼び出す
       const newPreset = selectedMembers.map((member) => member.lineId);
-      addPresets(myLineId, newPreset);
+      await addPresets(
+        myLineId,
+        newPreset,
+        presetName === null ? undefined : presetName
+      );
     }
     //予約を追加
     await (isKinjyou
@@ -192,6 +201,17 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
           <label htmlFor="preset" className="ml-1 text-sm">
             今回のメンバーをプリセットに登録する
           </label>
+          {isPreset && (
+            <div className="flex items-center mt-2">
+              <input
+                type="text"
+                value={presetName || ""}
+                onChange={(e) => setPresetName(e.target.value)}
+                placeholder="プリセットの名前(必要ならば)"
+                className="border border-gray-300 rounded p-1 w-full"
+              />
+            </div>
+          )}
         </div>
         {/* ボタン要素 */}
         <div className="flex justify-between mt-4">
