@@ -40,7 +40,8 @@ const MemberList: React.FC<MemberListProps> = ({
             >
               <label
                 htmlFor={member.lineId}
-                className="user-select-none cursor-pointer"
+                className="user-select-none cursor-pointer flex items-center w-full"
+                onClick={() => handleAddSelectedMembers(member)}
               >
                 <input
                   type="checkbox"
@@ -49,7 +50,7 @@ const MemberList: React.FC<MemberListProps> = ({
                   onChange={() => handleAddSelectedMembers(member)}
                   className="mr-2 appearance-none h-3 w-3 border border-blue-200 rounded-full checked:bg-blue-500 checked:border-transparent focus:outline-none"
                 />
-                {member.name}
+                <span className="flex-grow">{member.name}</span>
               </label>
             </li>
           ))}
