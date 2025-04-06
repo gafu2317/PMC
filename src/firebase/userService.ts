@@ -477,11 +477,11 @@ export const getPresets = async (
         (preset: {
           membersLineIds: string[];
           name?: string;
-          presetId: string;
+          id: string;
         }) => ({
           name: preset.name,
           membersLineIds: preset.membersLineIds,
-          presetId: preset.presetId,
+          presetId: preset.id,
         })
       );
       return presets;
