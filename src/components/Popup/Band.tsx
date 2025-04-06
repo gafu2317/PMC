@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { Band, Member } from "../../types/type";
 import { addBand, addPresets, updateBand } from "../../firebase/userService";
 import { MemberList } from "../Forms";
-import Swal from "sweetalert2";
+import {
+  showError,
+  showWarning,
+  showSuccess,
+  showConfirm,
+} from "../../utils/Swal";
 
 interface BandPopupProps {
   myLineId: string;
@@ -47,12 +52,7 @@ const BandPopup: React.FC<BandPopupProps> = ({
   };
   const handleAddselectedBand = (band: Band) => {
     if (!band.memberIds.includes(myLineId)) {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "自分が所属していないバンドは編集できません。",
-        confirmButtonText: "OK",
-      });
+      showWarning("自分が所属していないバンドは編集できません。");
       return;
     }
     if (selectedBand === band) {
@@ -70,12 +70,7 @@ const BandPopup: React.FC<BandPopupProps> = ({
       );
       updateBand(selectedBand.bandId, selectedBand.name, newMemberIds);
     } else {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "必要な情報を選択してください。",
-        confirmButtonText: "OK",
-      });
+      showError("必要な情報を選択してください。");
     }
   };
   // バンドからメンバーを削除する関数
@@ -86,34 +81,19 @@ const BandPopup: React.FC<BandPopupProps> = ({
         (memberId) => !deleteMemberIds.includes(memberId)
       );
       if (newMemberIds.length === 0) {
-        Swal.fire({
-          icon: "warning",
-          title: "エラー",
-          text: "バンドには最低1人のメンバーが必要です。",
-          confirmButtonText: "OK",
-        });
+        showWarning("バンドには最低1人のメンバーが必要です。");
       } else {
         updateBand(selectedBand.bandId, selectedBand.name, newMemberIds);
       }
     } else {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "必要な情報を選択してください。",
-        confirmButtonText: "OK",
-      });
+      showError("必要な情報を選択してください。");
     }
   };
   const changeBandName = () => {
     if (selectedBand && bandName) {
       updateBand(selectedBand.bandId, bandName, selectedBand.memberIds);
     } else {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "必要な情報を選択してください。",
-        confirmButtonText: "OK",
-      });
+      showError("必要な情報を選択してください。");
     }
   };
 
@@ -127,13 +107,30 @@ const BandPopup: React.FC<BandPopupProps> = ({
       }
       setIsBandAddPopupVisible(false);
     } else {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "バンド名を入力してください。",
-        confirmButtonText: "OK",
-      });
+      showError("バンド名を入力してください。");
     }
+  };
+
+  //バンドをクリックしたらプリセットに追加する関数
+  const handleAddBandToPreset = (band: Band) => {
+    //自分が所属しているバンドを選択した場合
+    showConfirm(
+      `${band.name}をプリセットに追加しますか？`,
+      "プリセットに追加"
+    ).then((result) => {
+      if (result.isConfirmed) {
+        if (band.memberIds.includes(myLineId)) {
+          addPresets(myLineId, band.memberIds, band.name);
+          showSuccess("プリセットに追加しました。");
+        }
+        //自分が所属していないバンドを選択した場合
+        else {
+          showWarning(
+            "自分が所属していないバンドはプリセットに追加できません。"
+          );
+        }
+      }
+    });
   };
   return (
     <div
@@ -157,7 +154,11 @@ const BandPopup: React.FC<BandPopupProps> = ({
         </div>
         <ul>
           {bands.map((band) => (
-            <li key={band.bandId} className="border-b pb-2">
+            <li
+              key={band.bandId}
+              className="border-b pb-2"
+              onClick={() => handleAddBandToPreset(band)}
+            >
               <h3 className="text-lg font-semibold">{band.name}</h3>
               <div className="ml-4">
                 {getBandMembers(band.memberIds).map((member) => (
