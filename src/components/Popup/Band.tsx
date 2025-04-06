@@ -7,7 +7,7 @@ import {
   showWarning,
   showSuccess,
   showConfirm,
-} from "../../utils/Swal";
+} from "../../utils/swal";
 
 interface BandPopupProps {
   myLineId: string;
