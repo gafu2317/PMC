@@ -69,17 +69,6 @@ const Calendar: React.FC<CalendarProps> = ({
     <div>
       {isKinjyou ? (
         <div className="flex space-x-1">
-          {/* <div className="flex flex-col justify-between">
-              <div className="h-8"></div>
-              {Array.from({ length: timeSlotsKinjyou.length }).map(
-                (_, index) => (
-                  <div key={index} className="text-center p-1 text-xs rounded">
-                    {slotsKinjyou[index]}
-                    <br />
-                  </div>
-                )
-              )}
-            </div> */}
           <div className="grid grid-cols-9 gap-2 mb-4">
             <div className="text-center p-1 text-xs rounded"></div>
             {weekDays.map((item, index) => (

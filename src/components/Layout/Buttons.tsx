@@ -6,10 +6,9 @@ import {
   BandPopup,
 } from "../../components/Popup";
 import { Member, Band, Reservation } from "../../types/type";
-import Swal from "sweetalert2";
-// import { sendMessages } from "../../liff/liffService";
 import { usePriority } from "../../context/PriorityContext";
 import { isReservationExist } from "../../utils/utils";
+import { showError, showWarning} from "../../utils/swal";
 
 interface ButtonsProps {
   lineId: string;
@@ -44,22 +43,12 @@ const Buttons: React.FC<ButtonsProps> = ({
     //Hourが選択されているときのみポップアップを表示
     if (selectedHours.some((hours) => hours.includes(true))) {
       if (!isPriority && isReservationExist(reservations, selectedHours)) {
-        Swal.fire({
-          icon: "warning",
-          title: "エラー",
-          text: "すでに予約が存在します",
-          confirmButtonText: "OK",
-        });
+        showWarning("すでに予約が存在します");
         return;
       }
       setIsReservationPopupVisible(true);
     } else {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "予約する日時を選択してください",
-        confirmButtonText: "OK",
-      });
+      showError("予約する日時を選択してください");
     }
   };
   // 編集ポップアップの表示状態を管理
@@ -71,12 +60,7 @@ const Buttons: React.FC<ButtonsProps> = ({
     ) {
       setIsEditPopupVisible(true);
     } else {
-      Swal.fire({
-        icon: "warning",
-        title: "エラー",
-        text: "編集する予約を選択してください",
-        confirmButtonText: "OK",
-      });
+      showError("編集する予約を選択してください");
     }
   };
   // LineIdを名前に変換
@@ -85,18 +69,8 @@ const Buttons: React.FC<ButtonsProps> = ({
     return member ? member.name : "名前が登録されていません";
   };
 
-  // const handleNotification = () => {
-  //   sendMessages("Uaad36f829cb1c10a72df296f112a16dd", "通知テスト");
-  // };
-
   return (
     <div>
-      {/* <button
-        className="fixed bottom-56 right-8 p-2 bg-gray-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
-        onClick={handleNotification}
-      >
-        通知
-      </button> */}
       <button
         className="fixed bottom-40 right-8 p-2 bg-red-500 text-white rounded-full w-14 h-14 flex items-center justify-center whitespace-nowrap "
         onClick={() => setIsBandPopupVisible(true)}
@@ -132,8 +106,8 @@ const Buttons: React.FC<ButtonsProps> = ({
           myLineId={lineId}
           members={members}
           name={getName(lineId)}
-          reservations={reservations} 
-          selectedReservations={selectedReservations} 
+          reservations={reservations}
+          selectedReservations={selectedReservations}
           onClose={() => setIsEditPopupVisible(false)}
           isKinjyou={isKinjyou}
         />
