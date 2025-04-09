@@ -138,7 +138,7 @@ const BandPopup: React.FC<BandPopupProps> = ({
       onClick={onClose}
     >
       <div
-        className="bg-white  px-6 pb-6 pt-3 rounded shadow-md w-4/5 max-h-2/5 overflow-y-auto"
+        className="bg-white  px-6 pb-6 pt-3 rounded shadow-md w-4/5 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-1">
