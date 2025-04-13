@@ -11,7 +11,6 @@ import {
   CheckPaid,
   ChangePassword,
   MakePriority,
-  LiveDay,
   TwoWeekBooking,
   BanPeriods,
 } from "../HamburgerMenu/index";
@@ -71,7 +70,6 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou
   const actions = [
     "makePriority",
     "twoWeekBooking",
-    "liveDay",
     "addFineData",
     "calculate",
     "checkPaid",
@@ -106,8 +104,6 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou
         return <ChangePassword />;
       case "calculate":
         return <Calculate members={members} bands={bands} />;
-      case "liveDay":
-        return <LiveDay />;
       case "twoWeekBooking":
         return <TwoWeekBooking />;
       case "banPeriods":
@@ -209,7 +205,6 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou
                       {action === "checkPaid" && "・支払い確認"}
                       {action === "changePassword" && "・パスワード変更"}
                       {action === "calculate" && "・料金計算"}
-                      {action === "liveDay" && "・ライブ日の設定"}
                       {action === "twoWeekBooking" && "・2週間予約の設定"}
                       {action === "banPeriods" && "・予約禁止期間の設定"}
                     </li>

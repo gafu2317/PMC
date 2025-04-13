@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   getReservationsByDateRange,
+  getReservationsByDateRangeKnjyou,
   getAllPeriodReservations,
-  deleteReservation,
-  deleteFine,
-  addUnpaidFee,
-  deleteBand,
+  getAllPeriodReservationsKinjyou,
+  updateMemberFees,
 } from "../../firebase/userService";
 import { Member, Band } from "../../types/type";
-import { db } from "../../firebase/firebase"; // Firestoreのインポート
-import { doc, onSnapshot } from "firebase/firestore";
-import { showError, showSuccess} from "../../utils/swal";
+import { showError, showSuccess } from "../../utils/swal";
 
 interface CalculateProps {
   members: Member[];
@@ -20,260 +17,166 @@ interface CalculateProps {
 const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
   const [startDate, setStartDate] = useState(""); // 開始日を管理
   const [endDate, setEndDate] = useState(""); // 終了日を管理
-  const [isAll, setIsAll] = useState(false); //全て選択されているかどうか
-  const [reservations, setReservations] = useState<
-    { id: string; names: string[]; date: Date }[]
-  >([]); // 予約情報を管理
-  const [userData, setUserData] = useState<
-    {
-      name: string;
-      lineId: string;
-      fee: number;
-      fine: number;
-      performanceFee: number;
-      unPaidFee: number;
-      total: number;
-    }[]
-  >([]); // ユーザーの料金データを管理
-  const [reservationData, setReservationData] = useState<
-    { id: string; reservation: string; names: string[] }[]
-  >([]); // 予約データを管理(整形済み)
-    const [liveDay1, setLiveDay1db] = useState<Date | undefined>(undefined);
-    const [liveDay2, setLiveDay2db] = useState<Date | undefined>(undefined);
-  
-    // Firestoreからライブ日をリアルタイムで取得
-    useEffect(() => {
-      const unsubscribe = onSnapshot(doc(db, "setting", "liveDays"), (doc) => {
-        const data = doc.data();
-        if (data) {
-          if (data.liveDay1) {
-            setLiveDay1db(new Date(data.liveDay1.toDate())); // 次のライブ日
-          }
-          if (data.liveDay2) {
-            setLiveDay2db(new Date(data.liveDay2.toDate())); // 前回のライブ日
-          }
+  const [isAll, setIsAll] = useState(true); //全て選択されているかどうか
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredMembers = members.filter((member) =>
+    member.name.includes(searchTerm)
+  );
+
+  const handleCalculate = async () => {
+    // 予約を取得
+    let reservations: {
+      id: string;
+      names: string[];
+      date: Date;
+    }[] = [];
+    if (isAll) {
+      const reservationsMeikou = await getAllPeriodReservations();
+      const reservationsKinjyou = await getAllPeriodReservationsKinjyou();
+      reservations = [...reservationsMeikou, ...reservationsKinjyou];
+    } else {
+      if (startDate && endDate) {
+        if (startDate > endDate) {
+          showError("開始日は終了日よりも前の日付にしてください");
+          return;
         }
-      });
-      return () => unsubscribe(); // クリーンアップ
-    }, []);
-
-  const fetchReservation = async () => {
-    if (startDate && endDate) {
-      const fetchedReservations = await getReservationsByDateRange(
-        new Date(startDate),
-        new Date(endDate)
-      );
-      setReservations(fetchedReservations);
-      generateReservationData(fetchedReservations);
-      setIsAll(false);
+        const reservationsMeikou = await getReservationsByDateRange(
+          new Date(startDate),
+          new Date(endDate)
+        );
+        const reservationsKinjyou = await getReservationsByDateRangeKnjyou(
+          new Date(startDate),
+          new Date(endDate)
+        );
+        reservations = [...reservationsMeikou, ...reservationsKinjyou];
+      } else {
+        showError("予約を取得する期間を選択してください");
+      }
     }
-  };
+    // 学スタ料金を計算
+    // メンバーごとの料金計算用のマップを作成
+    const memberFees: { [key: string]: number } = {};
 
-  const fetchAllReservation = async () => {
-    const fetchedReservations = await getAllPeriodReservations();
-    setReservations(fetchedReservations);
-    generateReservationData(fetchedReservations);
-    setIsAll(true);
-  };
-
-  const getFine = (name: string) => {
-    const member = members.find((member) => member.name === name);
-    return member ? member.fine : 0;
-  };
-
-  const getUnpaidFee = (name: string) => {
-    const member = members.find((member) => member.name === name);
-    return member ? member.unPaidFee : 0;
-  }
-
-  const generateReservationData = (
-    reservations: { id: string; names: string[]; date: Date }[]
-  ) => {
-    const reservationData = reservations.map((reservation) => {
-      const date = reservation.date;
-      const formattedDate = `${date.getFullYear()}/${
-        date.getMonth() + 1
-      }/${date.getDate()} ${date.getHours()}:${String(
-        date.getMinutes()
-      ).padStart(2, "0")}`;
-      return {
-        id: reservation.id,
-        reservation: formattedDate,
-        names: reservation.names,
-      };
-    });
-    setReservationData(reservationData);
-  };
-
-  const changeNameToLineId = (name: string) => {
-    const member = members.find((member) => member.name === name);
-    return member ? member.lineId : "";
-  };
-
-  const generateUserData =(
-    reservations: { id: string; names: string[]; date: Date }[]
-  ) => {
-    const userData: {
-      name: string;
-      lineId: string;
-      fee: number;
-      fine: number;
-      performanceFee: number;
-      unPaidFee: number;
-      total: number;
-    }[] = []; // 名前と料金のオブジェクトの配列
-    // バンドメンバーを取得
-    const bandMemberIds = new Set(bands.map((band) => band.memberIds).flat());
-    const bandMemberNames = members.map((member) =>
-      bandMemberIds.has(member.lineId) ? member.name : ""
-    );
-    const feeMap: { [key: string]: number } = {}; // 名前ごとの料金を一時的に保持するマップ
+    // 各予約について処理
     reservations.forEach((reservation) => {
-      const feePerPerson = 100 / reservation.names.length;
+      const feePerPerson = 100 / reservation.names.length; // 一人あたりの料金
       reservation.names.forEach((name) => {
-        const member = members.find((member) => member.name === name);
-        const memberName = member ? member.name : name; // メンバー名を取得
-        feeMap[memberName] = (feeMap[memberName] || 0) + feePerPerson;
+        if (!memberFees[name]) {
+          memberFees[name] = 0;
+        }
+        memberFees[name] += feePerPerson;
       });
     });
-    // マップを配列に変換
-    for (const [name, fee] of Object.entries(feeMap)) {
-      const fine = getFine(name);
-      const performanceFee = bandMemberNames.includes(name) ? 500 : 0;
-      const roundedFee = Math.round(fee);
-      const lineId = changeNameToLineId(name);
-      const unPaidFee = getUnpaidFee(name);
-      const total = roundedFee + fine + performanceFee + unPaidFee;
-      userData.push({
-        name,
-        lineId,
-        fee: roundedFee,
-        fine,
-        performanceFee,
-        unPaidFee,
-        total,
+
+    // バンド出演費の計算（メンバーごとに500円、複数バンドでも合計500円）
+    const performanceFees: { [key: string]: number } = {};
+
+    // バンドメンバーを確認し、出演費を設定
+    bands.forEach((band) => {
+      band.memberIds.forEach((memberId) => {
+        // 既に出演費が設定されていなければ500円を設定
+        performanceFees[memberId] = 500;
       });
-    }
-    setUserData(userData); // 名前と料金のオブジェクトの配列を返す
-  };
+    });
 
-  useEffect(() => {
-    if (reservations.length > 0) {
-      generateUserData(reservations);
-    }
-  }, [reservations]);
+    // 更新対象のデータを準備
+    const updates = members.map((member) => {
+      // 学スタ使用料（予約料）を計算（小数点以下切り上げ）
+      const studyFee = memberFees[member.name]
+        ? Math.ceil(memberFees[member.name])
+        : 0;
 
-  const generateClipboardData = async () => {
-    const maxLength = Math.max(userData.length, reservationData.length);
-    let data = [];
-    for (let i = 0; i < maxLength; i++) {
-      const user = userData[i] || {
-        name: "",
-        fee: "",
-        fine: "",
-        performanceFee: "",
-        unPaidFee: "",
-        total: "",
+      // 出演費を取得（バンドに所属していれば500円、そうでなければ0円）
+      const performanceFee = performanceFees[member.lineId] || 0;
+
+      return {
+        lineId: member.lineId,
+        studyFee: studyFee,
+        performanceFee: performanceFee,
       };
-      const reservation = reservationData[i] || {
-        reservation: "",
-        names: "",
-      };
-      data.push(
-        `${reservation.reservation}\t${reservation.names}\t""\t${user.name}\t${user.fee}\t${user.performanceFee}\t${user.fine}\t${user.unPaidFee}\t${user.total}`
-      );
-    }
-    const heder =
-      "予約日時\t使用者の名前\t\t名前\t学スタ使用料\tライブ出演費\t罰金\t未払金\t合計";
-    return `${heder}\n${data.join("\n")}`;
-  };
+    });
 
-  const handleClick = async () => {
-    if (reservations.length === 0) {
-      showError("期間が選択されていないか、予約データがありません");
-      return;
+    try {
+      // 一括更新を実行（studyFeeとperformanceFeeの両方を更新）
+      await updateMemberFees(updates);
+      showSuccess(`料金計算が完了しました`);
+    } catch (error) {
+      showError("料金更新に失敗しました");
+      console.error(error);
     }
-    //クリップボードにコピー
-    const data = await generateClipboardData();
-    navigator.clipboard
-      .writeText(data)
-      .then(() => {
-        console.log("データがクリップボードにコピーされました");
-        setReservations([]);
-        setIsAll(false);
-      })
-      .catch((err) => {
-        console.error("クリップボードへのコピーに失敗しました:", err);
-        showError("クリップボードへのコピーに失敗しました");
-      });
-    //予約データを削除
-    for (const reservation of reservationData) {
-      await deleteReservation(reservation.id);
-    }
-    //バンド削除
-    for (const band of bands) {
-      await deleteBand(band.bandId);
-    }
-    //罰金を削除 & 未払い料金を追加
-    for (const user of userData) {
-      if (user.fine > 0) {
-        await deleteFine(user.lineId);
-      }
-      if (user.total > 0) {
-        await addUnpaidFee(user.lineId, user.total);
-      }
-    }
-    showSuccess("処理が終了しました");
   };
 
   return (
     <div>
       <h2 className="mb-2">料金を計算する期間を入力</h2>
-      <h3 className="text-xs">
-        現在の次回のライブ日:{" "}
-        {liveDay1 ? liveDay1.toLocaleDateString() : "読み込み中..."}
-      </h3>
-      <h3 className="text-xs">
-        現在の前回のライブ日:{" "}
-        {liveDay2 ? liveDay2.toLocaleDateString() : "読み込み中..."}
-      </h3>
-      <label className="block my-1 text-xs">開始日</label>
-      <input
-        type="date"
-        className="border rounded p-1 mb-2 w-full"
-        value={startDate}
-        onChange={(e) => setStartDate(e.target.value)}
-      />
-      <label className="block mb-1 text-xs">終了日</label>
-      <input
-        type="date"
-        className="border rounded p-1 mb-2 w-full"
-        value={endDate}
-        onChange={(e) => setEndDate(e.target.value)}
-      />
-      <div className="flex justify-around mt-4">
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <label className="block my-1 text-xs">開始日</label>
+          <input
+            type="date"
+            className="border rounded p-1 mb-2 w-full"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block mb-1 text-xs">終了日</label>
+          <input
+            type="date"
+            className="border rounded p-1 mb-2 w-full"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-around">
         <button
-          className={` text-sm rounded p-1 ${isAll ? "bg-gray-400" : "bg-gray-300"}`}
-          onClick={fetchAllReservation}
+          className={` text-sm rounded p-1 ${
+            isAll ? "bg-green-400" : "bg-gray-300"
+          }`}
+          onClick={() => setIsAll(true)}
         >
-          全ての期間を取得
+          全ての期間
         </button>
         <button
           className={` text-sm rounded p-1 ${
-            isAll || (!isAll && reservations.length === 0)
-              ? "bg-gray-300"
-              : "bg-gray-400"
+            isAll ? "bg-gray-300" : "bg-green-400"
           }`}
-          onClick={fetchReservation}
+          onClick={() => setIsAll(false)}
         >
-          指定した期間を取得
+          指定した期間
         </button>
       </div>
-      {reservations.length > 0 && <p className="p-1">データ取得しました</p>}
-      <div className="flex justify-end mt-4 items-center">
-        <button className="bg-gray-300 rounded p-1 w-16 " onClick={handleClick}>
-          決定
+      <div className="flex justify-end my-2 items-center">
+        <button
+          className="bg-gray-300 rounded p-1 w-20 "
+          onClick={() => handleCalculate()}
+        >
+          料金計算
         </button>
+      </div>
+      <input
+        type="text"
+        placeholder="名前(一部でも可)"
+        className="border rounded p-1 mb-2 w-full"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)} // 入力が変更されたときに呼び出す
+      />
+      <div className=" h-32 overflow-y-auto border rounded p-2 mb-2">
+        <ul className="">
+          {filteredMembers.map((member) => (
+            <li key={member.lineId} className="border-b py-2">
+              <span className="font-medium w-full">{member.name}</span>
+              <div className="text-sm text-gray-600 mt-1 flex items-center space-x-2">
+                <div>罰金:{member.fine}円</div>
+                <div>出演費:{member.performanceFee}円</div>
+                <div>学スタ:{member.studyFee}円</div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
