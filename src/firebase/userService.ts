@@ -820,3 +820,16 @@ export const setTwoWeeksFlag = async (twoWeeksFlag: boolean): Promise<void> => {
     console.error("２週間予約のフラグの設定に失敗しました:", error);
   }
 }
+
+//学スタ使用料を追加する関数
+export const addStudyFee = async (lineId: string, studyFee: number): Promise<void> => {
+  try {
+    const docRef = doc(db, "users", lineId);
+    const docSnap = await getDoc(docRef);
+    const existingStudyFee = docSnap.data()?.studyFee || 0; // 現在の学スタ使用料を取得
+    await setDoc(docRef, { studyFee: existingStudyFee + studyFee }, { merge: true });
+    console.log("学スタ使用料が追加されました。");
+  } catch (error) {
+    console.error("学スタ使用料の追加に失敗しました:", error);
+  }
+};

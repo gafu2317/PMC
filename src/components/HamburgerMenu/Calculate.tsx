@@ -7,11 +7,10 @@ import {
   addUnpaidFee,
   deleteBand,
 } from "../../firebase/userService";
-import { sendMessages } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
-import Swal from "sweetalert2";
 import { db } from "../../firebase/firebase"; // Firestoreのインポート
 import { doc, onSnapshot } from "firebase/firestore";
+import { showError, showSuccess} from "../../utils/swal";
 
 interface CalculateProps {
   members: Member[];
@@ -191,18 +190,8 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
 
   const handleClick = async () => {
     if (reservations.length === 0) {
-      Swal.fire({
-        icon: "error",
-        title: "期間が選択されていないか、予約データがありません",
-      });
+      showError("期間が選択されていないか、予約データがありません");
       return;
-    }
-    //料金の通知
-    for (const user of userData) {
-      await sendMessages(
-        user.lineId,
-        `学スタ使用料金等のお知らせ\n学スタ使用料: ${user.fee}円\nライブ出演費: ${user.performanceFee}円\n罰金: ${user.fine}円\n未払金: ${user.unPaidFee}円\n合計: ${user.total}円`
-      );
     }
     //クリップボードにコピー
     const data = await generateClipboardData();
@@ -215,10 +204,7 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
       })
       .catch((err) => {
         console.error("クリップボードへのコピーに失敗しました:", err);
-        Swal.fire({
-          icon: "error",
-          title: "クリップボードへのコピーに失敗しました",
-        });
+        showError("クリップボードへのコピーに失敗しました");
       });
     //予約データを削除
     for (const reservation of reservationData) {
@@ -237,10 +223,7 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
         await addUnpaidFee(user.lineId, user.total);
       }
     }
-    Swal.fire({
-      icon: "success",
-      title: "処理が終了しました",
-    });
+    showSuccess("処理が終了しました");
   };
 
   return (
@@ -270,33 +253,22 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
       />
       <div className="flex justify-around mt-4">
         <button
-          className={` rounded p-1 ${isAll ? "bg-gray-400" : "bg-gray-300"}`}
+          className={` text-sm rounded p-1 ${isAll ? "bg-gray-400" : "bg-gray-300"}`}
           onClick={fetchAllReservation}
         >
-          全ての期間
+          全ての期間を取得
         </button>
         <button
-          className={` rounded p-1 ${
+          className={` text-sm rounded p-1 ${
             isAll || (!isAll && reservations.length === 0)
               ? "bg-gray-300"
               : "bg-gray-400"
           }`}
           onClick={fetchReservation}
         >
-          指定した期間
+          指定した期間を取得
         </button>
       </div>
-      <span className="text-xs">
-        注意:決定ボタンを押すと以下が実行されます。
-      </span>
-      <ul className="list-disc ml-4 text-xs">
-        <li>各メンバーに料金の通知(現在停止中)</li>
-        <li>クリップボードにデータをコピー</li>
-        <li>指定された期間の予約データを削除</li>
-        <li>バンド削除</li>
-        <li>罰金データを削除(バンド費用等とともに未払金に追加されます)</li>
-        <li>未払い料金をデータに追加</li>
-      </ul>
       {reservations.length > 0 && <p className="p-1">データ取得しました</p>}
       <div className="flex justify-end mt-4 items-center">
         <button className="bg-gray-300 rounded p-1 w-16 " onClick={handleClick}>
