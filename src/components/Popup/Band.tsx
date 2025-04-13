@@ -51,10 +51,6 @@ const BandPopup: React.FC<BandPopupProps> = ({
     );
   };
   const handleAddselectedBand = (band: Band) => {
-    if (!band.memberIds.includes(myLineId)) {
-      showWarning("自分が所属していないバンドは編集できません。");
-      return;
-    }
     if (selectedBand === band) {
       setselectedBand(undefined);
     } else {
