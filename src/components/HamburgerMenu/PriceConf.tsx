@@ -112,7 +112,7 @@ const PriceConf: React.FC<PriceConfProps> = (
     downloadTextFile(text, `予約データ_${today}.txt`);
     // 予約データをクリップボードにコピー
     copyReservationsToClipboard(reservations);
-    // //料金の通知
+    //料金の通知
     for (const member of members) {
       await sendMessages(
         member.lineId,
