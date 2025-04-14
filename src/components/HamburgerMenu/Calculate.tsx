@@ -52,6 +52,7 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
         reservations = [...reservationsMeikou, ...reservationsKinjyou];
       } else {
         showError("予約を取得する期間を選択してください");
+        return;
       }
     }
     // 学スタ料金を計算
@@ -82,9 +83,9 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
 
     // 更新対象のデータを準備
     const updates = members.map((member) => {
-      // 学スタ使用料（予約料）を計算（小数点以下切り上げ）
+      // 学スタ使用料（予約料）を計算（小数点以下切りすて）
       const studyFee = memberFees[member.name]
-        ? Math.ceil(memberFees[member.name])
+        ? Math.floor(memberFees[member.name])
         : 0;
 
       // 出演費を取得（バンドに所属していれば500円、そうでなければ0円）

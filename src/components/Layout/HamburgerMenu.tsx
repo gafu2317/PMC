@@ -111,7 +111,7 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou
       case "banPeriods":
         return <BanPeriods />;
       case "priceConf":
-        return <PriceConf />;
+        return <PriceConf members={members} bands={bands} />;
       default:
         return null;
     }

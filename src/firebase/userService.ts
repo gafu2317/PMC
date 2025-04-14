@@ -800,3 +800,35 @@ export const updateMemberFees = async (
     throw error;
   }
 };
+
+//ユーザーの料金を未払金に追加する関数(その他の料金をゼロにする)
+export const batchUpdateUnpaidFees = async (
+  updates: { lineId: string; unPaidFee: number }[]
+): Promise<void> => {
+  try {
+    // バッチ処理の初期化
+    const batch = writeBatch(db);
+
+    // 各ユーザーの未払金を更新
+    for (const update of updates) {
+      const userRef = doc(db, "users", update.lineId);
+
+      // 現在のドキュメントを取得して存在確認（オプション）
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        console.warn(`ユーザー ${update.lineId} が存在しません`);
+        continue;
+      }
+
+      // バッチに更新操作を追加
+      batch.update(userRef, { unPaidFee: update.unPaidFee, studyFee: 0, performanceFee: 0, fine: 0 });
+    }
+
+    // バッチ処理を実行
+    await batch.commit();
+    console.log(`${updates.length}人のユーザーの未払金を更新しました`);
+  } catch (error) {
+    console.error("未払金の一括更新に失敗しました:", error);
+    throw error;
+  }
+};
