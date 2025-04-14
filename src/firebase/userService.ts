@@ -30,6 +30,8 @@ export const addUser = async (
       studentId: studentId,
       fine: 0,
       unPaidFee: 0,
+      performanceFee: 0,
+      studyFee: 0,
     });
     console.log(`ユーザーが追加されました。`);
   } catch (error) {
@@ -63,6 +65,8 @@ export const getAllUser = async (): Promise<Member[]> => {
       studentId: doc.data().studentId || 0,
       fine: doc.data().fine || 0,
       unPaidFee: doc.data().unPaidFee || 0,
+      performanceFee: doc.data().performanceFee || 0,
+      studyFee: doc.data().studyFee || 0,
     }));
     return users;
   } catch (error) {
@@ -474,11 +478,7 @@ export const getPresets = async (
 
       // プリセットをオブジェクトの配列に変換
       const presets = presetObj.map(
-        (preset: {
-          membersLineIds: string[];
-          name?: string;
-          id: string;
-        }) => ({
+        (preset: { membersLineIds: string[]; name?: string; id: string }) => ({
           name: preset.name,
           membersLineIds: preset.membersLineIds,
           presetId: preset.id,
@@ -494,7 +494,6 @@ export const getPresets = async (
     return undefined; // エラー時にundefinedを返す
   }
 };
-
 
 //バンドを追加する関数
 export const addBand = async (
@@ -642,50 +641,6 @@ export const deleteUnpaidFee = async (lineId: string): Promise<void> => {
   }
 };
 
-// 今回のライブの日付を設定する関数
-export const setLiveDay1 = async (liveDay1: Date): Promise<void> => {
-  try {
-    const docRef = doc(db, "setting", "liveDays");
-    await updateDoc(docRef, { liveDay1: liveDay1 });
-    console.log("ライブの日付が設定されました。");
-  } catch (error) {
-    console.error("ライブの日付の設定に失敗しました:", error);
-  }
-};
-
-// 今回のライブの日付を取得する関数
-export const getLiveDay1 = async (): Promise<Date | undefined> => {
-  try {
-    const liveDayDocRef = doc(db, "setting", "liveDays");
-    const liveDayDocSnap = await getDoc(liveDayDocRef);
-    console.log(liveDayDocSnap.data()?.liveDay1.toDate());
-    return liveDayDocSnap.data()?.liveDay1.toDate();
-  } catch (error) {
-    console.error("ライブの日付の取得に失敗しました:", error);
-  }
-};
-
-// 前回のライブの日付を設定する関数
-export const setLiveDay2 = async (liveDay2: Date): Promise<void> => {
-  try {
-    const docRef = doc(db, "setting", "liveDays");
-    await updateDoc(docRef, { liveDay2: liveDay2 });
-    console.log("ライブの日付が設定されました。");
-  } catch (error) {
-    console.error("ライブの日付の設定に失敗しました:", error);
-  }
-};
-
-// 前回のライブの日付を取得する関数
-export const getLiveDay2 = async (): Promise<Date | undefined> => {
-  try {
-    const liveDayDocRef = doc(db, "setting", "liveDays");
-    const liveDayDocSnap = await getDoc(liveDayDocRef);
-    return liveDayDocSnap.data()?.liveDay2.toDate();
-  } catch (error) {
-    console.error("ライブの日付の取得に失敗しました:", error);
-  }
-};
 
 // 予約禁止期間を設定する関数
 export const setReservationBanPeriod = async (
@@ -808,7 +763,7 @@ export const getTwoWeeksFlag = async (): Promise<boolean | undefined> => {
   } catch (error) {
     console.error("２週間予約のフラグの取得に失敗しました:", error);
   }
-}
+};
 
 //２週間予約のフラグを設定する関数
 export const setTwoWeeksFlag = async (twoWeeksFlag: boolean): Promise<void> => {
@@ -819,4 +774,61 @@ export const setTwoWeeksFlag = async (twoWeeksFlag: boolean): Promise<void> => {
   } catch (error) {
     console.error("２週間予約のフラグの設定に失敗しました:", error);
   }
-}
+};
+
+// 複数のユーザーの学スタ使用料、出演費を一度に更新する関数
+export const updateMemberFees = async (
+  updates: { lineId: string; studyFee: number; performanceFee: number }[]
+): Promise<void> => {
+  try {
+    const batch = writeBatch(db);
+    
+    // 各ユーザーの更新をバッチに追加
+    updates.forEach(({ lineId, studyFee, performanceFee }) => {
+      const docRef = doc(db, "users", lineId);
+      batch.set(docRef, { 
+        studyFee: studyFee,
+        performanceFee: performanceFee 
+      }, { merge: true });
+    });
+    
+    // バッチ処理を実行
+    await batch.commit();
+    console.log(`${updates.length}人のユーザーの料金情報が更新されました。`);
+  } catch (error) {
+    console.error("料金情報の一括更新に失敗しました:", error);
+    throw error;
+  }
+};
+
+//ユーザーの料金を未払金に追加する関数(その他の料金をゼロにする)
+export const batchUpdateUnpaidFees = async (
+  updates: { lineId: string; unPaidFee: number }[]
+): Promise<void> => {
+  try {
+    // バッチ処理の初期化
+    const batch = writeBatch(db);
+
+    // 各ユーザーの未払金を更新
+    for (const update of updates) {
+      const userRef = doc(db, "users", update.lineId);
+
+      // 現在のドキュメントを取得して存在確認（オプション）
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        console.warn(`ユーザー ${update.lineId} が存在しません`);
+        continue;
+      }
+
+      // バッチに更新操作を追加
+      batch.update(userRef, { unPaidFee: update.unPaidFee, studyFee: 0, performanceFee: 0, fine: 0 });
+    }
+
+    // バッチ処理を実行
+    await batch.commit();
+    console.log(`${updates.length}人のユーザーの未払金を更新しました`);
+  } catch (error) {
+    console.error("未払金の一括更新に失敗しました:", error);
+    throw error;
+  }
+};

@@ -11,8 +11,10 @@ export interface Member {
   lineId: string;
   name: string;
   studentId: number;
-  fine: number;
-  unPaidFee: number;
+  fine: number;//罰金
+  performanceFee: number;//出演費
+  studyFee: number;//学スタ費用
+  unPaidFee: number;//未払い料金
 }
 
 export interface Band {
