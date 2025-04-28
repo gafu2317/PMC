@@ -754,21 +754,10 @@ export const getPriorityFlag = async (): Promise<boolean | undefined> => {
   }
 };
 
-//２週間予約のフラグを取得する関数
-export const getTwoWeeksFlag = async (): Promise<boolean | undefined> => {
-  try {
-    const twoWeeksFlagDocRef = doc(db, "setting", "twoWeeksFlag");
-    const twoWeeksFlagDocSnap = await getDoc(twoWeeksFlagDocRef);
-    return twoWeeksFlagDocSnap.data()?.twoWeeksFlag;
-  } catch (error) {
-    console.error("２週間予約のフラグの取得に失敗しました:", error);
-  }
-};
-
 //２週間予約のフラグを設定する関数
 export const setTwoWeeksFlag = async (twoWeeksFlag: boolean): Promise<void> => {
   try {
-    const docRef = doc(db, "setting", "twoWeeksFlag");
+    const docRef = doc(db, "setting", "twoWeekBookingFlag");
     await updateDoc(docRef, { twoWeeksFlag });
     console.log("２週間予約のフラグが設定されました。");
   } catch (error) {
