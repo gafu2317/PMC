@@ -22,7 +22,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        const twoWeekBookingFlag = docSnap.data()?.twoWeekBookingFlag;
+        const twoWeekBookingFlag = docSnap.data()?.twoWeekFlag;
         setIsTwoWeekBookingEnabled(!!twoWeekBookingFlag);
       }
     });
@@ -35,7 +35,6 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({
     const newTwoWeekBookingState = !isTwoWeekBookingEnabled;
     await setTwoWeeksFlag(newTwoWeekBookingState);
     console.log("２週間予約のフラグが切り替えられました。");
-    setIsTwoWeekBookingEnabled(newTwoWeekBookingState);
   };
 
   return (
