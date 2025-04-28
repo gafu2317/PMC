@@ -34,7 +34,6 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({
   const toggleTwoWeekBooking = async () => {
     const newTwoWeekBookingState = !isTwoWeekBookingEnabled;
     await setTwoWeeksFlag(newTwoWeekBookingState);
-    setIsTwoWeekBookingEnabled((prev) => !prev);
   };
 
   return (
