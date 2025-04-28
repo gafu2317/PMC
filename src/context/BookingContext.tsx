@@ -22,7 +22,7 @@ export const BookingProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
-        const twoWeekBookingFlag = docSnap.data()?.twoWeekFlag;
+        const twoWeekBookingFlag = docSnap.data()?.twoWeeksFlag;
         setIsTwoWeekBookingEnabled(!!twoWeekBookingFlag);
       }
     });
