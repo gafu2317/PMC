@@ -569,9 +569,7 @@ export const getAllBands = async (): Promise<Band[] | undefined> => {
 export const addFine = async (lineId: string, fine: number): Promise<void> => {
   try {
     const docRef = doc(db, "users", lineId);
-    const docSnap = await getDoc(docRef);
-    const existingFine = docSnap.data()?.fine || 0; // 現在の罰金を取得
-    await setDoc(docRef, { fine: existingFine + fine }, { merge: true });
+    await setDoc(docRef, { fine:  fine }, { merge: true });
     console.log("罰金が追加されました。");
   } catch (error) {
     console.error("罰金の追加に失敗しました:", error);

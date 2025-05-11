@@ -148,6 +148,7 @@ const PriceConf: React.FC<PriceConfProps> = (
       await deleteReservation(reservation.id);
       await deleteReservationKinjyou(reservation.id);
     }
+    showSuccess("料金計算完了");
   };
   return (
     <div>
