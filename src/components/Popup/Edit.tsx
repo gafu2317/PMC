@@ -59,23 +59,22 @@ const EditReservationPopup: React.FC<ReservationPopupProps> = ({
     setNewReservations((prevReservations) => {
       let isError = false; // エラーフラグを初期化
       const newReservations = prevReservations.map((reservation) => {
-        // 自分のlineIdが予約に含まれているかを確認
-        const isMember = reservation.names.includes(name);
-        // 自分が予約のメンバーであるときのみ処理を行う
-        if (isMember) {
-          selectedMembers.forEach((member) => {
-            if (ids.includes(reservation.id)) {
-              // 予約にメンバーがまだ含まれていない場合、追加する
+        if (ids.includes(reservation.id)) {
+          // 自分のlineIdが予約に含まれているかを確認
+          const isMember = reservation.names.includes(name);
+          // 自分が予約のメンバーであるときのみ処理を行う
+          if (isMember) {
+            selectedMembers.forEach((member) => {
               if (!reservation.names.includes(member.name)) {
                 reservation.names.push(member.name);
                 isKinjyou
                   ? updateReservationKinjyou(reservation.id, reservation.names)
                   : updateReservation(reservation.id, reservation.names);
               }
-            }
-          });
-        } else {
-          isError = true; // エラーフラグをセット
+            });
+          } else {
+            isError = true; // エラーフラグをセット
+          }
         }
         return reservation; // 予約を返す
       });

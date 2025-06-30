@@ -235,6 +235,11 @@ export const getAllReservations = async (
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
     const reservations = reservationsDocs.docs
+      .filter((doc) => {
+        // dateフィールドが存在し、有効なTimestampかチェック
+        const dateField = doc.data().date;
+        return dateField && typeof dateField.toDate === "function";
+      })
       .map((doc) => ({
         id: doc.id,
         names: doc.data().names,
@@ -266,6 +271,11 @@ export const getAllReservationsKinjyou = async (
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
     const reservations = reservationsDocs.docs
+      .filter((doc) => {
+        // dateフィールドが存在し、有効なTimestampかチェック
+        const dateField = doc.data().date;
+        return dateField && typeof dateField.toDate === "function";
+      })
       .map((doc) => ({
         id: doc.id,
         names: doc.data().names,
@@ -294,6 +304,11 @@ export const getReservationsByDateRange = async (
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
     const reservations = reservationsDocs.docs
+      .filter((doc) => {
+        // dateフィールドが存在し、有効なTimestampかチェック
+        const dateField = doc.data().date;
+        return dateField && typeof dateField.toDate === "function";
+      })
       .map((doc) => ({
         id: doc.id,
         names: doc.data().names,
@@ -321,6 +336,11 @@ export const getReservationsByDateRangeKnjyou = async (
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
     const reservations = reservationsDocs.docs
+      .filter((doc) => {
+        // dateフィールドが存在し、有効なTimestampかチェック
+        const dateField = doc.data().date;
+        return dateField && typeof dateField.toDate === "function";
+      })
       .map((doc) => ({
         id: doc.id,
         names: doc.data().names,
@@ -348,6 +368,11 @@ export const getAllPeriodReservations = async (): Promise<
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
     const reservations = reservationsDocs.docs
+      .filter((doc) => {
+        // dateフィールドが存在し、有効なTimestampかチェック
+        const dateField = doc.data().date;
+        return dateField && typeof dateField.toDate === "function";
+      })
       .map((doc) => ({
         id: doc.id,
         names: doc.data().names,
@@ -369,6 +394,11 @@ export const getAllPeriodReservationsKinjyou = async (): Promise<
     const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
 
     const reservations = reservationsDocs.docs
+      .filter((doc) => {
+        // dateフィールドが存在し、有効なTimestampかチェック
+        const dateField = doc.data().date;
+        return dateField && typeof dateField.toDate === "function";
+      })
       .map((doc) => ({
         id: doc.id,
         names: doc.data().names,
