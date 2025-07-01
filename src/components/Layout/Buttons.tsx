@@ -9,7 +9,7 @@ import { Member, Band, Reservation } from "../../types/type";
 import { usePriority } from "../../context/PriorityContext";
 import { isReservationExist } from "../../utils/utils";
 import { showError, showWarning} from "../../utils/swal";
-import { sendMessages } from "../../liff/liffService";
+// import { sendMessages } from "../../liff/liffService";
 
 interface ButtonsProps {
   lineId: string;
