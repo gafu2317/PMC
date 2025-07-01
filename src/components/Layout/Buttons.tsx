@@ -95,12 +95,12 @@ const Buttons: React.FC<ButtonsProps> = ({
         編集
       </button>
 
-      <button
+      {/* <button
         className="fixed bottom-56 right-8 p-2 bg-green-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
         onClick={handleNotice}
       >
         通知テスト
-      </button>
+      </button> */}
 
       {isReservationPopupVisible && (
         <ReservationPopup
