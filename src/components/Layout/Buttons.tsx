@@ -69,9 +69,9 @@ const Buttons: React.FC<ButtonsProps> = ({
     const member = members.find((member) => member.lineId === lineId);
     return member ? member.name : "名前が登録されていません";
   };
-  const handleNotice = () => {
-    sendMessages("Uaad36f829cb1c10a72df296f112a16dd", "通知テスト");
-  }
+  // const handleNotice = () => {
+  //   sendMessages("Uaad36f829cb1c10a72df296f112a16dd", "通知テスト");
+  // }
 
   return (
     <div>
