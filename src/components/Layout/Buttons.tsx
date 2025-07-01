@@ -9,6 +9,7 @@ import { Member, Band, Reservation } from "../../types/type";
 import { usePriority } from "../../context/PriorityContext";
 import { isReservationExist } from "../../utils/utils";
 import { showError, showWarning} from "../../utils/swal";
+import { sendMessages } from "../../liff/liffService";
 
 interface ButtonsProps {
   lineId: string;
@@ -68,6 +69,9 @@ const Buttons: React.FC<ButtonsProps> = ({
     const member = members.find((member) => member.lineId === lineId);
     return member ? member.name : "名前が登録されていません";
   };
+  const handleNotice = () => {
+    sendMessages("Uaad36f829cb1c10a72df296f112a16dd", "通知テスト");
+  }
 
   return (
     <div>
@@ -89,6 +93,13 @@ const Buttons: React.FC<ButtonsProps> = ({
         onClick={handleEdit}
       >
         編集
+      </button>
+
+      <button
+        className="fixed bottom-56 right-8 p-2 bg-green-500 text-white rounded-full w-14 h-14 flex items-center justify-center"
+        onClick={handleNotice}
+      >
+        通知テスト
       </button>
 
       {isReservationPopupVisible && (
