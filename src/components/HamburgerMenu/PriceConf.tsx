@@ -9,7 +9,7 @@ import {
   getReservationsByDateRange,
   getReservationsByDateRangeKnjyou,
 } from "../../firebase/userService";
-import { sendMessages } from "../../liff/liffService";
+// import { sendMessages } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
 import { showError, showSuccess } from "../../utils/swal";
 import { downloadTextFile } from "../../utils/utils";
@@ -112,22 +112,22 @@ const PriceConf: React.FC<PriceConfProps> = (
     downloadTextFile(text, `予約データ_${today}.txt`);
     // 予約データをクリップボードにコピー
     copyReservationsToClipboard(reservations);
-    //料金の通知
-    for (const member of members) {
-      await sendMessages(
-        member.lineId,
-        `学スタ使用料金等のお知らせ\n学スタ使用料: ${
-          member.studyFee
-        }円\nライブ出演費: ${member.performanceFee}円\n罰金: ${
-          member.fine
-        }円\n未払金: ${member.unPaidFee}円\n合計: ${
-          member.studyFee +
-          member.performanceFee +
-          member.fine +
-          member.unPaidFee
-        }円`
-      );
-    }
+    // //料金の通知
+    // for (const member of members) {
+    //   await sendMessages(
+    //     member.lineId,
+    //     `学スタ使用料金等のお知らせ\n学スタ使用料: ${
+    //       member.studyFee
+    //     }円\nライブ出演費: ${member.performanceFee}円\n罰金: ${
+    //       member.fine
+    //     }円\n未払金: ${member.unPaidFee}円\n合計: ${
+    //       member.studyFee +
+    //       member.performanceFee +
+    //       member.fine +
+    //       member.unPaidFee
+    //     }円`
+    //   );
+    // }
     //今回の料金を未払金に追加
     batchUpdateUnpaidFees(
       members.map((member) => ({
