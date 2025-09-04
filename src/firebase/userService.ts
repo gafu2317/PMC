@@ -15,6 +15,10 @@ import {
 import { getDayIndex, getTimeIndex, getTimeIndexKinjyou } from "../utils/utils";
 import { Member, Reservation, Band } from "../types/type";
 
+// -------------------------------------------------------------------------------
+// ユーザー関連の関数
+// -------------------------------------------------------------------------------
+
 // ユーザーを追加する関数
 export const addUser = async (
   name: string,
@@ -74,6 +78,10 @@ export const getAllUser = async (): Promise<Member[]> => {
     return [];
   }
 };
+
+// -------------------------------------------------------------------------------
+// 予約関連の関数
+// -------------------------------------------------------------------------------
 
 //予約を追加する関数
 export const addReservations = async (
