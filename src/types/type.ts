@@ -8,7 +8,7 @@ export interface Reservation {
 }
 
 // メンバーの型
-export interface Member {
+export interface User {
   lineId: string;
   name: string;
   studentId: number;
@@ -18,11 +18,10 @@ export interface Member {
   unPaidFee: number;//未払い料金
 }
 
-// ユーザー作成時の必要最小限の情報のみ要求（料金は自動で0初期化）
-export interface CreateUserRequest {
-  name: string;      // 必須：表示に使用
-  lineId: string;    // 必須：LINE連携の主キー
-  studentId: number; // 必須：学生識別用
+export interface Band {
+  bandId: string;
+  name: string;
+  memberIds: string[];
 }
 
 // 一貫したレスポンス形式で、呼び出し元がエラーハンドリングしやすくする
@@ -32,9 +31,23 @@ export interface ServiceResponse<T> {
   error?: string;   // 失敗時のエラーメッセージ
 }
 
-export interface Band {
-  bandId: string;
+// ユーザー作成時の必要最小限の情報のみ要求（料金は自動で0初期化）
+export interface CreateUserRequest {
+  name: string;      // 必須：表示に使用
+  lineId: string;    // 必須：LINE連携の主キー
+  studentId: number; // 必須：学生識別用
+}
+
+// ユーザー情報更新時のオプショナルな情報
+export interface CreateBandRequest {
   name: string;
   memberIds: string[];
 }
+
+// バンド情報更新時のオプショナルな情報
+export interface UpdateBandRequest {
+  name?: string;
+  memberIds?: string[];
+}
+
 
