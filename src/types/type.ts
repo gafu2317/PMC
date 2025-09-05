@@ -18,10 +18,18 @@ export interface User {
   unPaidFee: number;//未払い料金
 }
 
+// バンドの型
 export interface Band {
   bandId: string;
   name: string;
   memberIds: string[];
+}
+
+// プリセットの型
+export interface Preset {
+  presetId: string;
+  name?: string;
+  membersLineIds: string[];
 }
 
 // 一貫したレスポンス形式で、呼び出し元がエラーハンドリングしやすくする
@@ -49,5 +57,13 @@ export interface UpdateBandRequest {
   name?: string;
   memberIds?: string[];
 }
+
+// プリセット作成リクエスト
+export interface CreatePresetRequest {
+  lineId: string;
+  membersLineIds: string[];
+  name?: string;
+}
+
 
 

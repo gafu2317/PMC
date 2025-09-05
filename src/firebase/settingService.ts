@@ -13,7 +13,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { getDayIndex, getTimeIndex, getTimeIndexKinjyou } from "../utils/utils";
-import { Member, Reservation, Band } from "../types/type";
+import { User, Reservation, Band } from "../types/type";
 
 // パスワードを変更する関数
 export const changePassword = async (newPassword: string): Promise<void> => {

@@ -1,4 +1,4 @@
-import { CreateUserRequest, CreateBandRequest, UpdateBandRequest } from "../types/type";
+import { CreateUserRequest, CreateBandRequest, UpdateBandRequest, CreatePresetRequest } from "../types/type";
 
 // Validation functions - 不正データによるデータベース破損を防ぐ
 export const validateLineId = (lineId: string): boolean => {
@@ -81,6 +81,21 @@ export const validateUpdateBandRequest = (request: UpdateBandRequest): string | 
     if (uniqueIds.size !== request.memberIds.length) {
       return "Duplicate member IDs are not allowed";
     }
+  }
+  return null;
+};
+
+export const validateCreatePresetRequest = (request: CreatePresetRequest): string | null => {
+  if (!validateLineId(request.lineId)) {
+    return "Invalid line ID: must be a non-empty string";
+  }
+  if (!validateMemberIds(request.membersLineIds)) {
+    return "Invalid member IDs: must be a non-empty array of valid user IDs";
+  }
+  // 重複メンバーチェック
+  const uniqueIds = new Set(request.membersLineIds);
+  if (uniqueIds.size !== request.membersLineIds.length) {
+    return "Duplicate member IDs are not allowed";
   }
   return null;
 };

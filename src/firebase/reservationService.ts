@@ -13,7 +13,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { getDayIndex, getTimeIndex, getTimeIndexKinjyou } from "../utils/utils";
-import { Member, Reservation, Band } from "../types/type";
+import { User, Reservation, Band } from "../types/type";
 
 //予約を追加する関数
 export const addReservations = async (
