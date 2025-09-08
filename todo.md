@@ -1,0 +1,2 @@
+isKinjyouの削除
+変えたfirebaseに適応させる

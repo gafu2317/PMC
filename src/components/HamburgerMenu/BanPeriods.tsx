@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   setReservationBanPeriod,
-  getReservationBanPeriod,
+  getReservationBanPeriods,
   deleteReservationBanPeriod,
   getAllPeriodReservations,
   getAllPeriodReservationsKinjyou,
@@ -120,7 +120,7 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
     const collectionRef = collection(db, "setting");
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
-        const periods = await getReservationBanPeriod();
+        const periods = await getReservationBanPeriods();
         if (periods) {
           setBanPeriods(periods);
         } else {

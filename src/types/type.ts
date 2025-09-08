@@ -32,6 +32,14 @@ export interface Preset {
   membersLineIds: string[];
 }
 
+// 予約禁止期間の型
+export interface BanPeriod {
+  id: string;
+  startDate: Date;
+  endDate: Date;
+  isKinjyou: boolean;
+}
+
 // 一貫したレスポンス形式で、呼び出し元がエラーハンドリングしやすくする
 export interface ServiceResponse<T> {
   success: boolean;  // 成功/失敗の明確な判定

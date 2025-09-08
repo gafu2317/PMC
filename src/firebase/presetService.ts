@@ -1,21 +1,12 @@
 // userService.ts
 import { db } from "./firebase";
 import {
-  collection,
-  addDoc,
   getDoc,
-  getDocs,
-  updateDoc,
   doc,
   setDoc,
-  deleteDoc,
-  Timestamp,
-  writeBatch,
 } from "firebase/firestore";
-import { getDayIndex, getTimeIndex, getTimeIndexKinjyou } from "../utils/utils";
-import { User, Reservation, Band } from "../types/type";
 import { CreatePresetRequest, Preset, ServiceResponse } from "../types/type";
-import { validateCreatePresetRequest, validateMemberIds, validateLineId } from "../utils/validations";
+import { validateCreatePresetRequest, validateLineId } from "../utils/validations";
 
 // 重複プリセット判定
 const isDuplicatePreset = (

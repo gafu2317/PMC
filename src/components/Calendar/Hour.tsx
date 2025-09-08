@@ -10,7 +10,7 @@ import {
 import Swal from "sweetalert2";
 import { db } from "../../firebase/firebase";
 import { collection, onSnapshot } from "firebase/firestore";
-import { getReservationBanPeriod } from "../../firebase/userService";
+import { getReservationBanPeriods } from "../../firebase/userService";
 
 interface HourProps {
   isUserReservation: boolean; // ユーザーの予約状況
@@ -41,7 +41,7 @@ const Hour: React.FC<HourProps> = ({
     const collectionRef = collection(db, "setting");
     const unsubscribe = onSnapshot(collectionRef, async () => {
       try {
-        const periods = await getReservationBanPeriod();
+        const periods = await getReservationBanPeriods();
         if (periods) {
           setBanPeriods(periods);
         } else {

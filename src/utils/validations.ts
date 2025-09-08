@@ -99,3 +99,25 @@ export const validateCreatePresetRequest = (request: CreatePresetRequest): strin
   }
   return null;
 };
+
+// Validation functions
+export const validatePassword = (password: string): boolean => {
+  return typeof password === 'string' && password.trim().length > 0;
+};
+
+export const validateDate = (date: Date): boolean => {
+  return date instanceof Date && !isNaN(date.getTime());
+};
+
+export const validateBanPeriod = (startDate: Date, endDate: Date): string | null => {
+  if (!validateDate(startDate)) {
+    return "Invalid start date";
+  }
+  if (!validateDate(endDate)) {
+    return "Invalid end date";
+  }
+  if (startDate >= endDate) {
+    return "Start date must be before end date";
+  }
+  return null;
+};
