@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   deleteBand,
   deleteReservation,
@@ -9,9 +9,9 @@ import {
   getReservationsByDateRange,
   getReservationsByDateRangeKnjyou,
 } from "../../firebase/userService";
-// import { sendMessages } from "../../liff/liffService";
+import { sendMessages, getMessageStatus } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
-import { showError, showSuccess } from "../../utils/swal";
+import { showError, showSuccess,showWarning,  } from "../../utils/swal";
 import { downloadTextFile } from "../../utils/utils";
 
 interface PriceConfProps {
@@ -27,6 +27,25 @@ const PriceConf: React.FC<PriceConfProps> = (
   const [startDate, setStartDate] = useState(""); // 開始日を管理
   const [endDate, setEndDate] = useState(""); // 終了日を管理
   const [isAll, setIsAll] = useState(true); //全て選択されているかどうか
+  const [messageStatus, setMessageStatus] = useState<any>(null);
+  const [canSendMessages, setCanSendMessages] = useState(false);
+  useEffect(() => {
+    getMessageStatus()
+      .then(status => {
+        console.log('取得した値:', status);
+        setMessageStatus(status);
+      })
+      .catch(error => {
+        console.error('エラー:', error);
+      });
+  }, []);
+  useEffect(() => {
+    if (messageStatus && members.length > 0) {
+      setCanSendMessages(members.length <= messageStatus.remainingMessages);
+    } else {
+      setCanSendMessages(false);
+    }
+  }, [messageStatus, members.length]);
 
   const generateReservationText = (reservations: any[]): string => {
     let text = "予約データ一覧\n\n";
@@ -112,22 +131,26 @@ const PriceConf: React.FC<PriceConfProps> = (
     downloadTextFile(text, `予約データ_${today}.txt`);
     // // 予約データをクリップボードにコピー
     // copyReservationsToClipboard(reservations);
-    // //料金の通知
-    // for (const member of members) {
-    //   await sendMessages(
-    //     member.lineId,
-    //     `学スタ使用料金等のお知らせ\n学スタ使用料: ${
-    //       member.studyFee
-    //     }円\nライブ出演費: ${member.performanceFee}円\n罰金: ${
-    //       member.fine
-    //     }円\n未払金: ${member.unPaidFee}円\n合計: ${
-    //       member.studyFee +
-    //       member.performanceFee +
-    //       member.fine +
-    //       member.unPaidFee
-    //     }円`
-    //   );
-    // }
+    //料金の通知
+    if (canSendMessages) {
+      for (const member of members) {
+        await sendMessages(
+          member.lineId,
+          `学スタ使用料金等のお知らせ\n学スタ使用料: ${
+            member.studyFee
+          }円\nライブ出演費: ${member.performanceFee}円\n罰金: ${
+            member.fine
+          }円\n未払金: ${member.unPaidFee}円\n合計: ${
+            member.studyFee +
+            member.performanceFee +
+            member.fine +
+            member.unPaidFee
+          }円`
+        );
+      }
+    } else {
+      showWarning("メッセージ数が足りないため、料金通知は実行されませんでした");
+    }
     //今回の料金を未払金に追加
     batchUpdateUnpaidFees(
       members.map((member) => ({
@@ -160,7 +183,6 @@ const PriceConf: React.FC<PriceConfProps> = (
         <li className="text-sm">バンド全削除</li>
         <li className="text-sm">指定した期間の予約削除</li>
         <li className="text-sm">予約データをテキストファイルに保存</li>
-        <li className="text-sm">予約データをクリップボードにコピー</li>
       </ul>
       <h2 className="mb-2">料金を計算した期間を入力</h2>
       <div className="flex gap-4">
@@ -202,6 +224,26 @@ const PriceConf: React.FC<PriceConfProps> = (
           指定した期間
         </button>
       </div>
+      <div className="mb-2">
+        <div className="mb-2">
+          {messageStatus ? (
+            `残りのメッセージ数：${messageStatus.remainingMessages}/${messageStatus.totalQuota}`
+          ) : (
+            '読み込み中...'
+          )}
+        </div>
+        <div className="mb-2">
+          メッセージ送信人数：{members.length}人
+        </div>
+        <div>
+          料金通知を
+          {canSendMessages
+            ? '実行する' 
+            : '実行しない（メッセージ数不足）'
+          }
+        </div>
+      </div>
+
       <div className="flex justify-center my-2 items-center">
         <button
           className="bg-gray-300 rounded p-1 w-24 text-lg"
