@@ -240,35 +240,35 @@ export function isDuplicate(reservations: Reservation[]) {
   return updatedIsDuplicates;
 }
 
-/**
- * テキストファイルを作成してダウンロードする関数
- * @param content テキストファイルの内容
- * @param filename ダウンロードするファイル名
- */
-export const downloadTextFile = (content: string, filename: string): void => {
-  // テキストコンテンツからBlobを作成
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+// /**
+//  * テキストファイルを作成してダウンロードする関数
+//  * @param content テキストファイルの内容
+//  * @param filename ダウンロードするファイル名
+//  */
+// export const downloadTextFile = (content: string, filename: string): void => {
+//   // テキストコンテンツからBlobを作成
+//   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   
-  // BlobからURLを生成
-  const url = URL.createObjectURL(blob);
+//   // BlobからURLを生成
+//   const url = URL.createObjectURL(blob);
   
-  // ダウンロード用のリンク要素を作成
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
+//   // ダウンロード用のリンク要素を作成
+//   const link = document.createElement('a');
+//   link.href = url;
+//   link.download = filename;
   
-  // リンクを非表示にする
-  link.style.display = 'none';
+//   // リンクを非表示にする
+//   link.style.display = 'none';
   
-  // リンクをDOMに追加
-  document.body.appendChild(link);
+//   // リンクをDOMに追加
+//   document.body.appendChild(link);
   
-  // リンクをクリック（ダウンロード開始）
-  link.click();
+//   // リンクをクリック（ダウンロード開始）
+//   link.click();
   
-  // リンクをDOMから削除
-  document.body.removeChild(link);
+//   // リンクをDOMから削除
+//   document.body.removeChild(link);
   
-  // URLオブジェクトを解放
-  URL.revokeObjectURL(url);
-};
+//   // URLオブジェクトを解放
+//   URL.revokeObjectURL(url);
+// };
