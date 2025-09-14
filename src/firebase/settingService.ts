@@ -1,18 +1,12 @@
 // userService.ts
 import { db } from "./firebase";
 import {
-  collection,
-  addDoc,
   getDoc,
-  getDocs,
   updateDoc,
   doc,
   setDoc,
-  deleteDoc,
-  Timestamp,
-  writeBatch,
 } from "firebase/firestore";
-import { ServiceResponse, BanPeriod } from "../types/type";
+import { ServiceResponse, BanPeriod , StudioLocation } from "../types/type";
 import { validatePassword, validateBanPeriod } from "../utils/validations";
 
 // パスワードを変更する関数
@@ -65,7 +59,7 @@ export const getPassword = async (): Promise<ServiceResponse<string>> => {
 export const addReservationBanPeriod = async (
   startDate: Date,
   endDate: Date,
-  isKinjyou: boolean,
+  location: StudioLocation 
 ): Promise<ServiceResponse<void>> => {
   try {
     const validationError = validateBanPeriod(startDate, endDate);
@@ -81,7 +75,7 @@ export const addReservationBanPeriod = async (
       id: `ban_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`, 
       startDate, 
       endDate, 
-      isKinjyou 
+      location
     };
     const updatedPeriods = [...existingPeriods, newPeriod];
 
@@ -116,7 +110,7 @@ export const getReservationBanPeriods = async (): Promise<ServiceResponse<BanPer
             id: period.id || `period_${index}`, // 既存データ対応
             startDate: period.startDate.toDate(),
             endDate: period.endDate.toDate(),
-            isKinjyou: Boolean(period.isKinjyou)
+            location: (period.location as StudioLocation) || (period.isKinjyou ? 'kinjyou' : 'meiko') as StudioLocation, // 既存データ対応
           };
         } catch {
           return null;

@@ -1,10 +1,13 @@
 // 加工済みのデータの型
+export type StudioLocation = 'meiko' | 'kinjyou';
+
 export interface Reservation {
-  id: string; //ドキュメントIDを使用
-  names: string[]; //使用者の名前
-  date: Date; //時間まで含める (複数時間予約していても、別々の予約として扱う)17:00~18:00は17:00とする
-  dayIndex: number; //日にちのインデックス
-  timeIndex: number; //時間のインデックス
+  id: string;
+  names: string[];
+  date: Date;
+  location: StudioLocation;
+  dayIndex?: number;
+  timeIndex?: number;
 }
 
 // メンバーの型
@@ -37,7 +40,7 @@ export interface BanPeriod {
   id: string;
   startDate: Date;
   endDate: Date;
-  isKinjyou: boolean;
+  location: StudioLocation;
 }
 
 // 一貫したレスポンス形式で、呼び出し元がエラーハンドリングしやすくする
@@ -73,5 +76,9 @@ export interface CreatePresetRequest {
   name?: string;
 }
 
-
+export interface CreateReservationRequest {
+  names: string[];
+  date: Date;
+  location: StudioLocation;
+}
 

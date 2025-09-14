@@ -1,2 +1,3 @@
 isKinjyouの削除
 変えたfirebaseに適応させる
+Reservationの型にlocationを追加したのでその修正

@@ -1,4 +1,4 @@
-import { CreateUserRequest, CreateBandRequest, UpdateBandRequest, CreatePresetRequest } from "../types/type";
+import { CreateUserRequest, CreateBandRequest, UpdateBandRequest, CreatePresetRequest, StudioLocation, CreateReservationRequest } from "../types/type";
 
 // Validation functions - 不正データによるデータベース破損を防ぐ
 export const validateLineId = (lineId: string): boolean => {
@@ -118,6 +118,30 @@ export const validateBanPeriod = (startDate: Date, endDate: Date): string | null
   }
   if (startDate >= endDate) {
     return "Start date must be before end date";
+  }
+  return null;
+};
+
+// Validation functions
+export const validateNames = (names: string[]): boolean => {
+  return Array.isArray(names) && 
+         names.length > 0 && 
+         names.every(name => typeof name === 'string' && name.trim().length > 0);
+};
+
+export const validateLocation = (location: string): location is StudioLocation => {
+  return location === 'meiko' || location === 'kinjyou';
+};
+
+export const validateCreateReservationRequest = (request: CreateReservationRequest): string | null => {
+  if (!validateNames(request.names)) {
+    return "Invalid names: must be a non-empty array of valid names";
+  }
+  if (!validateDate(request.date)) {
+    return "Invalid date: must be a valid Date object";
+  }
+  if (!validateLocation(request.location)) {
+    return "Invalid location: must be 'meiko' or 'kinjyou'";
   }
   return null;
 };
