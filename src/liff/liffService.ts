@@ -48,3 +48,16 @@ export const sendMessages = async (
   }
 };
 
+export const getMessageStatus = async (): Promise<any> => {
+  // ローカルでは3000番ポート、本番では相対パス
+  const url = window.location.hostname === 'localhost' 
+    ? "http://localhost:3000/api/message-status"
+    : "/api/message-status";
+  
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
