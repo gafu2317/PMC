@@ -91,6 +91,30 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
     document.body.removeChild(link);
   };
 
+const handleRoundUp = async () => {
+  try {
+    // 各メンバーの料金を10円単位に繰り上げして更新データを準備
+    const updates = members.map((member) => {
+      const roundUpPrice = (price: number) => Math.ceil(price / 10) * 10;
+      
+      return {
+        lineId: member.lineId,
+        fine: roundUpPrice(member.fine),
+        performanceFee: roundUpPrice(member.performanceFee),
+        studyFee: roundUpPrice(member.studyFee),
+      };
+    });
+
+    // 一括更新を実行
+    await updateMemberFees(updates);
+    showSuccess("料金の下1桁繰り上げが完了しました");
+    
+  } catch (error) {
+    showError("料金の繰り上げに失敗しました");
+    console.error(error);
+  }
+};
+
   const handleCalculate = async () => {
     // 予約を取得
     let fetchedReservations: {
@@ -251,6 +275,17 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
           料金計算
         </button>
       </div>
+
+      <div className="flex justify-end my-2 items-center">
+        <button
+          className="bg-gray-300 rounded p-1 w-44"
+          onClick={() => handleRoundUp()}
+        >
+          料金の下1桁を繰上げ
+        </button>
+      </div>
+
+
       
       <input
         type="text"

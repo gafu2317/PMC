@@ -43,36 +43,36 @@ const PriceConf: React.FC<PriceConfProps> = (
     return text;
   };
 
-  // 予約データをクリップボードにコピーする関数
-  const copyReservationsToClipboard = (reservations: any[]): void => {
-    // ヘッダー行
-    let text = "日付\t時間\t予約者\n";
+  // // 予約データをクリップボードにコピーする関数
+  // const copyReservationsToClipboard = (reservations: any[]): void => {
+  //   // ヘッダー行
+  //   let text = "日付\t時間\t予約者\n";
 
-    // データ行
-    reservations.forEach((reservation) => {
-      const date = reservation.date.toLocaleDateString("ja-JP");
-      const time = reservation.date.toLocaleTimeString("ja-JP", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const names = reservation.names.join(", ");
+  //   // データ行
+  //   reservations.forEach((reservation) => {
+  //     const date = reservation.date.toLocaleDateString("ja-JP");
+  //     const time = reservation.date.toLocaleTimeString("ja-JP", {
+  //       hour: "2-digit",
+  //       minute: "2-digit",
+  //     });
+  //     const names = reservation.names.join(", ");
 
-      text += `${date}\t${time}\t${names}\n`;
-    });
+  //     text += `${date}\t${time}\t${names}\n`;
+  //   });
 
-    // クリップボードにコピー
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        showSuccess(
-          "予約データがクリップボードにコピーされました。Excelに貼り付けてください。"
-        );
-      })
-      .catch((err) => {
-        console.error("クリップボードへのコピーに失敗しました:", err);
-        showError("クリップボードへのコピーに失敗しました。");
-      });
-  };
+  //   // クリップボードにコピー
+  //   navigator.clipboard
+  //     .writeText(text)
+  //     .then(() => {
+  //       showSuccess(
+  //         "予約データがクリップボードにコピーされました。Excelに貼り付けてください。"
+  //       );
+  //     })
+  //     .catch((err) => {
+  //       console.error("クリップボードへのコピーに失敗しました:", err);
+  //       showError("クリップボードへのコピーに失敗しました。");
+  //     });
+  // };
 
   const handleConf = async () => {
     //削除する予約を取得
@@ -110,8 +110,8 @@ const PriceConf: React.FC<PriceConfProps> = (
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD形式
     //テキストファイルをダウンロード
     downloadTextFile(text, `予約データ_${today}.txt`);
-    // 予約データをクリップボードにコピー
-    copyReservationsToClipboard(reservations);
+    // // 予約データをクリップボードにコピー
+    // copyReservationsToClipboard(reservations);
     // //料金の通知
     // for (const member of members) {
     //   await sendMessages(
