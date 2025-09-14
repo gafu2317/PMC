@@ -19,77 +19,77 @@ const Calculate: React.FC<CalculateProps> = ({ members, bands }) => {
   const [endDate, setEndDate] = useState(""); // 終了日を管理
   const [isAll, setIsAll] = useState(true); //全て選択されているかどうか
   const [searchTerm, setSearchTerm] = useState("");
-  const [fileFormat, setFileFormat] = useState<"csv" | "txt">("txt"); // ファイル形式の選択状態
+  // const [fileFormat, setFileFormat] = useState<"csv" | "txt">("txt"); // ファイル形式の選択状態
 
   const filteredMembers = members.filter((member) =>
     member.name.includes(searchTerm)
   );
 
-  // CSVデータを生成する関数
-  const generateCSV = (reservations: { id: string; names: string[]; date: Date }[]) => {
-    // ヘッダー行
-    let csvContent = "これは料金があっているかを確認するためのファイルです\n日付は開始時刻を表し１コマ単位で処理しています\n予約ID,日付,参加者\n";
+  // // CSVデータを生成する関数
+  // const generateCSV = (reservations: { id: string; names: string[]; date: Date }[]) => {
+  //   // ヘッダー行
+  //   let csvContent = "これは料金があっているかを確認するためのファイルです\n日付は開始時刻を表し１コマ単位で処理しています\n予約ID,日付,参加者\n";
     
-    // 予約情報
-    reservations.forEach(reservation => {
-      const date = reservation.date instanceof Date 
-        ? `${reservation.date.toLocaleDateString()} ${reservation.date.toLocaleTimeString()}`
-        : `${new Date(reservation.date).toLocaleDateString()} ${new Date(reservation.date).toLocaleTimeString()}`;
-      csvContent += `${reservation.id},${date},"${reservation.names.join(', ')}"\n`;
-    });
+  //   // 予約情報
+  //   reservations.forEach(reservation => {
+  //     const date = reservation.date instanceof Date 
+  //       ? `${reservation.date.toLocaleDateString()} ${reservation.date.toLocaleTimeString()}`
+  //       : `${new Date(reservation.date).toLocaleDateString()} ${new Date(reservation.date).toLocaleTimeString()}`;
+  //     csvContent += `${reservation.id},${date},"${reservation.names.join(', ')}"\n`;
+  //   });
     
-    return csvContent;
-  };
+  //   return csvContent;
+  // };
 
-  // テキストデータを生成する関数
-  const generateText = (reservations: { id: string; names: string[]; date: Date }[]) => {
-    // テキスト形式のヘッダー
-    let textContent =
-      "これは料金があっているかを確認するためのファイルです\n日付は開始時刻を表し１コマ単位で処理しています\n予約情報\n";
-    textContent += "===================\n\n";
+  // // テキストデータを生成する関数
+  // const generateText = (reservations: { id: string; names: string[]; date: Date }[]) => {
+  //   // テキスト形式のヘッダー
+  //   let textContent =
+  //     "これは料金があっているかを確認するためのファイルです\n日付は開始時刻を表し１コマ単位で処理しています\n予約情報\n";
+  //   textContent += "===================\n\n";
     
-    // 予約情報
-    reservations.forEach(reservation => {
-      const date = reservation.date instanceof Date 
-        ? `${reservation.date.toLocaleDateString()} ${reservation.date.toLocaleTimeString()}`
-        : `${new Date(reservation.date).toLocaleDateString()} ${new Date(reservation.date).toLocaleTimeString()}`;
-      textContent += `日付: ${date}\n`;
-      textContent += `参加者: ${reservation.names.join(', ')}\n`;
-      textContent += "-------------------\n";
-    });
+  //   // 予約情報
+  //   reservations.forEach(reservation => {
+  //     const date = reservation.date instanceof Date 
+  //       ? `${reservation.date.toLocaleDateString()} ${reservation.date.toLocaleTimeString()}`
+  //       : `${new Date(reservation.date).toLocaleDateString()} ${new Date(reservation.date).toLocaleTimeString()}`;
+  //     textContent += `日付: ${date}\n`;
+  //     textContent += `参加者: ${reservation.names.join(', ')}\n`;
+  //     textContent += "-------------------\n";
+  //   });
     
-    return textContent;
-  };
+  //   return textContent;
+  // };
 
-  // ファイルをダウンロードする関数
-  const downloadFile = (reservations: { id: string; names: string[]; date: Date }[]) => {
-    if (reservations.length === 0) {
-      showError("予約データがありません");
-      return;
-    }
+  // // ファイルをダウンロードする関数
+  // const downloadFile = (reservations: { id: string; names: string[]; date: Date }[]) => {
+  //   if (reservations.length === 0) {
+  //     showError("予約データがありません");
+  //     return;
+  //   }
     
-    // 選択された形式に基づいてデータを生成
-    const content = fileFormat === "csv" ? generateCSV(reservations) : generateText(reservations);
-    const mimeType = fileFormat === "csv" ? 'text/csv;charset=utf-8;' : 'text/plain;charset=utf-8;';
+  //   // 選択された形式に基づいてデータを生成
+  //   const content = fileFormat === "csv" ? generateCSV(reservations) : generateText(reservations);
+  //   const mimeType = fileFormat === "csv" ? 'text/csv;charset=utf-8;' : 'text/plain;charset=utf-8;';
     
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+  //   const blob = new Blob([content], { type: mimeType });
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement('a');
     
-    // 日付範囲をファイル名に含める
-    let fileName = "予約情報";
-    if (!isAll && startDate && endDate) {
-      fileName += `_${startDate}_${endDate}`;
-    }
-    fileName += fileFormat === "csv" ? ".csv" : ".txt";
+  //   // 日付範囲をファイル名に含める
+  //   let fileName = "予約情報";
+  //   if (!isAll && startDate && endDate) {
+  //     fileName += `_${startDate}_${endDate}`;
+  //   }
+  //   fileName += fileFormat === "csv" ? ".csv" : ".txt";
     
-    link.setAttribute('href', url);
-    link.setAttribute('download', fileName);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  //   link.setAttribute('href', url);
+  //   link.setAttribute('download', fileName);
+  //   link.style.visibility = 'hidden';
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  // };
 
 const handleRoundUp = async () => {
   try {
@@ -196,8 +196,8 @@ const handleRoundUp = async () => {
       await updateMemberFees(updates);
       showSuccess(`料金計算が完了しました`);
       
-      // 料金計算が完了したら自動的にファイルをダウンロード
-      downloadFile(fetchedReservations);
+      // // 料金計算が完了したら自動的にファイルをダウンロード
+      // downloadFile(fetchedReservations);
       
     } catch (error) {
       showError("料金更新に失敗しました");
@@ -248,7 +248,7 @@ const handleRoundUp = async () => {
         </button>
       </div>
 
-      <div className="flex justify-around mt-2 mb-2">
+      {/* <div className="flex justify-around mt-2 mb-2">
         <button
           className={`text-sm rounded p-1 ${
             fileFormat === "csv" ? "bg-green-400" : "bg-gray-300"
@@ -265,7 +265,7 @@ const handleRoundUp = async () => {
         >
           テキスト形式
         </button>
-      </div>
+      </div> */}
       
       <div className="flex justify-end my-2 items-center">
         <button

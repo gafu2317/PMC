@@ -12,7 +12,7 @@ import {
 import { sendMessages, getMessageStatus } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
 import { showError, showSuccess,showWarning,  } from "../../utils/swal";
-import { downloadTextFile } from "../../utils/utils";
+// import { downloadTextFile } from "../../utils/utils";
 
 interface PriceConfProps {
   members: Member[];
@@ -47,20 +47,20 @@ const PriceConf: React.FC<PriceConfProps> = (
     }
   }, [messageStatus, members.length]);
 
-  const generateReservationText = (reservations: any[]): string => {
-    let text = "予約データ一覧\n\n";
+  // const generateReservationText = (reservations: any[]): string => {
+  //   let text = "予約データ一覧\n\n";
 
-    reservations.forEach((reservation, index) => {
-      const date = reservation.date.toLocaleDateString("ja-JP");
-      const names = reservation.names.join(", ");
+  //   reservations.forEach((reservation, index) => {
+  //     const date = reservation.date.toLocaleDateString("ja-JP");
+  //     const names = reservation.names.join(", ");
 
-      text += `予約 ${index + 1}:\n`;
-      text += `日付: ${date}\n`;
-      text += `予約者: ${names}\n\n`;
-    });
+  //     text += `予約 ${index + 1}:\n`;
+  //     text += `日付: ${date}\n`;
+  //     text += `予約者: ${names}\n\n`;
+  //   });
 
-    return text;
-  };
+  //   return text;
+  // };
 
   // // 予約データをクリップボードにコピーする関数
   // const copyReservationsToClipboard = (reservations: any[]): void => {
@@ -124,11 +124,11 @@ const PriceConf: React.FC<PriceConfProps> = (
         return;
       }
     }
-    //予約データをテキストファイルにする
-    const text = generateReservationText(reservations);
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD形式
-    //テキストファイルをダウンロード
-    downloadTextFile(text, `予約データ_${today}.txt`);
+    // //予約データをテキストファイルにする
+    // const text = generateReservationText(reservations);
+    // const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD形式
+    // //テキストファイルをダウンロード
+    // downloadTextFile(text, `予約データ_${today}.txt`);
     // // 予約データをクリップボードにコピー
     // copyReservationsToClipboard(reservations);
     //料金の通知
