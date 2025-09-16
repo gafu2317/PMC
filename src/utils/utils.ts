@@ -352,8 +352,7 @@ export const downloadMembersExcel = async (members: Member[]): Promise<void> => 
         });
         debugLog(`Blob作成完了: ${blob.size}バイト`, 10);
         
-        // 方法1: 新しいタブで開く方式（LIFF では基本的に失敗するのでスキップ）
-        const url = URL.createObjectURL(blob);
+        // 方法1: 新しいタブで開く方式をスキップ（LIFFアプリでは制限されるため）
         debugLog("方法1: 新しいタブで開く方式をスキップ（LIFFアプリでは制限されるため）", 11);
         
         // LIFFアプリでは window.open が偽の成功を返すことがあるため、この方法をスキップ
