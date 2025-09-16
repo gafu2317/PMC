@@ -290,9 +290,39 @@ export const downloadMembersExcel = (members: Member[]): void => {
   const today = new Date().toISOString().split('T')[0];
   const filename = `料金一覧_${today}.xlsx`;
   
-  // ファイルをダウンロード
-  XLSX.writeFile(workbook, filename);
+  // モバイル対応のダウンロード処理
+  try {
+    // 標準的なダウンロード方法を試す
+    XLSX.writeFile(workbook, filename);
+  } catch (error) {
+    // 標準的な方法が失敗した場合、手動でBlobを作成してダウンロード
+    const workbookOut = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+    
+    const blob = new Blob([workbookOut], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    
+    // ダウンロード用のリンク要素を作成
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    
+    // リンクをDOMに追加してクリック
+    document.body.appendChild(link);
+    link.click();
+    
+    // クリーンアップ
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
 };
+
 
 // /**
 //  * テキストファイルを作成してダウンロードする関数
