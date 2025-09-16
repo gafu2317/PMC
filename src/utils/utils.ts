@@ -1,6 +1,7 @@
-import { Reservation } from "../types/type";
+import { Reservation, Member } from "../types/type";
 import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 
 export const emitter = new EventEmitter();
 
@@ -239,6 +240,59 @@ export function isDuplicate(reservations: Reservation[]) {
   });
   return updatedIsDuplicates;
 }
+
+/**
+ * ふりがなで50音順にメンバーをソートする関数
+ */
+export const sortMembersByFurigana = (members: Member[]): Member[] => {
+  return [...members].sort((a, b) => {
+    // ふりがなでソート（空の場合は名前でソート）
+    const furiganaA = a.furigana || a.name;
+    const furiganaB = b.furigana || b.name;
+    return furiganaA.localeCompare(furiganaB, 'ja', { 
+      numeric: true, 
+      sensitivity: 'base' 
+    });
+  });
+};
+
+/**
+ * メンバー料金情報をExcelファイルでダウンロードする関数
+ */
+export const downloadMembersExcel = (members: Member[]): void => {
+  // ふりがな順でソート
+  const sortedMembers = sortMembersByFurigana(members);
+  
+  // Excelデータの準備
+  const worksheetData = [
+    // ヘッダー行
+    ['名前', 'ふりがな', '罰金', '出演費', '学スタ使用料', '未払金', '合計'],
+    // データ行
+    ...sortedMembers.map(member => [
+      member.name,
+      member.furigana,
+      member.fine,
+      member.performanceFee,
+      member.studyFee,
+      member.unPaidFee,
+      member.fine + member.performanceFee + member.studyFee + member.unPaidFee
+    ])
+  ];
+  
+  // ワークシートを作成
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  
+  // ワークブックを作成
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, '料金一覧');
+  
+  // ファイル名を生成（現在の日付を使用）
+  const today = new Date().toISOString().split('T')[0];
+  const filename = `料金一覧_${today}.xlsx`;
+  
+  // ファイルをダウンロード
+  XLSX.writeFile(workbook, filename);
+};
 
 // /**
 //  * テキストファイルを作成してダウンロードする関数
