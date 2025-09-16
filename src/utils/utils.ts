@@ -294,7 +294,7 @@ export const sortMembersByFurigana = (members: Member[]): Member[] => {
 /**
  * メンバー料金情報をExcelファイルでダウンロードする関数（詳細デバッグ版）
  */
-export const downloadMembersExcel = (members: Member[]): void => {
+export const downloadMembersExcel = async (members: Member[]): Promise<void> => {
   try {
     debugLog("ダウンロード開始: データ準備中...", 1);
     
@@ -352,87 +352,42 @@ export const downloadMembersExcel = (members: Member[]): void => {
         });
         debugLog(`Blob作成完了: ${blob.size}バイト`, 10);
         
-        // 方法1: 新しいタブで開く方式
+        // 方法1: 新しいタブで開く方式（LIFF では基本的に失敗するのでスキップ）
         const url = URL.createObjectURL(blob);
-        debugLog("方法1: 新しいタブで開く方式を試行", 11);
+        debugLog("方法1: 新しいタブで開く方式をスキップ（LIFFアプリでは制限されるため）", 11);
         
+        // LIFFアプリでは window.open が偽の成功を返すことがあるため、この方法をスキップ
+        
+        // 直接CSVデータをクリップボードにコピーする方式（LIFFアプリに最適化）
+        debugLog("LIFF最適化: CSVクリップボードコピー方式を試行", 12);
         try {
-          const newWindow = window.open(url, '_blank');
-          debugLog(`window.openの結果: ${newWindow ? '成功' : '失敗'}`, 12);
+          const csvData = generateCSVData(members);
+          debugLog("CSVデータ生成完了", 13);
           
-          if (newWindow) {
-            debugLog("新しいタブでファイルを開きました", 13);
-            // 少し待ってからクリーンアップ
-            setTimeout(() => {
-              URL.revokeObjectURL(url);
-              debugLog("方法1完了: URLクリーンアップ済み", 14);
-            }, 1000);
+          // クリップボードAPIを試行
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(csvData);
+            debugLog("クリップボードコピー成功", 14);
+            showWarning("CSVデータをクリップボードにコピーしました！メモ帳やExcelに貼り付けてください。");
             return;
           } else {
-            debugLog("新しいタブの開放が失敗 - 方法2を試行", 15);
+            debugLog("クリップボードAPI利用不可 - 手動表示方式を使用", 15);
+            showDataInTextArea(csvData);
+            return;
           }
-        } catch (tabError) {
-          debugLog(`新しいタブ方式失敗: ${tabError instanceof Error ? tabError.message : '不明なエラー'}`, 16);
+        } catch (clipboardError) {
+          debugLog(`クリップボードコピー失敗: ${clipboardError instanceof Error ? clipboardError.message : '不明なエラー'}`, 16);
         }
         
-        // 方法2: DataURL方式
-        debugLog("方法2: DataURL方式を試行", 17);
+        // フォールバック: テキストエリア表示
+        debugLog("フォールバック: テキストエリア表示方式", 17);
         try {
-          const workbookOutBase64 = XLSX.write(workbook, {
-            bookType: 'xlsx',
-            type: 'base64'
-          });
-          debugLog("Base64データ生成完了", 18);
-          
-          const dataUrl = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${workbookOutBase64}`;
-          debugLog(`DataURL作成完了 (長さ: ${dataUrl.length}文字)`, 19);
-          
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = filename;
-          link.style.display = 'none';
-          debugLog("DataURLリンク要素作成完了", 20);
-          
-          document.body.appendChild(link);
-          debugLog("DataURLリンクをDOMに追加", 21);
-          
-          link.click();
-          debugLog("DataURLリンククリック実行", 22);
-          
-          document.body.removeChild(link);
-          debugLog("方法2完了: DataURL方式でダウンロード実行", 23);
-          return;
-        } catch (dataUrlError) {
-          debugLog(`DataURL方式失敗: ${dataUrlError instanceof Error ? dataUrlError.message : '不明なエラー'}`, 24);
+          const csvData = generateCSVData(members);
+          showDataInTextArea(csvData);
+          debugLog("テキストエリア表示完了", 18);
+        } catch (textAreaError) {
+          debugLog(`テキストエリア表示失敗: ${textAreaError instanceof Error ? textAreaError.message : '不明なエラー'}`, 19);
         }
-        
-        // 方法3: 通常のBlob方式（最後の手段）
-        debugLog("方法3: 通常のBlob方式を試行", 25);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.style.display = 'none';
-        debugLog("Blobリンク要素作成完了", 26);
-        
-        // ユーザーの操作として認識されるように、イベントを作成
-        const event = new MouseEvent('click', {
-          view: window,
-          bubbles: true,
-          cancelable: true,
-        });
-        debugLog("カスタムMouseEvent作成完了", 27);
-        
-        document.body.appendChild(link);
-        debugLog("BlobリンクをDOMに追加完了", 28);
-        
-        link.dispatchEvent(event);
-        debugLog("カスタムクリックイベント実行", 29);
-        
-        setTimeout(() => {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-          debugLog("方法3完了: 全てクリーンアップ済み", 30);
-        }, 500);
         
       } catch (manualError) {
         debugLog(`全ての手動方式が失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`, 31);
@@ -488,25 +443,8 @@ export const downloadMembersExcel = (members: Member[]): void => {
   // LIFFアプリ内ブラウザの場合の追加対策
   debugLog("処理完了 - LINEアプリ内ブラウザの制限によりダウンロードが失敗する可能性があります", 37);
   
-  // LIFFアプリでの代替案を提供
-  setTimeout(() => {
-    showWarning("LINEアプリ内ブラウザではファイルダウンロードが制限されています。代替案：1) URLをコピーしてSafari/Chromeで開く 2) CSVデータをクリップボードにコピー");
-    
-    // 代替案：CSVデータをクリップボードにコピー
-    setTimeout(() => {
-      try {
-        const csvData = generateCSVData(members);
-        navigator.clipboard.writeText(csvData).then(() => {
-          showWarning("CSVデータをクリップボードにコピーしました。メモ帳やExcelに貼り付けてください。");
-        }).catch(() => {
-          // クリップボードAPIが失敗した場合、テキストエリアを表示
-          showDataInTextArea(csvData);
-        });
-      } catch (error) {
-        debugLog(`クリップボードコピー失敗: ${error}`, 38);
-      }
-    }, 3000);
-  }, 2000);
+  // 最終的なフォールバック（上記で処理されなかった場合）
+  debugLog("最終フォールバック処理", 20);
 };
 
 /**
