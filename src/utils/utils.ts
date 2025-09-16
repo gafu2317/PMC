@@ -299,18 +299,14 @@ export const downloadMembersExcel = (members: Member[]): void => {
     const filename = `料金一覧_${today}.xlsx`;
     showWarning(`ファイル名: ${filename}`);
     
-    // モバイル対応のダウンロード処理
-    try {
-      showWarning("標準ダウンロード方式を試行中...");
-      // 標準的なダウンロード方法を試す
-      XLSX.writeFile(workbook, filename);
-      showWarning("標準ダウンロード成功！");
-    } catch (error) {
-      showWarning(`標準ダウンロード失敗: ${error instanceof Error ? error.message : '不明なエラー'}`);
-      showWarning("手動ダウンロード方式に切り替え中...");
+    // モバイル端末の判定
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      showWarning("モバイル端末検出: 手動ダウンロード方式を使用");
       
       try {
-        // 標準的な方法が失敗した場合、手動でBlobを作成してダウンロード
+        // モバイルの場合は最初から手動ダウンロードを使用
         const workbookOut = XLSX.write(workbook, {
           bookType: 'xlsx',
           type: 'array'
@@ -332,21 +328,66 @@ export const downloadMembersExcel = (members: Member[]): void => {
         link.style.display = 'none';
         showWarning("リンク要素設定完了");
         
-        // リンクをDOMに追加してクリック
-        document.body.appendChild(link);
-        showWarning("リンクをDOMに追加");
-        
-        link.click();
-        showWarning("リンククリック実行");
-        
-        // クリーンアップ
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        showWarning("手動ダウンロード完了！クリーンアップ済み");
+        // ユーザーがクリックしたタイミングで実行するため、少し待つ
+        setTimeout(() => {
+          document.body.appendChild(link);
+          showWarning("リンクをDOMに追加");
+          
+          link.click();
+          showWarning("リンククリック実行");
+          
+          // クリーンアップ
+          setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showWarning("手動ダウンロード完了！クリーンアップ済み");
+          }, 100);
+        }, 100);
         
       } catch (manualError) {
-        showWarning(`手動ダウンロードも失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`);
+        showWarning(`手動ダウンロード失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`);
         showWarning("ブラウザがファイルダウンロードをブロックしている可能性があります");
+      }
+      
+    } else {
+      // デスクトップの場合は標準ダウンロードを試す
+      try {
+        showWarning("デスクトップ端末: 標準ダウンロード方式を試行中...");
+        XLSX.writeFile(workbook, filename);
+        showWarning("標準ダウンロード成功！");
+      } catch (error) {
+        showWarning(`標準ダウンロード失敗: ${error instanceof Error ? error.message : '不明なエラー'}`);
+        showWarning("手動ダウンロード方式に切り替え中...");
+        
+        try {
+          const workbookOut = XLSX.write(workbook, {
+            bookType: 'xlsx',
+            type: 'array'
+          });
+          showWarning("バイナリデータ生成完了");
+          
+          const blob = new Blob([workbookOut], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+          });
+          showWarning(`Blob作成完了: ${blob.size}バイト`);
+          
+          const link = document.createElement('a');
+          const url = URL.createObjectURL(blob);
+          showWarning("ObjectURL作成完了");
+          
+          link.href = url;
+          link.download = filename;
+          link.style.display = 'none';
+          
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          showWarning("手動ダウンロード完了！");
+          
+        } catch (manualError) {
+          showWarning(`手動ダウンロードも失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`);
+        }
       }
     }
     
