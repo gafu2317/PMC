@@ -10,6 +10,7 @@ export interface Reservation {
 export interface Member {
   lineId: string;
   name: string;
+  furigana: string;//ふりがな
   studentId: number;
   fine: number;//罰金
   performanceFee: number;//出演費

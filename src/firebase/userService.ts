@@ -19,7 +19,8 @@ import { Member, Reservation, Band } from "../types/type";
 export const addUser = async (
   name: string,
   lineId: string,
-  studentId: string
+  studentId: string,
+  furigana: string
 ): Promise<void> => {
   try {
     // usersドキュメントの参照を取得
@@ -27,6 +28,7 @@ export const addUser = async (
     // ユーザー情報を追加
     await setDoc(docRef, {
       name: name,
+      furigana: furigana,
       studentId: studentId,
       fine: 0,
       unPaidFee: 0,
@@ -62,6 +64,7 @@ export const getAllUser = async (): Promise<Member[]> => {
     const users = userDocs.docs.map((doc) => ({
       lineId: doc.id,
       name: doc.data().name || "データなし",
+      furigana: doc.data().furigana || "データなし",
       studentId: doc.data().studentId || 0,
       fine: doc.data().fine || 0,
       unPaidFee: doc.data().unPaidFee || 0,
