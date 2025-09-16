@@ -4,6 +4,40 @@ import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { showWarning } from "./swal";
 
+// デバッグ用のログ表示関数
+const debugLog = (message: string, step: number) => {
+  const timestamp = new Date().toLocaleTimeString();
+  const logMessage = `[${timestamp}] ステップ${step}: ${message}`;
+  
+  // コンソールログ
+  console.log(logMessage);
+  
+  // ページ上にも表示（デバッグ用）
+  const debugDiv = document.getElementById('debug-log') || (() => {
+    const div = document.createElement('div');
+    div.id = 'debug-log';
+    div.style.cssText = `
+      position: fixed; 
+      top: 10px; 
+      left: 10px; 
+      background: rgba(0,0,0,0.8); 
+      color: white; 
+      padding: 10px; 
+      max-width: 300px; 
+      max-height: 400px; 
+      overflow-y: auto; 
+      font-size: 12px; 
+      z-index: 9999;
+      border-radius: 5px;
+    `;
+    document.body.appendChild(div);
+    return div;
+  })();
+  
+  debugDiv.innerHTML += `<div>${logMessage}</div>`;
+  debugDiv.scrollTop = debugDiv.scrollHeight;
+};
+
 export const emitter = new EventEmitter();
 
 let baseDate = new Date();
@@ -258,15 +292,15 @@ export const sortMembersByFurigana = (members: Member[]): Member[] => {
 };
 
 /**
- * メンバー料金情報をExcelファイルでダウンロードする関数（デバッグ版）
+ * メンバー料金情報をExcelファイルでダウンロードする関数（詳細デバッグ版）
  */
 export const downloadMembersExcel = (members: Member[]): void => {
   try {
-    showWarning("ダウンロード開始: データ準備中...");
+    debugLog("ダウンロード開始: データ準備中...", 1);
     
     // ふりがな順でソート
     const sortedMembers = sortMembersByFurigana(members);
-    showWarning(`ソート完了: ${sortedMembers.length}件のメンバー`);
+    debugLog(`ソート完了: ${sortedMembers.length}件のメンバー`, 2);
     
     // Excelデータの準備
     const worksheetData = [
@@ -283,70 +317,126 @@ export const downloadMembersExcel = (members: Member[]): void => {
         member.fine + member.performanceFee + member.studyFee + member.unPaidFee
       ])
     ];
-    showWarning("Excelデータ準備完了");
+    debugLog("Excelデータ準備完了", 3);
     
     // ワークシートを作成
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-    showWarning("ワークシート作成完了");
+    debugLog("ワークシート作成完了", 4);
     
     // ワークブックを作成
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, '料金一覧');
-    showWarning("ワークブック作成完了");
+    debugLog("ワークブック作成完了", 5);
     
     // ファイル名を生成（現在の日付を使用）
     const today = new Date().toISOString().split('T')[0];
     const filename = `料金一覧_${today}.xlsx`;
-    showWarning(`ファイル名: ${filename}`);
+    debugLog(`ファイル名: ${filename}`, 6);
     
     // モバイル端末の判定
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    debugLog(`デバイス判定: ${isMobile ? 'モバイル' : 'デスクトップ'}`, 7);
     
     if (isMobile) {
-      showWarning("モバイル端末検出: 手動ダウンロード方式を使用");
+      debugLog("モバイル端末検出: 複数の方式を順番に試行", 8);
       
       try {
-        // モバイルの場合は最初から手動ダウンロードを使用
         const workbookOut = XLSX.write(workbook, {
           bookType: 'xlsx',
           type: 'array'
         });
-        showWarning("バイナリデータ生成完了");
+        debugLog("バイナリデータ生成完了", 9);
         
         const blob = new Blob([workbookOut], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         });
-        showWarning(`Blob作成完了: ${blob.size}バイト`);
+        debugLog(`Blob作成完了: ${blob.size}バイト`, 10);
         
-        // ダウンロード用のリンク要素を作成
-        const link = document.createElement('a');
+        // 方法1: 新しいタブで開く方式
         const url = URL.createObjectURL(blob);
-        showWarning("ObjectURL作成完了");
+        debugLog("方法1: 新しいタブで開く方式を試行", 11);
         
+        try {
+          const newWindow = window.open(url, '_blank');
+          debugLog(`window.openの結果: ${newWindow ? '成功' : '失敗'}`, 12);
+          
+          if (newWindow) {
+            debugLog("新しいタブでファイルを開きました", 13);
+            // 少し待ってからクリーンアップ
+            setTimeout(() => {
+              URL.revokeObjectURL(url);
+              debugLog("方法1完了: URLクリーンアップ済み", 14);
+            }, 1000);
+            return;
+          } else {
+            debugLog("新しいタブの開放が失敗 - 方法2を試行", 15);
+          }
+        } catch (tabError) {
+          debugLog(`新しいタブ方式失敗: ${tabError instanceof Error ? tabError.message : '不明なエラー'}`, 16);
+        }
+        
+        // 方法2: DataURL方式
+        debugLog("方法2: DataURL方式を試行", 17);
+        try {
+          const workbookOutBase64 = XLSX.write(workbook, {
+            bookType: 'xlsx',
+            type: 'base64'
+          });
+          debugLog("Base64データ生成完了", 18);
+          
+          const dataUrl = `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${workbookOutBase64}`;
+          debugLog(`DataURL作成完了 (長さ: ${dataUrl.length}文字)`, 19);
+          
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = filename;
+          link.style.display = 'none';
+          debugLog("DataURLリンク要素作成完了", 20);
+          
+          document.body.appendChild(link);
+          debugLog("DataURLリンクをDOMに追加", 21);
+          
+          link.click();
+          debugLog("DataURLリンククリック実行", 22);
+          
+          document.body.removeChild(link);
+          debugLog("方法2完了: DataURL方式でダウンロード実行", 23);
+          return;
+        } catch (dataUrlError) {
+          debugLog(`DataURL方式失敗: ${dataUrlError instanceof Error ? dataUrlError.message : '不明なエラー'}`, 24);
+        }
+        
+        // 方法3: 通常のBlob方式（最後の手段）
+        debugLog("方法3: 通常のBlob方式を試行", 25);
+        const link = document.createElement('a');
         link.href = url;
         link.download = filename;
         link.style.display = 'none';
-        showWarning("リンク要素設定完了");
+        debugLog("Blobリンク要素作成完了", 26);
         
-        // ユーザーがクリックしたタイミングで実行するため、少し待つ
+        // ユーザーの操作として認識されるように、イベントを作成
+        const event = new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        });
+        debugLog("カスタムMouseEvent作成完了", 27);
+        
+        document.body.appendChild(link);
+        debugLog("BlobリンクをDOMに追加完了", 28);
+        
+        link.dispatchEvent(event);
+        debugLog("カスタムクリックイベント実行", 29);
+        
         setTimeout(() => {
-          document.body.appendChild(link);
-          showWarning("リンクをDOMに追加");
-          
-          link.click();
-          showWarning("リンククリック実行");
-          
-          // クリーンアップ
-          setTimeout(() => {
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            showWarning("手動ダウンロード完了！クリーンアップ済み");
-          }, 100);
-        }, 100);
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          debugLog("方法3完了: 全てクリーンアップ済み", 30);
+        }, 500);
         
       } catch (manualError) {
-        showWarning(`手動ダウンロード失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`);
-        showWarning("ブラウザがファイルダウンロードをブロックしている可能性があります");
+        debugLog(`全ての手動方式が失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`, 31);
+        debugLog("ブラウザがファイルダウンロードを完全にブロックしています", 32);
       }
       
     } else {
@@ -392,8 +482,115 @@ export const downloadMembersExcel = (members: Member[]): void => {
     }
     
   } catch (generalError) {
-    showWarning(`全体的なエラー: ${generalError instanceof Error ? generalError.message : '不明なエラー'}`);
+    debugLog(`全体的なエラー: ${generalError instanceof Error ? generalError.message : '不明なエラー'}`, 36);
   }
+  
+  // LIFFアプリ内ブラウザの場合の追加対策
+  debugLog("処理完了 - LINEアプリ内ブラウザの制限によりダウンロードが失敗する可能性があります", 37);
+  
+  // LIFFアプリでの代替案を提供
+  setTimeout(() => {
+    showWarning("LINEアプリ内ブラウザではファイルダウンロードが制限されています。代替案：1) URLをコピーしてSafari/Chromeで開く 2) CSVデータをクリップボードにコピー");
+    
+    // 代替案：CSVデータをクリップボードにコピー
+    setTimeout(() => {
+      try {
+        const csvData = generateCSVData(members);
+        navigator.clipboard.writeText(csvData).then(() => {
+          showWarning("CSVデータをクリップボードにコピーしました。メモ帳やExcelに貼り付けてください。");
+        }).catch(() => {
+          // クリップボードAPIが失敗した場合、テキストエリアを表示
+          showDataInTextArea(csvData);
+        });
+      } catch (error) {
+        debugLog(`クリップボードコピー失敗: ${error}`, 38);
+      }
+    }, 3000);
+  }, 2000);
+};
+
+/**
+ * CSVデータを生成する関数
+ */
+const generateCSVData = (members: Member[]): string => {
+  const sortedMembers = sortMembersByFurigana(members);
+  
+  const csvData = [
+    // ヘッダー行
+    '名前,ふりがな,罰金,出演費,学スタ使用料,未払金,合計',
+    // データ行
+    ...sortedMembers.map(member => 
+      [
+        `"${member.name}"`,
+        `"${member.furigana}"`,
+        member.fine,
+        member.performanceFee,
+        member.studyFee,
+        member.unPaidFee,
+        member.fine + member.performanceFee + member.studyFee + member.unPaidFee
+      ].join(',')
+    )
+  ].join('\n');
+  
+  return csvData;
+};
+
+/**
+ * テキストエリアでデータを表示する関数（クリップボードが使えない場合）
+ */
+const showDataInTextArea = (csvData: string): void => {
+  // 既存のテキストエリアを削除
+  const existingTextArea = document.getElementById('csv-data-display');
+  if (existingTextArea) {
+    existingTextArea.remove();
+  }
+  
+  // 新しいテキストエリアを作成
+  const textArea = document.createElement('textarea');
+  textArea.id = 'csv-data-display';
+  textArea.value = csvData;
+  textArea.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 70%;
+    z-index: 10000;
+    background: white;
+    border: 2px solid #333;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 12px;
+  `;
+  
+  // 閉じるボタンを作成
+  const closeButton = document.createElement('button');
+  closeButton.textContent = '✕ 閉じる';
+  closeButton.style.cssText = `
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+  `;
+  
+  closeButton.onclick = () => {
+    document.body.removeChild(textArea);
+  };
+  
+  textArea.appendChild(closeButton);
+  document.body.appendChild(textArea);
+  
+  // テキストを全選択
+  textArea.select();
+  textArea.setSelectionRange(0, 99999); // モバイル対応
+  
+  showWarning("データを手動でコピーしてください。長押しで全選択→コピーができます。");
 };
 
 
