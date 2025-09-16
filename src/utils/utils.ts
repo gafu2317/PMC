@@ -2,6 +2,7 @@ import { Reservation, Member } from "../types/type";
 import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import { showWarning } from "./swal";
 
 export const emitter = new EventEmitter();
 
@@ -257,69 +258,100 @@ export const sortMembersByFurigana = (members: Member[]): Member[] => {
 };
 
 /**
- * メンバー料金情報をExcelファイルでダウンロードする関数
+ * メンバー料金情報をExcelファイルでダウンロードする関数（デバッグ版）
  */
 export const downloadMembersExcel = (members: Member[]): void => {
-  // ふりがな順でソート
-  const sortedMembers = sortMembersByFurigana(members);
-  
-  // Excelデータの準備
-  const worksheetData = [
-    // ヘッダー行
-    ['名前', 'ふりがな', '罰金', '出演費', '学スタ使用料', '未払金', '合計'],
-    // データ行
-    ...sortedMembers.map(member => [
-      member.name,
-      member.furigana,
-      member.fine,
-      member.performanceFee,
-      member.studyFee,
-      member.unPaidFee,
-      member.fine + member.performanceFee + member.studyFee + member.unPaidFee
-    ])
-  ];
-  
-  // ワークシートを作成
-  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-  
-  // ワークブックを作成
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, '料金一覧');
-  
-  // ファイル名を生成（現在の日付を使用）
-  const today = new Date().toISOString().split('T')[0];
-  const filename = `料金一覧_${today}.xlsx`;
-  
-  // モバイル対応のダウンロード処理
   try {
-    // 標準的なダウンロード方法を試す
-    XLSX.writeFile(workbook, filename);
-  } catch (error) {
-    // 標準的な方法が失敗した場合、手動でBlobを作成してダウンロード
-    const workbookOut = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
+    showWarning("ダウンロード開始: データ準備中...");
     
-    const blob = new Blob([workbookOut], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
+    // ふりがな順でソート
+    const sortedMembers = sortMembersByFurigana(members);
+    showWarning(`ソート完了: ${sortedMembers.length}件のメンバー`);
     
-    // ダウンロード用のリンク要素を作成
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
+    // Excelデータの準備
+    const worksheetData = [
+      // ヘッダー行
+      ['名前', 'ふりがな', '罰金', '出演費', '学スタ使用料', '未払金', '合計'],
+      // データ行
+      ...sortedMembers.map(member => [
+        member.name,
+        member.furigana,
+        member.fine,
+        member.performanceFee,
+        member.studyFee,
+        member.unPaidFee,
+        member.fine + member.performanceFee + member.studyFee + member.unPaidFee
+      ])
+    ];
+    showWarning("Excelデータ準備完了");
     
-    link.href = url;
-    link.download = filename;
-    link.style.display = 'none';
+    // ワークシートを作成
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    showWarning("ワークシート作成完了");
     
-    // リンクをDOMに追加してクリック
-    document.body.appendChild(link);
-    link.click();
+    // ワークブックを作成
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, '料金一覧');
+    showWarning("ワークブック作成完了");
     
-    // クリーンアップ
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // ファイル名を生成（現在の日付を使用）
+    const today = new Date().toISOString().split('T')[0];
+    const filename = `料金一覧_${today}.xlsx`;
+    showWarning(`ファイル名: ${filename}`);
+    
+    // モバイル対応のダウンロード処理
+    try {
+      showWarning("標準ダウンロード方式を試行中...");
+      // 標準的なダウンロード方法を試す
+      XLSX.writeFile(workbook, filename);
+      showWarning("標準ダウンロード成功！");
+    } catch (error) {
+      showWarning(`標準ダウンロード失敗: ${error instanceof Error ? error.message : '不明なエラー'}`);
+      showWarning("手動ダウンロード方式に切り替え中...");
+      
+      try {
+        // 標準的な方法が失敗した場合、手動でBlobを作成してダウンロード
+        const workbookOut = XLSX.write(workbook, {
+          bookType: 'xlsx',
+          type: 'array'
+        });
+        showWarning("バイナリデータ生成完了");
+        
+        const blob = new Blob([workbookOut], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        showWarning(`Blob作成完了: ${blob.size}バイト`);
+        
+        // ダウンロード用のリンク要素を作成
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        showWarning("ObjectURL作成完了");
+        
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+        showWarning("リンク要素設定完了");
+        
+        // リンクをDOMに追加してクリック
+        document.body.appendChild(link);
+        showWarning("リンクをDOMに追加");
+        
+        link.click();
+        showWarning("リンククリック実行");
+        
+        // クリーンアップ
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        showWarning("手動ダウンロード完了！クリーンアップ済み");
+        
+      } catch (manualError) {
+        showWarning(`手動ダウンロードも失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`);
+        showWarning("ブラウザがファイルダウンロードをブロックしている可能性があります");
+      }
+    }
+    
+  } catch (generalError) {
+    showWarning(`全体的なエラー: ${generalError instanceof Error ? generalError.message : '不明なエラー'}`);
   }
 };
 
