@@ -17,18 +17,21 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
   const [firstName, setFirstName] = useState<string | null>(null); // 苗字
   const [lastName, setLastName] = useState<string | null>(null); // 名前
   const name = `${firstName} ${lastName}`; // 名前
+  const [firstNameKana, setFirstNameKana] = useState<string | null>(null); // 苗字のふりがな
+  const [lastNameKana, setLastNameKana] = useState<string | null>(null); // 名前のふりがな
+  const furigana = `${firstNameKana} ${lastNameKana}`; // ふりがな
   const [studentId, setStudentId] = useState<string | null>(null); // 学籍番号
   const [isConfirmationVisible, setIsConfirmationVisible] =
     useState<boolean>(false); // 確認ポップアップの表示状態
 
   const handleSubmit = () => {
     setIsConfirmationVisible(false);
-    // 名前と学籍番号が入力されているかチェック
-    if (!firstName || !lastName || !studentId) {
+    // 名前、ふりがな、学籍番号が入力されているかチェック
+    if (!firstName || !lastName || !firstNameKana || !lastNameKana || !studentId) {
       Swal.fire({
         icon: "warning",
         title: "エラー",
-        text: "名前と学籍番号を入力してください。",
+        text: "名前、ふりがな、学籍番号を入力してください。",
         confirmButtonText: "OK",
       });
       return;
@@ -48,10 +51,10 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
         confirmButtonText: "OK",
       });
       const newName = `${name} (${studentId})`;
-      addUser(newName, lineId, studentId);
+      addUser(newName, lineId, studentId, furigana);
     } else {
       // 名前が重複していない場合
-      addUser(name, lineId, studentId);
+      addUser(name, lineId, studentId, furigana);
     }
     onClose();
   };
@@ -72,17 +75,31 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
             </label>
             <input
               type="text"
-              id="name"
+              id="firstName"
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
               placeholder="姓"
               onChange={(e) => setFirstName(e.target.value)}
             />
             <input
               type="text"
-              id="name"
+              id="firstNameKana"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              placeholder="せい"
+              onChange={(e) => setFirstNameKana(e.target.value)}
+            />
+            <input
+              type="text"
+              id="lastName"
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
               placeholder="名"
               onChange={(e) => setLastName(e.target.value)}
+            />
+            <input
+              type="text"
+              id="lastNameKana"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              placeholder="めい"
+              onChange={(e) => setLastNameKana(e.target.value)}
             />
           </div>
 
@@ -117,7 +134,7 @@ const RegistrationPopup: React.FC<RegistrationPopupProps> = ({
               <div className="bg-white p-4 rounded shadow w-80">
                 <h2 className="text-lg font-bold text-center">確認</h2>
                 <p>以下の内容でよろしいですか？</p>
-                <p>名前: {name}</p>
+                <p>名前: {name} ({furigana})</p>
                 <p>学籍番号: {studentId}</p>
                 <p className="text-xs mt-2">
                   ※同姓同名がいた場合、名前の後ろに学籍番号が付きます

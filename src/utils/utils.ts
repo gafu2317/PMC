@@ -1,6 +1,7 @@
-import { Reservation } from "../types/type";
+import { Reservation, Member } from "../types/type";
 import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 
 export const emitter = new EventEmitter();
 
@@ -241,34 +242,87 @@ export function isDuplicate(reservations: Reservation[]) {
 }
 
 /**
- * テキストファイルを作成してダウンロードする関数
- * @param content テキストファイルの内容
- * @param filename ダウンロードするファイル名
+ * ふりがなで50音順にメンバーをソートする関数
  */
-export const downloadTextFile = (content: string, filename: string): void => {
-  // テキストコンテンツからBlobを作成
-  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  
-  // BlobからURLを生成
-  const url = URL.createObjectURL(blob);
-  
-  // ダウンロード用のリンク要素を作成
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  
-  // リンクを非表示にする
-  link.style.display = 'none';
-  
-  // リンクをDOMに追加
-  document.body.appendChild(link);
-  
-  // リンクをクリック（ダウンロード開始）
-  link.click();
-  
-  // リンクをDOMから削除
-  document.body.removeChild(link);
-  
-  // URLオブジェクトを解放
-  URL.revokeObjectURL(url);
+export const sortMembersByFurigana = (members: Member[]): Member[] => {
+  return [...members].sort((a, b) => {
+    // ふりがなでソート（空の場合は名前でソート）
+    const furiganaA = a.furigana || a.name;
+    const furiganaB = b.furigana || b.name;
+    return furiganaA.localeCompare(furiganaB, 'ja', { 
+      numeric: true, 
+      sensitivity: 'base' 
+    });
+  });
 };
+
+/**
+ * メンバー料金情報をExcelファイルでダウンロードする関数
+ */
+export const downloadMembersExcel = (members: Member[]): void => {
+  // ふりがな順でソート
+  const sortedMembers = sortMembersByFurigana(members);
+  
+  // Excelデータの準備
+  const worksheetData = [
+    // ヘッダー行
+    ['名前', 'ふりがな', '罰金', '出演費', '学スタ使用料', '未払金', '合計'],
+    // データ行
+    ...sortedMembers.map(member => [
+      member.name,
+      member.furigana,
+      member.fine,
+      member.performanceFee,
+      member.studyFee,
+      member.unPaidFee,
+      member.fine + member.performanceFee + member.studyFee + member.unPaidFee
+    ])
+  ];
+  
+  // ワークシートを作成
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  
+  // ワークブックを作成
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, '料金一覧');
+  
+  // ファイル名を生成（現在の日付を使用）
+  const today = new Date().toISOString().split('T')[0];
+  const filename = `料金一覧_${today}.xlsx`;
+  
+  // ファイルをダウンロード
+  XLSX.writeFile(workbook, filename);
+};
+
+// /**
+//  * テキストファイルを作成してダウンロードする関数
+//  * @param content テキストファイルの内容
+//  * @param filename ダウンロードするファイル名
+//  */
+// export const downloadTextFile = (content: string, filename: string): void => {
+//   // テキストコンテンツからBlobを作成
+//   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  
+//   // BlobからURLを生成
+//   const url = URL.createObjectURL(blob);
+  
+//   // ダウンロード用のリンク要素を作成
+//   const link = document.createElement('a');
+//   link.href = url;
+//   link.download = filename;
+  
+//   // リンクを非表示にする
+//   link.style.display = 'none';
+  
+//   // リンクをDOMに追加
+//   document.body.appendChild(link);
+  
+//   // リンクをクリック（ダウンロード開始）
+//   link.click();
+  
+//   // リンクをDOMから削除
+//   document.body.removeChild(link);
+  
+//   // URLオブジェクトを解放
+//   URL.revokeObjectURL(url);
+// };

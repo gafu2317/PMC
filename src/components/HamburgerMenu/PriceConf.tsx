@@ -11,8 +11,8 @@ import {
 } from "../../firebase/userService";
 import { sendMessages, getMessageStatus } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
-import { showError, showSuccess,showWarning,  } from "../../utils/swal";
-import { downloadTextFile } from "../../utils/utils";
+import { showError, showSuccess, showWarning } from "../../utils/swal";
+import { downloadMembersExcel } from "../../utils/utils";
 
 interface PriceConfProps {
   members: Member[];
@@ -47,20 +47,20 @@ const PriceConf: React.FC<PriceConfProps> = (
     }
   }, [messageStatus, members.length]);
 
-  const generateReservationText = (reservations: any[]): string => {
-    let text = "予約データ一覧\n\n";
+  // const generateReservationText = (reservations: any[]): string => {
+  //   let text = "予約データ一覧\n\n";
 
-    reservations.forEach((reservation, index) => {
-      const date = reservation.date.toLocaleDateString("ja-JP");
-      const names = reservation.names.join(", ");
+  //   reservations.forEach((reservation, index) => {
+  //     const date = reservation.date.toLocaleDateString("ja-JP");
+  //     const names = reservation.names.join(", ");
 
-      text += `予約 ${index + 1}:\n`;
-      text += `日付: ${date}\n`;
-      text += `予約者: ${names}\n\n`;
-    });
+  //     text += `予約 ${index + 1}:\n`;
+  //     text += `日付: ${date}\n`;
+  //     text += `予約者: ${names}\n\n`;
+  //   });
 
-    return text;
-  };
+  //   return text;
+  // };
 
   // // 予約データをクリップボードにコピーする関数
   // const copyReservationsToClipboard = (reservations: any[]): void => {
@@ -124,13 +124,15 @@ const PriceConf: React.FC<PriceConfProps> = (
         return;
       }
     }
-    //予約データをテキストファイルにする
-    const text = generateReservationText(reservations);
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD形式
-    //テキストファイルをダウンロード
-    downloadTextFile(text, `予約データ_${today}.txt`);
+    // //予約データをテキストファイルにする
+    // const text = generateReservationText(reservations);
+    // const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD形式
+    // //テキストファイルをダウンロード
+    // downloadTextFile(text, `予約データ_${today}.txt`);
     // // 予約データをクリップボードにコピー
     // copyReservationsToClipboard(reservations);
+    //Excelダウンロード
+    downloadMembersExcel(members);
     //料金の通知
     if (canSendMessages) {
       for (const member of members) {
@@ -244,12 +246,18 @@ const PriceConf: React.FC<PriceConfProps> = (
         </div>
       </div>
 
-      <div className="flex justify-center my-2 items-center">
+      <div className="flex justify-center my-2 items-center gap-4">
         <button
-          className="bg-gray-300 rounded p-1 w-24 text-lg"
+          className="bg-blue-400 text-white rounded p-2 text-sm"
+          onClick={() => downloadMembersExcel(members)}
+        >
+          ①Excelダウンロード
+        </button>
+        <button
+          className="bg-gray-300 rounded p-1 w-28 text-lg"
           onClick={() => handleConf()}
         >
-          料金確定
+          ②料金確定
         </button>
       </div>
     </div>
