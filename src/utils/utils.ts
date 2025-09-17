@@ -447,6 +447,49 @@ export const downloadMembersExcel = async (members: Member[]): Promise<void> => 
 };
 
 /**
+ * サーバー側ダウンロード方式でExcelファイルをダウンロードする関数
+ */
+export const downloadExcelViaServer = async (members: Member[]): Promise<void> => {
+  try {
+    debugLog("サーバー側ダウンロード方式開始", 1);
+    
+    // POSTリクエスト用のフォームを動的に作成
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/api/download-excel';
+    form.target = '_blank'; // 新しいタブで開く
+    form.style.display = 'none';
+    
+    // メンバーデータをJSON文字列として送信
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'members';
+    input.value = JSON.stringify(members);
+    
+    form.appendChild(input);
+    document.body.appendChild(form);
+    
+    debugLog("フォーム作成完了、サブミット実行", 2);
+    
+    // フォームをサブミット
+    form.submit();
+    
+    // フォームを削除
+    setTimeout(() => {
+      document.body.removeChild(form);
+      debugLog("フォーム削除完了", 3);
+    }, 1000);
+    
+    showWarning("サーバー側ダウンロードを実行しました。新しいタブでファイルダウンロードが開始されます。");
+    
+  } catch (error) {
+    debugLog(`サーバー側ダウンロードエラー: ${error instanceof Error ? error.message : '不明なエラー'}`, 4);
+    showWarning(`❌ サーバー側ダウンロードに失敗しました。\n\nエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
+    throw error;
+  }
+};
+
+/**
  * CSVデータを生成する関数
  */
 const generateCSVData = (members: Member[]): string => {

@@ -12,7 +12,7 @@ import {
 import { sendMessages, getMessageStatus } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
 import { showError, showSuccess, showWarning } from "../../utils/swal";
-import { downloadMembersExcel } from "../../utils/utils";
+import { downloadMembersExcel, downloadExcelViaServer } from "../../utils/utils";
 
 interface PriceConfProps {
   members: Member[];
@@ -246,19 +246,29 @@ const PriceConf: React.FC<PriceConfProps> = (
         </div>
       </div>
 
-      <div className="flex justify-center my-2 items-center gap-4">
-        <button
-          className="bg-blue-400 text-white rounded p-2 text-sm"
-          onClick={() => downloadMembersExcel(members)}
-        >
-          ①Excelダウンロード
-        </button>
-        <button
-          className="bg-gray-300 rounded p-1 w-28 text-lg"
-          onClick={() => handleConf()}
-        >
-          ②料金確定
-        </button>
+      <div className="flex flex-col gap-2 my-2">
+        <div className="flex justify-center gap-2">
+          <button
+            className="bg-blue-400 text-white rounded p-2 text-sm flex-1 max-w-32"
+            onClick={() => downloadMembersExcel(members)}
+          >
+            ①CSVコピー
+          </button>
+          <button
+            className="bg-green-500 text-white rounded p-2 text-sm flex-1 max-w-32"
+            onClick={() => downloadExcelViaServer(members)}
+          >
+            ①Excel別タブ
+          </button>
+        </div>
+        <div className="flex justify-center">
+          <button
+            className="bg-gray-300 rounded p-1 w-32 text-lg"
+            onClick={() => handleConf()}
+          >
+            ②料金確定
+          </button>
+        </div>
       </div>
     </div>
   );
