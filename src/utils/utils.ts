@@ -2,6 +2,7 @@ import { Reservation, Member } from "../types/type";
 import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import { showExcelDownloadConfirm } from "./swal";
 
 export const emitter = new EventEmitter();
 
@@ -259,19 +260,14 @@ export const sortMembersByFurigana = (members: Member[]): Member[] => {
 /**
  * メンバー料金情報をExcelファイルでダウンロードする関数
  */
-export const downloadMembersExcel = (members: Member[]): void => {
-  // LIFF環境かどうかをチェック
-  if ((window as any).liff) {
-    alert(`ChromeやSafariなどのブラウザで以下のURLを開いてください：
-
-名工大版: https://pmc-lilac.vercel.app/Meikou
-金城版: https://pmc-lilac.vercel.app/Kinjyou
-
-ブラウザで開いた後、もう一度Excelダウンロードボタンを押してください。`);
-    return; // LIFF環境では処理を終了
+export const downloadMembersExcel = async (members: Member[]): Promise<void> => {
+  // Excelダウンロードの説明とURL表示（SweetAlert2を使用）
+  const result = await showExcelDownloadConfirm();
+  
+  if (!result.isConfirmed) {
+    return; // キャンセルされた場合は処理を終了
   }
   
-  // LIFF環境でない場合のみExcel処理を実行
   // ふりがな順でソート
   const sortedMembers = sortMembersByFurigana(members);
   

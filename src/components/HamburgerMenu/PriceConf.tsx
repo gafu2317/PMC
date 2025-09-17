@@ -132,24 +132,7 @@ const PriceConf: React.FC<PriceConfProps> = (
     // // 予約データをクリップボードにコピー
     // copyReservationsToClipboard(reservations);
     //Excelダウンロード
-    // LIFF環境の場合は確認ダイアログを表示
-    if ((window as any).liff) {
-      const shouldDownloadExcel = confirm(
-        `Excelファイルのダウンロードには外部ブラウザ（Chrome、Safari等）を使う必要があります。
-
-「OK」を押すとブラウザ情報を表示します（Excelダウンロードを行う場合）
-「キャンセル」を押すとExcelダウンロードをスキップして料金確定処理のみ実行します`
-      );
-      
-      if (shouldDownloadExcel) {
-        downloadMembersExcel(members);
-        return; // Excelダウンロードのアラートが表示されるため、ここで処理を終了
-      }
-      // キャンセルの場合はExcelダウンロードをスキップして後続処理を実行
-    } else {
-      // LIFF環境でない場合は通常通りExcelダウンロードを実行
-      downloadMembersExcel(members);
-    }
+    await downloadMembersExcel(members);
     //料金の通知
     if (canSendMessages) {
       for (const member of members) {
@@ -266,7 +249,7 @@ const PriceConf: React.FC<PriceConfProps> = (
       <div className="flex justify-center my-2 items-center gap-4">
         <button
           className="bg-blue-400 text-white rounded p-2 text-sm"
-          onClick={() => downloadMembersExcel(members)}
+          onClick={async () => await downloadMembersExcel(members)}
         >
           ①Excelダウンロード
         </button>

@@ -70,3 +70,45 @@ export const showConfirm = (
     cancelButtonText: "いいえ",
   });
 };
+
+/**
+ * Excelダウンロード用の確認ダイアログを表示する（URL付き）
+ * @returns 確認結果のPromise
+ */
+export const showExcelDownloadConfirm = (): Promise<any> => {
+  return Swal.fire({
+    icon: "info",
+    title: "Excelダウンロードについて",
+    html: `
+      <p>ChromeやSafariなどのブラウザでないとダウンロードできません。</p>
+      <br>
+      <p>以下のURLをタップして開いてください：</p>
+      <br>
+      <div style="text-align: left; margin: 10px 0;">
+        <p style="margin: 5px 0;"><strong>名工大版:</strong></p>
+        <a href="https://pmc-lilac.vercel.app/Meikou" 
+           target="_blank" 
+           style="color: #007bff; text-decoration: underline; word-break: break-all;">
+          https://pmc-lilac.vercel.app/Meikou
+        </a>
+      </div>
+      <div style="text-align: left; margin: 10px 0;">
+        <p style="margin: 5px 0;"><strong>金城版:</strong></p>
+        <a href="https://pmc-lilac.vercel.app/Kinjyou" 
+           target="_blank" 
+           style="color: #007bff; text-decoration: underline; word-break: break-all;">
+          https://pmc-lilac.vercel.app/Kinjyou
+        </a>
+      </div>
+      <br>
+      <p>OKを押すと処理を続行します。</p>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "OK",
+    cancelButtonText: "キャンセル",
+    width: '90%',
+    customClass: {
+      htmlContainer: 'text-left'
+    }
+  });
+};
