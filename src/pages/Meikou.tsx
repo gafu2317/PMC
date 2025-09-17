@@ -20,22 +20,33 @@ import { initLiff } from "../liff/liffService";
 function Meikou() {
   const weekDays = useWeekDays();
   const { lineId, setLineId } = useLineId();
+  const [isLoading, setIsLoading] = useState(true);
+  const [initError, setInitError] = useState(false);
   
   // 名工大版専用LIFF初期化
   useEffect(() => {
     const fetchLineId = async () => {
       try {
+        setIsLoading(true);
         const fetchedLineId = await initLiff('meikou');
         if (fetchedLineId) {
           setLineId(fetchedLineId);
+          setInitError(false);
+        } else {
+          setInitError(true);
         }
       } catch (error) {
         console.error("LIFF initialization failed:", error);
+        setInitError(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (!lineId) {
       fetchLineId();
+    } else {
+      setIsLoading(false);
     }
   }, [lineId, setLineId]);
   //部員を管理
@@ -204,15 +215,15 @@ function Meikou() {
           )}
         </div>
       )}
-      {lineId === null && (
+      {isLoading && (
+        <div className="flex justify-center items-center h-screen">
+          <div>ロード中...</div>
+        </div>
+      )}
+      {!isLoading && initError && (
         <div className="flex flex-col justify-center items-center h-screen">
           <div>LINE IDが取得できませんでした。</div>
           <div>もう一度開き直してください</div>
-        </div>
-      )}
-      {!lineId && (
-        <div className="flex justify-center items-center h-screen">
-          <div>ロード中...</div>
         </div>
       )}
     </div>
