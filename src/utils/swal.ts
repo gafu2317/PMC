@@ -72,6 +72,54 @@ export const showConfirm = (
 };
 
 /**
+ * URLをクリップボードにコピーする関数
+ * @param url コピーするURL
+ */
+const copyToClipboard = async (url: string): Promise<void> => {
+  try {
+    await navigator.clipboard.writeText(url);
+    Swal.fire({
+      icon: 'success',
+      title: 'コピー完了',
+      text: 'URLをコピーしました！ブラウザのアドレスバーに貼り付けてください。',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  } catch (error) {
+    console.error('コピーに失敗:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'コピー失敗',
+      text: 'URLのコピーに失敗しました。手動でコピーしてください。',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
+};
+
+/**
+ * LIFFで外部ブラウザを開く関数
+ * @param url 開くURL
+ */
+const openInExternalBrowser = (url: string): void => {
+  try {
+    if ((window as any).liff && (window as any).liff.openWindow) {
+      (window as any).liff.openWindow({
+        url: url,
+        external: true
+      });
+    } else {
+      // LIFFが利用できない場合は通常のwindow.open
+      window.open(url, '_blank');
+    }
+  } catch (error) {
+    console.error('外部ブラウザで開くのに失敗:', error);
+    // エラーの場合はURLをコピー
+    copyToClipboard(url);
+  }
+};
+
+/**
  * Excelダウンロード用の確認ダイアログを表示する（URL付き）
  * @returns 確認結果のPromise
  */
@@ -82,23 +130,29 @@ export const showExcelDownloadConfirm = (): Promise<any> => {
     html: `
       <p>ChromeやSafariなどのブラウザでないとダウンロードできません。</p>
       <br>
-      <p>以下のURLをタップして開いてください：</p>
+      <p>以下のボタンから選択してください：</p>
       <br>
-      <div style="text-align: left; margin: 10px 0;">
-        <p style="margin: 5px 0;"><strong>名工大版:</strong></p>
-        <a href="https://pmc-lilac.vercel.app/Meikou" 
-           target="_blank" 
-           style="color: #007bff; text-decoration: underline; word-break: break-all;">
-          https://pmc-lilac.vercel.app/Meikou
-        </a>
+      <div style="margin: 15px 0;">
+        <p style="margin: 5px 0; font-weight: bold;">名工大版:</p>
+        <button id="open-meikou" 
+                style="margin: 5px; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          ブラウザで開く
+        </button>
+        <button id="copy-meikou" 
+                style="margin: 5px; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          URLをコピー
+        </button>
       </div>
-      <div style="text-align: left; margin: 10px 0;">
-        <p style="margin: 5px 0;"><strong>金城版:</strong></p>
-        <a href="https://pmc-lilac.vercel.app/Kinjyou" 
-           target="_blank" 
-           style="color: #007bff; text-decoration: underline; word-break: break-all;">
-          https://pmc-lilac.vercel.app/Kinjyou
-        </a>
+      <div style="margin: 15px 0;">
+        <p style="margin: 5px 0; font-weight: bold;">金城版:</p>
+        <button id="open-kinjyou" 
+                style="margin: 5px; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          ブラウザで開く
+        </button>
+        <button id="copy-kinjyou" 
+                style="margin: 5px; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          URLをコピー
+        </button>
       </div>
       <br>
       <p>OKを押すと処理を続行します。</p>
@@ -109,6 +163,21 @@ export const showExcelDownloadConfirm = (): Promise<any> => {
     width: '90%',
     customClass: {
       htmlContainer: 'text-left'
+    },
+    didOpen: () => {
+      // ボタンのイベントリスナーを設定
+      document.getElementById('open-meikou')?.addEventListener('click', () => {
+        openInExternalBrowser('https://pmc-lilac.vercel.app/Meikou');
+      });
+      document.getElementById('copy-meikou')?.addEventListener('click', () => {
+        copyToClipboard('https://pmc-lilac.vercel.app/Meikou');
+      });
+      document.getElementById('open-kinjyou')?.addEventListener('click', () => {
+        openInExternalBrowser('https://pmc-lilac.vercel.app/Kinjyou');
+      });
+      document.getElementById('copy-kinjyou')?.addEventListener('click', () => {
+        copyToClipboard('https://pmc-lilac.vercel.app/Kinjyou');
+      });
     }
   });
 };
