@@ -11,7 +11,7 @@ import {
 } from "../../firebase/userService";
 import { sendMessages, getMessageStatus } from "../../liff/liffService";
 import { Member, Band } from "../../types/type";
-import { showError, showSuccess, showWarning } from "../../utils/swal";
+import { showError, showSuccess, showWarning, showPriceConfirmWithExcelCheck } from "../../utils/swal";
 import { downloadMembersExcel } from "../../utils/utils";
 
 interface PriceConfProps {
@@ -94,6 +94,13 @@ const PriceConf: React.FC<PriceConfProps> = (
   // };
 
   const handleConf = async () => {
+    // 料金確定前の確認ダイアログを表示
+    const result = await showPriceConfirmWithExcelCheck();
+    
+    if (!result.isConfirmed) {
+      return; // キャンセルされた場合は処理を中断
+    }
+    
     //削除する予約を取得
     let reservations: {
       id: string;
@@ -131,8 +138,6 @@ const PriceConf: React.FC<PriceConfProps> = (
     // downloadTextFile(text, `予約データ_${today}.txt`);
     // // 予約データをクリップボードにコピー
     // copyReservationsToClipboard(reservations);
-    //Excelダウンロード
-    await downloadMembersExcel(members);
     //料金の通知
     if (canSendMessages) {
       for (const member of members) {
