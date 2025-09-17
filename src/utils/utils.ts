@@ -2,41 +2,6 @@ import { Reservation, Member } from "../types/type";
 import EventEmitter from "eventemitter3";
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import { showWarning } from "./swal";
-
-// デバッグ用のログ表示関数
-const debugLog = (message: string, step: number) => {
-  const timestamp = new Date().toLocaleTimeString();
-  const logMessage = `[${timestamp}] ステップ${step}: ${message}`;
-  
-  // コンソールログ
-  console.log(logMessage);
-  
-  // ページ上にも表示（デバッグ用）
-  const debugDiv = document.getElementById('debug-log') || (() => {
-    const div = document.createElement('div');
-    div.id = 'debug-log';
-    div.style.cssText = `
-      position: fixed; 
-      top: 10px; 
-      left: 10px; 
-      background: rgba(0,0,0,0.8); 
-      color: white; 
-      padding: 10px; 
-      max-width: 300px; 
-      max-height: 400px; 
-      overflow-y: auto; 
-      font-size: 12px; 
-      z-index: 9999;
-      border-radius: 5px;
-    `;
-    document.body.appendChild(div);
-    return div;
-  })();
-  
-  debugDiv.innerHTML += `<div>${logMessage}</div>`;
-  debugDiv.scrollTop = debugDiv.scrollHeight;
-};
 
 export const emitter = new EventEmitter();
 
@@ -292,317 +257,41 @@ export const sortMembersByFurigana = (members: Member[]): Member[] => {
 };
 
 /**
- * メンバー料金情報をExcelファイルでダウンロードする関数（詳細デバッグ版）
+ * メンバー料金情報をExcelファイルでダウンロードする関数
  */
-export const downloadMembersExcel = async (members: Member[]): Promise<void> => {
-  try {
-    debugLog("ダウンロード開始: データ準備中...", 1);
-    
-    // ふりがな順でソート
-    const sortedMembers = sortMembersByFurigana(members);
-    debugLog(`ソート完了: ${sortedMembers.length}件のメンバー`, 2);
-    
-    // Excelデータの準備
-    const worksheetData = [
-      // ヘッダー行
-      ['名前', 'ふりがな', '罰金', '出演費', '学スタ使用料', '未払金', '合計'],
-      // データ行
-      ...sortedMembers.map(member => [
-        member.name,
-        member.furigana,
-        member.fine,
-        member.performanceFee,
-        member.studyFee,
-        member.unPaidFee,
-        member.fine + member.performanceFee + member.studyFee + member.unPaidFee
-      ])
-    ];
-    debugLog("Excelデータ準備完了", 3);
-    
-    // ワークシートを作成
-    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-    debugLog("ワークシート作成完了", 4);
-    
-    // ワークブックを作成
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, '料金一覧');
-    debugLog("ワークブック作成完了", 5);
-    
-    // ファイル名を生成（現在の日付を使用）
-    const today = new Date().toISOString().split('T')[0];
-    const filename = `料金一覧_${today}.xlsx`;
-    debugLog(`ファイル名: ${filename}`, 6);
-    
-    // モバイル端末の判定
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    debugLog(`デバイス判定: ${isMobile ? 'モバイル' : 'デスクトップ'}`, 7);
-    
-    if (isMobile) {
-      debugLog("モバイル端末検出: 複数の方式を順番に試行", 8);
-      
-      try {
-        const workbookOut = XLSX.write(workbook, {
-          bookType: 'xlsx',
-          type: 'array'
-        });
-        debugLog("バイナリデータ生成完了", 9);
-        
-        const blob = new Blob([workbookOut], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        });
-        debugLog(`Blob作成完了: ${blob.size}バイト`, 10);
-        
-        // 方法1: 新しいタブで開く方式をスキップ（LIFFアプリでは制限されるため）
-        debugLog("方法1: 新しいタブで開く方式をスキップ（LIFFアプリでは制限されるため）", 11);
-        
-        // LIFFアプリでは window.open が偽の成功を返すことがあるため、この方法をスキップ
-        
-        // 直接CSVデータをクリップボードにコピーする方式（LIFFアプリに最適化）
-        debugLog("LIFF最適化: CSVクリップボードコピー方式を試行", 12);
-        try {
-          const csvData = generateCSVData(members);
-          debugLog("CSVデータ生成完了", 13);
-          
-          // クリップボードAPIを試行
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(csvData);
-            debugLog("クリップボードコピー成功", 14);
-            showWarning("CSVデータをクリップボードにコピーしました！メモ帳やExcelに貼り付けてください。");
-            return;
-          } else {
-            debugLog("クリップボードAPI利用不可 - 手動表示方式を使用", 15);
-            showDataInTextArea(csvData);
-            return;
-          }
-        } catch (clipboardError) {
-          debugLog(`クリップボードコピー失敗: ${clipboardError instanceof Error ? clipboardError.message : '不明なエラー'}`, 16);
-        }
-        
-        // フォールバック: テキストエリア表示
-        debugLog("フォールバック: テキストエリア表示方式", 17);
-        try {
-          const csvData = generateCSVData(members);
-          showDataInTextArea(csvData);
-          debugLog("テキストエリア表示完了", 18);
-        } catch (textAreaError) {
-          debugLog(`テキストエリア表示失敗: ${textAreaError instanceof Error ? textAreaError.message : '不明なエラー'}`, 19);
-        }
-        
-      } catch (manualError) {
-        debugLog(`全ての手動方式が失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`, 31);
-        debugLog("ブラウザがファイルダウンロードを完全にブロックしています", 32);
-      }
-      
-    } else {
-      // デスクトップの場合は標準ダウンロードを試す
-      try {
-        showWarning("デスクトップ端末: 標準ダウンロード方式を試行中...");
-        XLSX.writeFile(workbook, filename);
-        showWarning("標準ダウンロード成功！");
-      } catch (error) {
-        showWarning(`標準ダウンロード失敗: ${error instanceof Error ? error.message : '不明なエラー'}`);
-        showWarning("手動ダウンロード方式に切り替え中...");
-        
-        try {
-          const workbookOut = XLSX.write(workbook, {
-            bookType: 'xlsx',
-            type: 'array'
-          });
-          showWarning("バイナリデータ生成完了");
-          
-          const blob = new Blob([workbookOut], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          });
-          showWarning(`Blob作成完了: ${blob.size}バイト`);
-          
-          const link = document.createElement('a');
-          const url = URL.createObjectURL(blob);
-          showWarning("ObjectURL作成完了");
-          
-          link.href = url;
-          link.download = filename;
-          link.style.display = 'none';
-          
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-          showWarning("手動ダウンロード完了！");
-          
-        } catch (manualError) {
-          showWarning(`手動ダウンロードも失敗: ${manualError instanceof Error ? manualError.message : '不明なエラー'}`);
-        }
-      }
-    }
-    
-  } catch (generalError) {
-    debugLog(`全体的なエラー: ${generalError instanceof Error ? generalError.message : '不明なエラー'}`, 36);
-  }
-  
-  // LIFFアプリ内ブラウザの場合の追加対策
-  debugLog("処理完了 - LINEアプリ内ブラウザの制限によりダウンロードが失敗する可能性があります", 37);
-  
-  // 最終的なフォールバック（上記で処理されなかった場合）
-  debugLog("最終フォールバック処理", 20);
-};
-
-/**
- * サーバー側ダウンロード方式でExcelファイルをダウンロードする関数
- */
-export const downloadExcelViaServer = async (members: Member[]): Promise<void> => {
-  try {
-    debugLog("サーバー側ダウンロード方式開始", 1);
-    
-    // POSTリクエスト用のフォームを動的に作成
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/api/download-excel';
-    form.target = '_blank'; // 新しいタブで開く
-    form.style.display = 'none';
-    
-    // メンバーデータをJSON文字列として送信
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'members';
-    input.value = JSON.stringify(members);
-    
-    form.appendChild(input);
-    document.body.appendChild(form);
-    
-    debugLog("フォーム作成完了、サブミット実行", 2);
-    
-    // フォームをサブミット
-    form.submit();
-    
-    // フォームを削除
-    setTimeout(() => {
-      document.body.removeChild(form);
-      debugLog("フォーム削除完了", 3);
-    }, 1000);
-    
-    showWarning("サーバー側ダウンロードを実行しました。新しいタブでファイルダウンロードが開始されます。");
-    
-  } catch (error) {
-    debugLog(`サーバー側ダウンロードエラー: ${error instanceof Error ? error.message : '不明なエラー'}`, 4);
-    showWarning(`❌ サーバー側ダウンロードに失敗しました。\n\nエラー: ${error instanceof Error ? error.message : '不明なエラー'}`);
-    throw error;
-  }
-};
-
-/**
- * CSVデータを生成する関数
- */
-const generateCSVData = (members: Member[]): string => {
+export const downloadMembersExcel = (members: Member[]): void => {
+  // ふりがな順でソート
   const sortedMembers = sortMembersByFurigana(members);
   
-  const csvData = [
+  // Excelデータの準備
+  const worksheetData = [
     // ヘッダー行
-    '名前,ふりがな,罰金,出演費,学スタ使用料,未払金,合計',
+    ['名前', 'ふりがな', '罰金', '出演費', '学スタ使用料', '未払金', '合計'],
     // データ行
-    ...sortedMembers.map(member => 
-      [
-        `"${member.name}"`,
-        `"${member.furigana}"`,
-        member.fine,
-        member.performanceFee,
-        member.studyFee,
-        member.unPaidFee,
-        member.fine + member.performanceFee + member.studyFee + member.unPaidFee
-      ].join(',')
-    )
-  ].join('\n');
+    ...sortedMembers.map(member => [
+      member.name,
+      member.furigana,
+      member.fine,
+      member.performanceFee,
+      member.studyFee,
+      member.unPaidFee,
+      member.fine + member.performanceFee + member.studyFee + member.unPaidFee
+    ])
+  ];
   
-  return csvData;
-};
-
-/**
- * テキストエリアでデータを表示する関数（クリップボードが使えない場合）
- */
-const showDataInTextArea = (csvData: string): void => {
-  // 既存のテキストエリアを削除
-  const existingTextArea = document.getElementById('csv-data-display');
-  if (existingTextArea) {
-    existingTextArea.remove();
-  }
+  // ワークシートを作成
+  const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
   
-  // 新しいテキストエリアを作成
-  const textArea = document.createElement('textarea');
-  textArea.id = 'csv-data-display';
-  textArea.value = csvData;
-  textArea.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    height: 70%;
-    z-index: 10000;
-    background: white;
-    border: 2px solid #333;
-    padding: 10px;
-    font-family: monospace;
-    font-size: 12px;
-  `;
+  // ワークブックを作成
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, '料金一覧');
   
-  // 閉じるボタンを作成
-  const closeButton = document.createElement('button');
-  closeButton.textContent = '✕ 閉じる';
-  closeButton.style.cssText = `
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: #ff4444;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 3px;
-  `;
+  // ファイル名を生成（現在の日付を使用）
+  const today = new Date().toISOString().split('T')[0];
+  const filename = `料金一覧_${today}.xlsx`;
   
-  closeButton.onclick = () => {
-    document.body.removeChild(textArea);
-  };
-  
-  textArea.appendChild(closeButton);
-  document.body.appendChild(textArea);
-  
-  // テキストを全選択
-  textArea.select();
-  textArea.setSelectionRange(0, 99999); // モバイル対応
-  
-  showWarning("データを手動でコピーしてください。長押しで全選択→コピーができます。");
+  // ファイルをダウンロード
+  XLSX.writeFile(workbook, filename);
 };
 
 
-// /**
-//  * テキストファイルを作成してダウンロードする関数
-//  * @param content テキストファイルの内容
-//  * @param filename ダウンロードするファイル名
-//  */
-// export const downloadTextFile = (content: string, filename: string): void => {
-//   // テキストコンテンツからBlobを作成
-//   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  
-//   // BlobからURLを生成
-//   const url = URL.createObjectURL(blob);
-  
-//   // ダウンロード用のリンク要素を作成
-//   const link = document.createElement('a');
-//   link.href = url;
-//   link.download = filename;
-  
-//   // リンクを非表示にする
-//   link.style.display = 'none';
-  
-//   // リンクをDOMに追加
-//   document.body.appendChild(link);
-  
-//   // リンクをクリック（ダウンロード開始）
-//   link.click();
-  
-//   // リンクをDOMから削除
-//   document.body.removeChild(link);
-  
-//   // URLオブジェクトを解放
-//   URL.revokeObjectURL(url);
-// };
