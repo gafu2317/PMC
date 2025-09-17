@@ -185,3 +185,18 @@ export const showExcelDownloadConfirm = (): Promise<any> => {
     }
   });
 };
+
+/**
+ * 料金確定前のExcelダウンロード確認ダイアログ
+ * @returns 確認結果のPromise
+ */
+export const showPriceConfirmWithExcelCheck = (): Promise<any> => {
+  return Swal.fire({
+    icon: "info",
+    title: "料金確定の実行",
+    text: "Excelファイルが必要な場合は、先にExcelファイルをダウンロードしてください。",
+    showCancelButton: true,
+    confirmButtonText: "OK（料金確定を実行）",
+    cancelButtonText: "キャンセル"
+  });
+};
