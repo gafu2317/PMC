@@ -130,29 +130,33 @@ export const showExcelDownloadConfirm = (): Promise<any> => {
     html: `
       <p>ChromeやSafariなどのブラウザでないとダウンロードできません。</p>
       <br>
-      <p>以下のボタンから選択してください：</p>
+      <p>以下から選択してください：</p>
       <br>
       <div style="margin: 15px 0;">
         <p style="margin: 5px 0; font-weight: bold;">名工大版:</p>
-        <button id="open-meikou" 
-                style="margin: 5px; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          ブラウザで開く
-        </button>
-        <button id="copy-meikou" 
-                style="margin: 5px; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          URLをコピー
-        </button>
+        <div style="display: flex; gap: 10px;">
+          <button id="open-meikou" 
+                  style="flex: 1; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ブラウザで開く
+          </button>
+          <button id="copy-meikou" 
+                  style="flex: 1; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            URLをコピー
+          </button>
+        </div>
       </div>
       <div style="margin: 15px 0;">
         <p style="margin: 5px 0; font-weight: bold;">金城版:</p>
-        <button id="open-kinjyou" 
-                style="margin: 5px; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          ブラウザで開く
-        </button>
-        <button id="copy-kinjyou" 
-                style="margin: 5px; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          URLをコピー
-        </button>
+        <div style="display: flex; gap: 10px;">
+          <button id="open-kinjyou" 
+                  style="flex: 1; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ブラウザで開く
+          </button>
+          <button id="copy-kinjyou" 
+                  style="flex: 1; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            URLをコピー
+          </button>
+        </div>
       </div>
       <br>
       <p>OKを押すと処理を続行します。</p>
