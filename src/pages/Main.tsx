@@ -16,12 +16,12 @@ const Main = () => {
         const lineId = await initLiff();
         setLineId(lineId);
 
-        // LINE IDが取得できた後にクエリパラメータをチェックして移動
-        const params = new URLSearchParams(location.search);
-        const redirectPage = params.get("redirect");
-        if (redirectPage) {
-          navigate(`/${redirectPage}`);
-        }
+        // // LINE IDが取得できた後にクエリパラメータをチェックして移動
+        // const params = new URLSearchParams(location.search);
+        // const redirectPage = params.get("redirect");
+        // if (redirectPage) {
+        //   navigate(`/${redirectPage}`);
+        // }
       } catch (err) {
         setError("LINE IDの取得に失敗しました。");
       } finally {
