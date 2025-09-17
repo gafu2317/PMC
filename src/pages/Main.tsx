@@ -13,7 +13,7 @@ const Main = () => {
   useEffect(() => {
     const fetchLineId = async () => {
       try {
-        const lineId = await initLiff();
+        const lineId = await initLiff('main');
         setLineId(lineId);
 
         // // LINE IDが取得できた後にクエリパラメータをチェックして移動

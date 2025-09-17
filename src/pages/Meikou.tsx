@@ -15,17 +15,29 @@ import { daysOfWeek, timeSlots } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
 import { useLineId } from "../context/LineIdContext";
 import { useWeekDays } from "../utils/utils";
-import { useNavigate } from "react-router-dom";
+import { initLiff } from "../liff/liffService";
 
 function Meikou() {
   const weekDays = useWeekDays();
-  const navigate = useNavigate();
-  const { lineId } = useLineId();
+  const { lineId, setLineId } = useLineId();
+  
+  // 名工大版専用LIFF初期化
   useEffect(() => {
-    if(lineId === null) {
-      navigate("/?redirect=Meikou");
+    const fetchLineId = async () => {
+      try {
+        const fetchedLineId = await initLiff('meikou');
+        if (fetchedLineId) {
+          setLineId(fetchedLineId);
+        }
+      } catch (error) {
+        console.error("LIFF initialization failed:", error);
+      }
+    };
+
+    if (!lineId) {
+      fetchLineId();
     }
-  }, [lineId, navigate]);
+  }, [lineId, setLineId]);
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
   useEffect(() => {
