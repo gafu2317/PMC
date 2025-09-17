@@ -14,17 +14,29 @@ import { daysOfWeek, timeSlotsKinjyou } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
 import { useLineId } from "../context/LineIdContext";
 import { useWeekDays } from "../utils/utils";
-import { useNavigate } from "react-router-dom";
+import { initLiff } from "../liff/liffService";
 
 function Kinjyou() {
   const weekDays = useWeekDays();
-  const navigate = useNavigate();
-  const { lineId } = useLineId();
+  const { lineId, setLineId } = useLineId();
+  
+  // 金城版専用LIFF初期化
   useEffect(() => {
-    if (lineId === null) {
-      navigate("/?redirect=Kinjyou");
+    const fetchLineId = async () => {
+      try {
+        const fetchedLineId = await initLiff('kinjyou');
+        if (fetchedLineId) {
+          setLineId(fetchedLineId);
+        }
+      } catch (error) {
+        console.error("LIFF initialization failed:", error);
+      }
+    };
+
+    if (!lineId) {
+      fetchLineId();
     }
-  }, [lineId, navigate]);
+  }, [lineId, setLineId]);
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
   useEffect(() => {

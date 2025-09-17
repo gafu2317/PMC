@@ -129,6 +129,7 @@ export const showExcelDownloadConfirm = (): Promise<any> => {
     title: "Excelダウンロードについて",
     html: `
       <p>ChromeやSafariなどのブラウザでないとダウンロードできません。</p>
+      <p>ダウンロードは少し時間がかかります</p>
       <br>
       <p>以下から選択してください：</p>
       <br>

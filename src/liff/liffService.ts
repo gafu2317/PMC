@@ -2,9 +2,19 @@
 import liff from "@line/liff";
 import axios from "axios";
 
-export const initLiff = async (): Promise<string | null> => {
+export const initLiff = async (page?: 'meikou' | 'kinjyou' | 'main'): Promise<string | null> => {
   try {
-    await liff.init({ liffId: import.meta.env.VITE_LIFF_ID });
+    // ページに応じてLIFF IDを選択
+    let liffId: string;
+    if (page === 'meikou') {
+      liffId = import.meta.env.VITE_LIFF_ID_MEIKOU;
+    } else if (page === 'kinjyou') {
+      liffId = import.meta.env.VITE_LIFF_ID_KINJYOU;
+    } else {
+      liffId = import.meta.env.VITE_LIFF_ID_MAIN;
+    }
+
+    await liff.init({ liffId });
 
     // ログインしているか確認
     if (liff.isLoggedIn()) {
