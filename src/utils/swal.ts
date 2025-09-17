@@ -149,11 +149,11 @@ export const showExcelDownloadConfirm = (): Promise<any> => {
         <p style="margin: 5px 0; font-weight: bold;">金城版:</p>
         <div style="display: flex; gap: 10px;">
           <button id="open-kinjyou" 
-                  style="flex: 1; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                  style="flex: 1; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
             ブラウザで開く
           </button>
           <button id="copy-kinjyou" 
-                  style="flex: 1; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                  style="flex: 1; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
             URLをコピー
           </button>
         </div>
