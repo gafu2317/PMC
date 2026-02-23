@@ -665,7 +665,7 @@ export const addUnpaidFee = async (
 export const deleteUnpaidFee = async (lineId: string): Promise<void> => {
   try {
     const docRef = doc(db, "users", lineId);
-    await setDoc(docRef, { unpaidFee: 0 }, { merge: true });
+    await setDoc(docRef, { unPaidFee: 0 }, { merge: true });
     console.log("未払い料金が削除されました。");
   } catch (error) {
     console.error("未払い料金の削除に失敗しました:", error);
