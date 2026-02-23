@@ -798,18 +798,22 @@ export const setTwoWeeksFlag = async (twoWeeksFlag: boolean): Promise<void> => {
 
 // 複数のユーザーの学スタ使用料、出演費を一度に更新する関数
 export const updateMemberFees = async (
-  updates: { lineId: string; studyFee: number; performanceFee: number }[]
+  updates: { lineId: string; studyFee: number; performanceFee: number; fine?: number }[]
 ): Promise<void> => {
   try {
     const batch = writeBatch(db);
-    
+
     // 各ユーザーの更新をバッチに追加
-    updates.forEach(({ lineId, studyFee, performanceFee }) => {
+    updates.forEach(({ lineId, studyFee, performanceFee, fine }) => {
       const docRef = doc(db, "users", lineId);
-      batch.set(docRef, { 
+      const data: { studyFee: number; performanceFee: number; fine?: number } = {
         studyFee: studyFee,
-        performanceFee: performanceFee 
-      }, { merge: true });
+        performanceFee: performanceFee,
+      };
+      if (fine !== undefined) {
+        data.fine = fine;
+      }
+      batch.set(docRef, data, { merge: true });
     });
     
     // バッチ処理を実行
