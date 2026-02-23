@@ -34,7 +34,7 @@ const CreateReservation: React.FC<CreateReservationProps> = ({
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // 選択されたメンバーの名前を取得
     const selectedNames = selectedMembers.map((member) => member.name);
     if (selectedNames.length === 0) {
@@ -113,9 +113,9 @@ const CreateReservation: React.FC<CreateReservationProps> = ({
       };
     });
     console.log(reservations);
-    isKinjyou
+    await (isKinjyou
       ? addReservationsAdminKinjyou(reservations)
-      : addReservationsAdmin(reservations);
+      : addReservationsAdmin(reservations));
     setSelectedMembers([]);
     setStartTime(timeSlots[0]);
     setEndTime(timeSlots[1]);
