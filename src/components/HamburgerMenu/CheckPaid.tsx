@@ -73,9 +73,9 @@ const CheckPaid: React.FC<CheckPaidProps> = ({ members }) => {
   };
 
   const handleSubmit = async () => {
-    changedMembers.forEach((member) => {
-      addUnpaidFee(member.lineId, member.newUnPaidFee);
-    });
+    await Promise.all(
+      changedMembers.map((member) => addUnpaidFee(member.lineId, member.newUnPaidFee))
+    );
     setChangedMembers([]);
     Swal.fire({
       icon: "success",
