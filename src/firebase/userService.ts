@@ -320,7 +320,7 @@ export const getReservationsByDateRange = async (
       .filter(
         (reservation) =>
           reservation.date >= startDate &&
-          reservation.date <= endDate.setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
+          reservation.date <= new Date(endDate).setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -352,7 +352,7 @@ export const getReservationsByDateRangeKnjyou = async (
       .filter(
         (reservation) =>
           reservation.date >= startDate &&
-          reservation.date <= endDate.setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
+          reservation.date <= new Date(endDate).setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
