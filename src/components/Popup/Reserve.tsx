@@ -105,7 +105,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             return;
           }
           // 当日の予約は警告を出して、OKを押すと予約し、キャンセルを押すと予約しない
-          if (day === new Date().getDate()) {
+          const today = new Date();
+          if (day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear()) {
             const result = await Swal.fire({
               icon: "warning",
               title: "警告",
