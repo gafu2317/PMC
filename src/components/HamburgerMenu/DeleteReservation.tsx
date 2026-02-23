@@ -44,48 +44,53 @@ const DeleteReservationData: React.FC<DeleteReservationDataProps> = ({}) => {
     setReservationsKinjyou(fetchedReservationsKinjyou);
     setIsAll(true);
   };
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set()); // 選択された予約のIDを管理
+  const [selectedMeikouIds, setSelectedMeikouIds] = useState<Set<string>>(new Set()); // 選択された名工予約のIDを管理
+  const [selectedKinjyouIds, setSelectedKinjyouIds] = useState<Set<string>>(new Set()); // 選択された金城予約のIDを管理
+  const selectedTotalSize = selectedMeikouIds.size + selectedKinjyouIds.size;
   const selectAllReservation = () => {
-    console.log(selectedIds.size);
-    console.log(reservations.length);
-    console.log(reservationsKinjyou.length);
-    if (selectedIds.size === reservations.length + reservationsKinjyou.length) {
-      setSelectedIds(new Set()); // すべて解除
+    if (selectedTotalSize === reservations.length + reservationsKinjyou.length) {
+      setSelectedMeikouIds(new Set()); // すべて解除
+      setSelectedKinjyouIds(new Set());
     } else {
-      const allIds = new Set(reservations.map((reservation) => reservation.id));
-      const allIdsKinjyou = new Set(
-        reservationsKinjyou.map((reservation) => reservation.id)
-      );
-      // 2つのSetをマージ
-      const combinedIds = new Set([...allIds, ...allIdsKinjyou]);
-      setSelectedIds(combinedIds);
+      setSelectedMeikouIds(new Set(reservations.map((r) => r.id)));
+      setSelectedKinjyouIds(new Set(reservationsKinjyou.map((r) => r.id)));
     }
   };
-  const toggleSelectReservation = (id: string) => {
-    setSelectedIds((prev) => {
-      const newSelectedIds = new Set(prev);
-      if (newSelectedIds.has(id)) {
-        newSelectedIds.delete(id); // すでに選択されている場合は解除
+  const toggleSelectMeikou = (id: string) => {
+    setSelectedMeikouIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
       } else {
-        newSelectedIds.add(id); // 選択
+        next.add(id);
       }
-      return newSelectedIds;
+      return next;
+    });
+  };
+  const toggleSelectKinjyou = (id: string) => {
+    setSelectedKinjyouIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
     });
   };
   const handleDeleteReservation = async () => {
-    for (const id of selectedIds) {
-      setLoading(true);
+    setLoading(true);
+    for (const id of selectedMeikouIds) {
       await deleteReservation(id);
-      await deleteReservationKinjyou(id);
-      setLoading(false);
-      setReservations((prev) =>
-        prev.filter((reservation) => reservation.id !== id)
-      );
-      setReservationsKinjyou((prev) =>
-        prev.filter((reservation) => reservation.id !== id)
-      );
+      setReservations((prev) => prev.filter((r) => r.id !== id));
     }
-    setSelectedIds(new Set());
+    for (const id of selectedKinjyouIds) {
+      await deleteReservationKinjyou(id);
+      setReservationsKinjyou((prev) => prev.filter((r) => r.id !== id));
+    }
+    setLoading(false);
+    setSelectedMeikouIds(new Set());
+    setSelectedKinjyouIds(new Set());
     Swal.fire({
       icon: "success",
       title: "削除が完了しました",
@@ -135,7 +140,7 @@ const DeleteReservationData: React.FC<DeleteReservationDataProps> = ({}) => {
               className="bg-blue-500 text-white rounded p-1 "
               onClick={selectAllReservation}
             >
-              {selectedIds.size ===
+              {selectedTotalSize ===
               reservations.length + reservationsKinjyou.length
                 ? "すべて解除"
                 : "すべて選択"}
@@ -147,8 +152,8 @@ const DeleteReservationData: React.FC<DeleteReservationDataProps> = ({}) => {
               <li key={reservation.id} className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={selectedIds.has(reservation.id)}
-                  onChange={() => toggleSelectReservation(reservation.id)}
+                  checked={selectedMeikouIds.has(reservation.id)}
+                  onChange={() => toggleSelectMeikou(reservation.id)}
                   className="mr-2"
                 />
                 {/* 日付と時間を表示 */}
@@ -165,8 +170,8 @@ const DeleteReservationData: React.FC<DeleteReservationDataProps> = ({}) => {
               <li key={reservation.id} className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={selectedIds.has(reservation.id)}
-                  onChange={() => toggleSelectReservation(reservation.id)}
+                  checked={selectedKinjyouIds.has(reservation.id)}
+                  onChange={() => toggleSelectKinjyou(reservation.id)}
                   className="mr-2"
                 />
                 {/* 日付と時間を表示 */}

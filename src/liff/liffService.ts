@@ -37,7 +37,9 @@ export const sendMessages = async (
   lineId: string,
   message: string
 ): Promise<void> => {
-  const url = "https://pmc-lilac.vercel.app/api/send-message"; // VercelのURL
+  const url = window.location.hostname === 'localhost'
+    ? "http://localhost:3000/api/send-message"
+    : "https://pmc-lilac.vercel.app/api/send-message";
   const data = { lineId, message }; // サーバーに送信するデータ
   console.log("Sending message to:", url, "with data:", data);
   try {

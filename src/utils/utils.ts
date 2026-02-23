@@ -8,8 +8,6 @@ export const emitter = new EventEmitter();
 
 let baseDate = new Date();
 
-const currentDay = baseDate.getDay() === 0 ? 6 : baseDate.getDay() - 1; // 月曜日を0とする
-
 export const getBaseDate = () => baseDate;
 
 export const setBaseDate = (newDate: Date) => {
@@ -19,6 +17,7 @@ export const setBaseDate = (newDate: Date) => {
 
 //今週の日付の配列
 export const getWeekDays = (baseDate:Date) => {
+  const currentDay = baseDate.getDay() === 0 ? 6 : baseDate.getDay() - 1; // 月曜日を0とする
   return Array.from({ length: 8 }, (_, index) => {
     const date = new Date(baseDate);
     // 今日の日付-今日の月曜日からの日数 = 今週の月曜日

@@ -20,7 +20,7 @@ const AddFineData: React.FC<AddFineDataProps> = ({ members }) => {
   };
   useEffect(() => {
     setFineMembers(members);
-  }, []);
+  }, [members]);
   useEffect(() => {
     const fine = members.map((member) => {
       return { lineId: member.lineId, fine: member.fine };
@@ -61,9 +61,9 @@ const AddFineData: React.FC<AddFineDataProps> = ({ members }) => {
     });
   };
   const handleSubmit = async () => {
-    changedMembers.forEach((member) => {
-      addFine(member.lineId, member.newFine);
-    });
+    await Promise.all(
+      changedMembers.map((member) => addFine(member.lineId, member.newFine))
+    );
     setChangedMembers([]);
     Swal.fire({
       icon: "success",

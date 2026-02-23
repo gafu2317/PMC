@@ -120,7 +120,7 @@ function Meikou() {
     )
   );
   const handleHourClick = (dayIndex: number, timeIndex: number) => {
-    const newSelectedHours = [...selectedHours];
+    const newSelectedHours = selectedHours.map((row) => [...row]);
     newSelectedHours[dayIndex][timeIndex] =
       !newSelectedHours[dayIndex][timeIndex];
     setSelectedHours(newSelectedHours);

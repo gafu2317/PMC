@@ -320,7 +320,7 @@ export const getReservationsByDateRange = async (
       .filter(
         (reservation) =>
           reservation.date >= startDate &&
-          reservation.date <= endDate.setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
+          reservation.date <= new Date(endDate).setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -352,7 +352,7 @@ export const getReservationsByDateRangeKnjyou = async (
       .filter(
         (reservation) =>
           reservation.date >= startDate &&
-          reservation.date <= endDate.setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
+          reservation.date <= new Date(endDate).setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -665,7 +665,7 @@ export const addUnpaidFee = async (
 export const deleteUnpaidFee = async (lineId: string): Promise<void> => {
   try {
     const docRef = doc(db, "users", lineId);
-    await setDoc(docRef, { unpaidFee: 0 }, { merge: true });
+    await setDoc(docRef, { unPaidFee: 0 }, { merge: true });
     console.log("未払い料金が削除されました。");
   } catch (error) {
     console.error("未払い料金の削除に失敗しました:", error);
@@ -798,18 +798,22 @@ export const setTwoWeeksFlag = async (twoWeeksFlag: boolean): Promise<void> => {
 
 // 複数のユーザーの学スタ使用料、出演費を一度に更新する関数
 export const updateMemberFees = async (
-  updates: { lineId: string; studyFee: number; performanceFee: number }[]
+  updates: { lineId: string; studyFee: number; performanceFee: number; fine?: number }[]
 ): Promise<void> => {
   try {
     const batch = writeBatch(db);
-    
+
     // 各ユーザーの更新をバッチに追加
-    updates.forEach(({ lineId, studyFee, performanceFee }) => {
+    updates.forEach(({ lineId, studyFee, performanceFee, fine }) => {
       const docRef = doc(db, "users", lineId);
-      batch.set(docRef, { 
+      const data: { studyFee: number; performanceFee: number; fine?: number } = {
         studyFee: studyFee,
-        performanceFee: performanceFee 
-      }, { merge: true });
+        performanceFee: performanceFee,
+      };
+      if (fine !== undefined) {
+        data.fine = fine;
+      }
+      batch.set(docRef, data, { merge: true });
     });
     
     // バッチ処理を実行

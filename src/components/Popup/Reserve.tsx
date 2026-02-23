@@ -1,7 +1,6 @@
 import React from "react";
 import { useState } from "react";
 import { Member, Reservation } from "../../types/type";
-import { v4 as uuidv4 } from "uuid";
 import { useWeekDays, timeSlots, timeSlotsKinjyou, getWeekDays } from "../../utils/utils";
 import {
   addPresets,
@@ -105,7 +104,8 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
             return;
           }
           // 当日の予約は警告を出して、OKを押すと予約し、キャンセルを押すと予約しない
-          if (day === new Date().getDate()) {
+          const today = new Date();
+          if (day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear()) {
             const result = await Swal.fire({
               icon: "warning",
               title: "警告",
@@ -117,7 +117,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
 
             if (result.isConfirmed) {
               reservations.push({
-                id: uuidv4(),
+                id: "",
                 names: selectedNames,
                 date: date,
                 dayIndex: dayIndex,
@@ -141,7 +141,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
               return;
             }
             reservations.push({
-              id: uuidv4(),
+              id: "",
               names: selectedNames,
               date: date,
               dayIndex: dayIndex,

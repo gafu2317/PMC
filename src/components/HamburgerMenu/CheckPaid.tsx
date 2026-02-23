@@ -23,7 +23,7 @@ const CheckPaid: React.FC<CheckPaidProps> = ({ members }) => {
   };
   useEffect(() => {
     setUnPaidMembers(members.filter((member) => member.unPaidFee > 0));
-  }, []);
+  }, [members]);
   useEffect(() => {
     const unPaidFee = members.map((member) => {
       return { lineId: member.lineId, unPaidFee: member.unPaidFee };
@@ -73,9 +73,9 @@ const CheckPaid: React.FC<CheckPaidProps> = ({ members }) => {
   };
 
   const handleSubmit = async () => {
-    changedMembers.forEach((member) => {
-      addUnpaidFee(member.lineId, member.newUnPaidFee);
-    });
+    await Promise.all(
+      changedMembers.map((member) => addUnpaidFee(member.lineId, member.newUnPaidFee))
+    );
     setChangedMembers([]);
     Swal.fire({
       icon: "success",

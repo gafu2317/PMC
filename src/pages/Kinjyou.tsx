@@ -71,7 +71,7 @@ function Kinjyou() {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [lineId]);
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -118,7 +118,7 @@ function Kinjyou() {
     )
   );
   const handleHourClick = (dayIndex: number, timeIndex: number) => {
-    const newSelectedHours = [...selectedHours];
+    const newSelectedHours = selectedHours.map((row) => [...row]);
     newSelectedHours[dayIndex][timeIndex] =
       !newSelectedHours[dayIndex][timeIndex];
     setSelectedHours(newSelectedHours);
