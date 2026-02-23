@@ -23,7 +23,7 @@ const CheckPaid: React.FC<CheckPaidProps> = ({ members }) => {
   };
   useEffect(() => {
     setUnPaidMembers(members.filter((member) => member.unPaidFee > 0));
-  }, []);
+  }, [members]);
   useEffect(() => {
     const unPaidFee = members.map((member) => {
       return { lineId: member.lineId, unPaidFee: member.unPaidFee };

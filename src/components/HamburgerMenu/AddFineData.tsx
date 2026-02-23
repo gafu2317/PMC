@@ -20,7 +20,7 @@ const AddFineData: React.FC<AddFineDataProps> = ({ members }) => {
   };
   useEffect(() => {
     setFineMembers(members);
-  }, []);
+  }, [members]);
   useEffect(() => {
     const fine = members.map((member) => {
       return { lineId: member.lineId, fine: member.fine };
