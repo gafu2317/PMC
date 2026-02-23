@@ -21,7 +21,6 @@ export const initLiff = async (page?: 'meikou' | 'kinjyou' | 'main'): Promise<st
       const profile = await liff.getProfile();
       return profile.userId; // これがlineIdです
     } else {
-      // return "Uaad36f829cb1c10a72df296f112a16dd";
       // ログインを促す
       liff.login();
       return null; // ログインが必要な場合はnullを返す
