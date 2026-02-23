@@ -141,7 +141,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
               return;
             }
             reservations.push({
-              id: uuidv4(),
+              id: "",
               names: selectedNames,
               date: date,
               dayIndex: dayIndex,
