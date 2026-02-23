@@ -1,7 +1,6 @@
 import React from "react";
 import { useState } from "react";
 import { Member, Reservation } from "../../types/type";
-import { v4 as uuidv4 } from "uuid";
 import { useWeekDays, timeSlots, timeSlotsKinjyou, getWeekDays } from "../../utils/utils";
 import {
   addPresets,
@@ -118,7 +117,7 @@ const ReservationPopup: React.FC<ReservationPopupProps> = ({
 
             if (result.isConfirmed) {
               reservations.push({
-                id: uuidv4(),
+                id: "",
                 names: selectedNames,
                 date: date,
                 dayIndex: dayIndex,
