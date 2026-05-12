@@ -21,7 +21,7 @@ export const getWeekDays = (baseDate:Date) => {
   return Array.from({ length: 8 }, (_, index) => {
     const date = new Date(baseDate);
     // 今日の日付-今日の月曜日からの日数 = 今週の月曜日
-    // 今週の月曜日　+ index = 今週の日付の配列
+    // 今週の月曜日 + index = 今週の日付の配列
     date.setDate(baseDate.getDate() - currentDay + index);
     // 月/日の形式で返す(割り算ではない)
     return {
@@ -100,21 +100,21 @@ export const slots = [
 
 export const timeSlotsKinjyou = [
   "9:10",
-  "10:55",
-  "12:25",
-  "13:20",
-  "15:05",
-  "16:45",
-  "18:30",
+  "11:05",
+  "12:45",
+  "13:40",
+  "15:30",
+  "17:25",
+  "19:05",
 ];
 export const timeEndSlotsKinjyou = [
-  "10:40",
-  "12:25",
-  "13:20",
+  "10:50",
+  "12:45",
+  "13:40",
   "14:45",
-  "16:35",
-  "18:15",
-  "19:30",
+  "17:15",
+  "19:05",
+  "20:30",
 ];
 
 export const slotsKinjyou = ["1限", "2限", "昼", "3限", "4限", "5限", "夜"];
@@ -124,7 +124,7 @@ export function getHour(slot: string): number {
     case "1限":
       return 9;
     case "2限":
-      return 10;
+      return 11;
     case "昼":
       return 12;
     case "3限":
@@ -132,9 +132,9 @@ export function getHour(slot: string): number {
     case "4限":
       return 15;
     case "5限":
-      return 16;
+      return 17;
     case "夜":
-      return 18;
+      return 19;
     default:
       return -1;
   }
