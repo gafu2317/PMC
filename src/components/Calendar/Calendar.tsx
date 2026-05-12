@@ -10,6 +10,12 @@ import {
   timeSlotsKinjyou,
 } from "../../utils/utils";
 import Hour from "./Hour";
+import { db } from "../../firebase/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+import {
+  parseReservationBanPeriodsFromDocData,
+  ReservationBanPeriodRow,
+} from "../../firebase/userService";
 
 interface CalendarProps {
   name: string;
@@ -27,6 +33,22 @@ const Calendar: React.FC<CalendarProps> = ({
   isKinjyou,
 }) => {
   const weekDays = useWeekDays();
+  const [banPeriods, setBanPeriods] = useState<ReservationBanPeriodRow[]>([]);
+
+  useEffect(() => {
+    const docRef = doc(db, "setting", "reservationBanPeriod");
+    const unsubscribe = onSnapshot(
+      docRef,
+      (snap) => {
+        setBanPeriods(parseReservationBanPeriodsFromDocData(snap.data()));
+      },
+      (error) => {
+        console.error("予約禁止期間の取得に失敗しました:", error);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
   const [reservedHours, setReservedHours] = useState<boolean[][]>(
     Array.from({ length: 8 }, () => Array(12).fill(false)) // 8日間、12時間の初期状態を設定
   );
@@ -94,6 +116,7 @@ const Calendar: React.FC<CalendarProps> = ({
                   {Array.from({ length: daysOfWeek.length }).map(
                     (_, dayIndex) => (
                       <Hour
+                        banPeriods={banPeriods}
                         isUserReservation={
                           isUserReservations[dayIndex][timeIndex]
                         }
@@ -145,6 +168,7 @@ const Calendar: React.FC<CalendarProps> = ({
                   {Array.from({ length: daysOfWeek.length }).map(
                     (_, dayIndex) => (
                       <Hour
+                        banPeriods={banPeriods}
                         isUserReservation={
                           isUserReservations[dayIndex][timeIndex]
                         }

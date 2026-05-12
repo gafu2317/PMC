@@ -11,9 +11,221 @@ import {
   deleteDoc,
   Timestamp,
   writeBatch,
+  QuerySnapshot,
+  QueryDocumentSnapshot,
+  DocumentData,
 } from "firebase/firestore";
-import { getDayIndex, getTimeIndex, getTimeIndexKinjyou } from "../utils/utils";
+import {
+  getDayIndex,
+  getTimeIndex,
+  getTimeIndexKinjyou,
+  timeSlots,
+  timeEndSlots,
+  timeSlotsKinjyou,
+  timeEndSlotsKinjyou,
+} from "../utils/utils";
 import { Member, Reservation, Band } from "../types/type";
+
+export type CalendarWeekDay = {
+  date: string;
+  day: number;
+  month: number;
+  year: number;
+};
+
+export type ReservationBanPeriodRow = {
+  startDate: Date;
+  endDate: Date;
+  isKinjyou: boolean;
+};
+
+/** setting/reservationBanPeriod の data() から禁止期間配列へ（onSnapshot でも getDoc でも共用） */
+export const parseReservationBanPeriodsFromDocData = (
+  data: DocumentData | undefined
+): ReservationBanPeriodRow[] => {
+  const banPeriodsData = data?.periods;
+  if (!Array.isArray(banPeriodsData)) return [];
+  return banPeriodsData.map((period: { startDate: { toDate: () => Date }; endDate: { toDate: () => Date }; isKinjyou: boolean }) => ({
+    startDate: period.startDate.toDate(),
+    endDate: period.endDate.toDate(),
+    isKinjyou: period.isKinjyou,
+  }));
+};
+
+/** カレンダー8日ウィンドウの [0:00 初日 .. 23:59:59.999 最終日] */
+export const getCalendarWeekDateBounds = (
+  weekDays: CalendarWeekDay[]
+): { rangeStart: Date; rangeEnd: Date } => {
+  const first = weekDays[0];
+  const last = weekDays[weekDays.length - 1];
+  const rangeStart = new Date(
+    first.year,
+    first.month - 1,
+    first.day,
+    0,
+    0,
+    0,
+    0
+  );
+  const rangeEnd = new Date(
+    last.year,
+    last.month - 1,
+    last.day,
+    23,
+    59,
+    59,
+    999
+  );
+  return { rangeStart, rangeEnd };
+};
+
+export const querySnapshotToMembers = (
+  snap: QuerySnapshot
+): Member[] => {
+  return snap.docs.map((d) => ({
+    lineId: d.id,
+    name: d.data().name || "データなし",
+    furigana: d.data().furigana || "データなし",
+    studentId: d.data().studentId || 0,
+    fine: d.data().fine || 0,
+    unPaidFee: d.data().unPaidFee || 0,
+    performanceFee: d.data().performanceFee || 0,
+    studyFee: d.data().studyFee || 0,
+  }));
+};
+
+export const querySnapshotToBands = (snap: QuerySnapshot): Band[] => {
+  return snap.docs.map((d) => ({
+    bandId: d.id,
+    name: d.data().name,
+    memberIds: d.data().memberIds,
+  }));
+};
+
+export const mapQueryDocsToReservationsMeikou = (
+  weekDays: CalendarWeekDay[],
+  docs: QueryDocumentSnapshot<DocumentData>[]
+): Reservation[] => {
+  return docs
+    .filter((d) => {
+      const dateField = d.data().date;
+      return dateField && typeof dateField.toDate === "function";
+    })
+    .map((d) => ({
+      id: d.id,
+      names: d.data().names,
+      date: d.data().date.toDate(),
+      dayIndex: getDayIndex(weekDays, d.data().date.toDate()),
+      timeIndex: getTimeIndex(d.data().date.toDate()),
+    }))
+    .filter(
+      (r) => r.dayIndex !== -1 && r.timeIndex !== -1
+    );
+};
+
+export const mapQueryDocsToReservationsKinjyou = (
+  weekDays: CalendarWeekDay[],
+  docs: QueryDocumentSnapshot<DocumentData>[]
+): Reservation[] => {
+  return docs
+    .filter((d) => {
+      const dateField = d.data().date;
+      return dateField && typeof dateField.toDate === "function";
+    })
+    .map((d) => ({
+      id: d.id,
+      names: d.data().names,
+      date: d.data().date.toDate(),
+      dayIndex: getDayIndex(weekDays, d.data().date.toDate()),
+      timeIndex: getTimeIndexKinjyou(d.data().date.toDate()),
+    }))
+    .filter(
+      (r) => r.dayIndex !== -1 && r.timeIndex !== -1
+    );
+};
+
+export type BanOverlapReservation = {
+  id: string;
+  names: string[];
+  startDate: Date;
+  endDate: Date;
+};
+
+/** 禁止期間設定画面用: Meikou 予約 docs → コマの実時間区間 */
+export const mapMeikouDocsToBanOverlapRows = (
+  docs: QueryDocumentSnapshot<DocumentData>[]
+): BanOverlapReservation[] => {
+  const rows: BanOverlapReservation[] = [];
+  for (const docSnap of docs) {
+    const data = docSnap.data();
+    const dateField = data.date;
+    if (!dateField || typeof dateField.toDate !== "function") continue;
+    const reservationDate = dateField.toDate();
+    const timeIndex = getTimeIndex(reservationDate);
+    if (timeIndex === -1) continue;
+    const startTime = timeSlots[timeIndex];
+    const endTime = timeEndSlots[timeIndex];
+    const startDate = new Date(
+      reservationDate.getFullYear(),
+      reservationDate.getMonth(),
+      reservationDate.getDate(),
+      parseInt(startTime.split(":")[0], 10),
+      parseInt(startTime.split(":")[1], 10)
+    );
+    const endDate = new Date(
+      reservationDate.getFullYear(),
+      reservationDate.getMonth(),
+      reservationDate.getDate(),
+      parseInt(endTime.split(":")[0], 10),
+      parseInt(endTime.split(":")[1], 10)
+    );
+    rows.push({
+      id: docSnap.id,
+      names: data.names,
+      startDate,
+      endDate,
+    });
+  }
+  return rows;
+};
+
+/** 禁止期間設定画面用: Kinjyou 予約 docs → コマの実時間区間 */
+export const mapKinjyouDocsToBanOverlapRows = (
+  docs: QueryDocumentSnapshot<DocumentData>[]
+): BanOverlapReservation[] => {
+  const rows: BanOverlapReservation[] = [];
+  for (const docSnap of docs) {
+    const data = docSnap.data();
+    const dateField = data.date;
+    if (!dateField || typeof dateField.toDate !== "function") continue;
+    const reservationDate = dateField.toDate();
+    const timeIndex = getTimeIndexKinjyou(reservationDate);
+    if (timeIndex === -1) continue;
+    const startTime = timeSlotsKinjyou[timeIndex];
+    const endTime = timeEndSlotsKinjyou[timeIndex];
+    const startDate = new Date(
+      reservationDate.getFullYear(),
+      reservationDate.getMonth(),
+      reservationDate.getDate(),
+      parseInt(startTime.split(":")[0], 10),
+      parseInt(startTime.split(":")[1], 10)
+    );
+    const endDate = new Date(
+      reservationDate.getFullYear(),
+      reservationDate.getMonth(),
+      reservationDate.getDate(),
+      parseInt(endTime.split(":")[0], 10),
+      parseInt(endTime.split(":")[1], 10)
+    );
+    rows.push({
+      id: docSnap.id,
+      names: data.names,
+      startDate,
+      endDate,
+    });
+  }
+  return rows;
+};
 
 // ユーザーを追加する関数
 export const addUser = async (
@@ -706,26 +918,13 @@ export const setReservationBanPeriod = async (
 
 // 予約禁止期間を取得する関数
 export const getReservationBanPeriod = async (): Promise<
-  | {
-      startDate: Date;
-      endDate: Date;
-      isKinjyou: boolean;
-    }[]
-  | undefined
+  ReservationBanPeriodRow[] | undefined
 > => {
   try {
     const banPeriodDocRef = doc(db, "setting", "reservationBanPeriod");
     const banPeriodDocSnap = await getDoc(banPeriodDocRef);
 
-    // すべての禁止期間を取得
-    const banPeriodsData = banPeriodDocSnap.data()?.periods || [];
-    const banPeriods = banPeriodsData.map((period: any) => ({
-      startDate: period.startDate.toDate(),
-      endDate: period.endDate.toDate(),
-      isKinjyou: period.isKinjyou,
-    }));
-
-    return banPeriods; // 配列を返す
+    return parseReservationBanPeriodsFromDocData(banPeriodDocSnap.data());
   } catch (error) {
     console.error("予約禁止期間の取得に失敗しました:", error);
   }

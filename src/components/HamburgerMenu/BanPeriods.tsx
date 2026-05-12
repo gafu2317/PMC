@@ -1,27 +1,17 @@
 import { useState, useEffect } from "react";
 import {
   setReservationBanPeriod,
-  getReservationBanPeriod,
+  parseReservationBanPeriodsFromDocData,
+  mapMeikouDocsToBanOverlapRows,
+  mapKinjyouDocsToBanOverlapRows,
   deleteReservationBanPeriod,
-  getAllPeriodReservations,
-  getAllPeriodReservationsKinjyou,
   deleteReservation,
 } from "../../firebase/userService";
 import { db } from "../../firebase/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
-import {
-  timeSlots,
-  timeEndSlots,
-  timeSlotsKinjyou,
-  timeEndSlotsKinjyou,
-  getTimeIndex,
-  getTimeIndexKinjyou,
-} from "../../utils/utils";
 
-interface BanPeriodsProps {}
-
-const BanPeriods: React.FC<BanPeriodsProps> = () => {
+const BanPeriods: React.FC = () => {
   const [newStartDate, setNewStartDate] = useState<Date | null>(null);
   const [newEndDate, setNewEndDate] = useState<Date | null>(null);
   const [newIsKinjyou, setNewIsKinjyou] = useState<boolean | null>(null);
@@ -35,101 +25,42 @@ const BanPeriods: React.FC<BanPeriodsProps> = () => {
     { id: string; names: string[]; startDate: Date; endDate: Date }[]
   >([]);
   useEffect(() => {
-    const collectionRef = collection(db, "reservations"); // リアルタイムリスナーを設定
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const newReservations = await getAllPeriodReservations();
-        if (newReservations.length > 0) {
-          const newArray = newReservations.map((reservation) => {
-            const timeIndex = getTimeIndex(reservation.date);
-            const startTime = timeSlots[timeIndex];
-            const endTime = timeEndSlots[timeIndex];
-            const startDate = new Date(
-              reservation.date.getFullYear(),
-              reservation.date.getMonth(),
-              reservation.date.getDate(),
-              parseInt(startTime.split(":")[0], 10),
-              parseInt(startTime.split(":")[1], 10)
-            );
-            const endDate = new Date(
-              reservation.date.getFullYear(),
-              reservation.date.getMonth(),
-              reservation.date.getDate(),
-              parseInt(endTime.split(":")[0], 10),
-              parseInt(endTime.split(":")[1], 10)
-            );
-            return {
-              id: reservation.id,
-              names: reservation.names,
-              startDate: startDate,
-              endDate: endDate,
-            };
-          });
-          setReservations(newArray);
-        } else {
-          console.warn("予約情報が取得できませんでした。");
-        }
-      } catch (error) {
+    const collectionRef = collection(db, "reservations");
+    const unsubscribe = onSnapshot(
+      collectionRef,
+      (snapshot) => {
+        setReservations(mapMeikouDocsToBanOverlapRows(snapshot.docs));
+      },
+      (error) => {
         console.error("予約情報の取得に失敗しました:", error);
       }
-    });
+    );
     return () => unsubscribe();
   }, []);
   useEffect(() => {
-    const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const newReservations = await getAllPeriodReservationsKinjyou();
-        if (newReservations.length > 0) {
-          const newArray = newReservations.map((reservation) => {
-            const timeIndex = getTimeIndexKinjyou(reservation.date);
-            const startTime = timeSlotsKinjyou[timeIndex];
-            const endTime = timeEndSlotsKinjyou[timeIndex];
-            const startDate = new Date(
-              reservation.date.getFullYear(),
-              reservation.date.getMonth(),
-              reservation.date.getDate(),
-              parseInt(startTime.split(":")[0], 10),
-              parseInt(startTime.split(":")[1], 10)
-            );
-            const endDate = new Date(
-              reservation.date.getFullYear(),
-              reservation.date.getMonth(),
-              reservation.date.getDate(),
-              parseInt(endTime.split(":")[0], 10),
-              parseInt(endTime.split(":")[1], 10)
-            );
-            return {
-              id: reservation.id,
-              names: reservation.names,
-              startDate: startDate,
-              endDate: endDate,
-            };
-          });
-          setReservationsKinjyou(newArray);
-        } else {
-          console.warn("予約情報が取得できませんでした。");
-        }
-      } catch (error) {
+    const collectionRef = collection(db, "reservationsKinjyou");
+    const unsubscribe = onSnapshot(
+      collectionRef,
+      (snapshot) => {
+        setReservationsKinjyou(mapKinjyouDocsToBanOverlapRows(snapshot.docs));
+      },
+      (error) => {
         console.error("予約情報の取得に失敗しました:", error);
       }
-    });
+    );
     return () => unsubscribe();
   }, []);
   useEffect(() => {
-    const collectionRef = collection(db, "setting");
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const periods = await getReservationBanPeriod();
-        if (periods) {
-          setBanPeriods(periods);
-        } else {
-          console.warn("予約禁止期間が取得できませんでした。");
-        }
-      } catch (error) {
+    const banDocRef = doc(db, "setting", "reservationBanPeriod");
+    const unsubscribe = onSnapshot(
+      banDocRef,
+      (snap) => {
+        setBanPeriods(parseReservationBanPeriodsFromDocData(snap.data()));
+      },
+      (error) => {
         console.error("予約禁止期間の取得に失敗しました:", error);
       }
-    });
+    );
     return () => unsubscribe();
   }, []);
   // 日付を "yyyy-MM-ddTHH:mm" 形式に変換するヘルパー関数

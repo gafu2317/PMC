@@ -1,5 +1,5 @@
 // Hour.tsx
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   timeSlots,
   timeSlotsKinjyou,
@@ -8,11 +8,10 @@ import {
   useWeekDays,
 } from "../../utils/utils";
 import Swal from "sweetalert2";
-import { db } from "../../firebase/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
-import { getReservationBanPeriod } from "../../firebase/userService";
+import { ReservationBanPeriodRow } from "../../firebase/userService";
 
 interface HourProps {
+  banPeriods: ReservationBanPeriodRow[];
   isUserReservation: boolean; // ユーザーの予約状況
   isDuplicate: boolean; // 重複フラグ
   dayIndex: number; // 日付のインデックス
@@ -24,6 +23,7 @@ interface HourProps {
 }
 
 const Hour: React.FC<HourProps> = ({
+  banPeriods,
   isUserReservation,
   isDuplicate,
   dayIndex,
@@ -34,26 +34,6 @@ const Hour: React.FC<HourProps> = ({
   isKinjyou,
 }) => {
   const weekDays = useWeekDays();
-  const [banPeriods, setBanPeriods] = useState<
-    { startDate: Date; endDate: Date; isKinjyou: Boolean }[]
-  >([]);
-  useEffect(() => {
-    const collectionRef = collection(db, "setting");
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const periods = await getReservationBanPeriod();
-        if (periods) {
-          setBanPeriods(periods);
-        } else {
-          console.warn("予約禁止期間が取得できませんでした。");
-        }
-      } catch (error) {
-        console.error("予約禁止期間の取得に失敗しました:", error);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
   const reserveDate = weekDays[dayIndex]; //日付
   const reserveStartTime = isKinjyou
     ? timeSlotsKinjyou[timeIndex]

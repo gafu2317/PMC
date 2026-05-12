@@ -4,12 +4,19 @@ import { Calendar, ReservationDisplay } from "../components/Calendar";
 import { HamburgerMenu, Header, Buttons } from "../components/Layout";
 import { Reservation, Member, Band } from "../types/type";
 import {
-  getAllReservationsKinjyou,
-  getAllUser,
-  getAllBands,
+  querySnapshotToMembers,
+  querySnapshotToBands,
+  getCalendarWeekDateBounds,
+  mapQueryDocsToReservationsKinjyou,
 } from "../firebase/userService";
 import { db } from "../firebase/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+  Timestamp,
+} from "firebase/firestore";
 import { daysOfWeek, timeSlotsKinjyou } from "../utils/utils";
 import { PriorityProvider } from "../context/PriorityContext";
 import { useLineId } from "../context/LineIdContext";
@@ -52,43 +59,46 @@ function Kinjyou() {
   const [members, setMembers] = useState<Member[]>([]);
   useEffect(() => {
     const collectionRef = collection(db, "users"); // リアルタイムリスナーを設定
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const newMembers = await getAllUser();
-        if (newMembers) {
-          setMembers(newMembers);
-          if (lineId) {
-            // membersが空でも登録画面を表示
-            setIsRegistrationPopupVisible(
-              !newMembers.some((member) => member.lineId === lineId)
-            );
-          }
-        } else {
-          console.warn("部員情報が取得できませんでした。");
+    const unsubscribe = onSnapshot(
+      collectionRef,
+      (snapshot) => {
+        const newMembers = querySnapshotToMembers(snapshot);
+        setMembers(newMembers);
+        if (lineId) {
+          setIsRegistrationPopupVisible(
+            !newMembers.some((member) => member.lineId === lineId)
+          );
         }
-      } catch (error) {
+      },
+      (error) => {
         console.error("部員情報の取得に失敗しました:", error);
       }
-    });
+    );
     return () => unsubscribe();
   }, [lineId]);
 
   // 予約情報を管理
   const [reservations, setReservations] = useState<Reservation[]>([]);
   useEffect(() => {
-    const collectionRef = collection(db, "reservationsKinjyou"); // リアルタイムリスナーを設定
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const newReservations = await getAllReservationsKinjyou(weekDays);
-        if (newReservations) {
-          setReservations(newReservations);
-        } else {
-          console.warn("予約情報が取得できませんでした。");
-        }
-      } catch (error) {
+    const { rangeStart, rangeEnd } = getCalendarWeekDateBounds(weekDays);
+    const reservationsQuery = query(
+      collection(db, "reservationsKinjyou"),
+      where("date", ">=", Timestamp.fromDate(rangeStart)),
+      where("date", "<=", Timestamp.fromDate(rangeEnd))
+    );
+    const unsubscribe = onSnapshot(
+      reservationsQuery,
+      (snapshot) => {
+        const newReservations = mapQueryDocsToReservationsKinjyou(
+          weekDays,
+          snapshot.docs
+        );
+        setReservations(newReservations);
+      },
+      (error) => {
         console.error("予約情報の取得に失敗しました:", error);
       }
-    });
+    );
     return () => unsubscribe();
   }, [weekDays]);
 
@@ -96,22 +106,19 @@ function Kinjyou() {
   const [bands, setBands] = useState<Band[]>([]);
   useEffect(() => {
     const collectionRef = collection(db, "bands");
-    const unsubscribe = onSnapshot(collectionRef, async () => {
-      try {
-        const newBands = await getAllBands();
-        if (newBands) {
-          setBands(newBands);
-        } else {
-          console.warn("バンド情報が取得できませんでした。");
-        }
-      } catch (error) {
+    const unsubscribe = onSnapshot(
+      collectionRef,
+      (snapshot) => {
+        setBands(querySnapshotToBands(snapshot));
+      },
+      (error) => {
         console.error("バンド情報の取得に失敗しました:", error);
       }
-    });
+    );
     return () => unsubscribe();
   }, []);
 
-  //　選択している時間帯を管理(Hourに渡しやすい型)
+  // 選択している時間帯を管理(Hourに渡しやすい型)
   const [selectedHours, setSelectedHours] = useState<boolean[][]>(
     Array.from({ length: daysOfWeek.length }, () =>
       Array(timeSlotsKinjyou.length).fill(false)
