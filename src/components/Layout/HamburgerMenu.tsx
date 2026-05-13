@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Member, Band } from "../../types/type";
 import {
   DeleteMemberData,
@@ -30,19 +30,11 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou
   const [isAuthenticated, setIsAuthenticated] = useState(false); // 認証状態を管理
   const [password, setPassword] = useState(""); // パスワードを管理
   const [selectedAction, setSelectedAction] = useState<string | null>(null); // 選択されたアクションを管理
-  const [correctPassword, setCorrectPassword] = useState<string>(""); // 正しいパスワードを管理
   const [isShow, setIsShow] = useState(false);
 
   const handleClick = () => {
     setIsShow(!isShow);
   };
-  useEffect(() => {
-    getPassword().then((password) => {
-      if (password) {
-        setCorrectPassword(password);
-      }
-    });
-  }, []);
   const handleMenuClick = (action: string) => {
     if (selectedAction === action) {
       setSelectedAction(null);
@@ -55,8 +47,9 @@ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ bands, members, isKinjyou
     setIsOpen(!isOpen);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const correctPassword = await getPassword();
     if (password === correctPassword) {
       setIsAuthenticated(true);
     } else {

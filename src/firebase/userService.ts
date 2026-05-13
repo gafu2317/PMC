@@ -14,6 +14,9 @@ import {
   QuerySnapshot,
   QueryDocumentSnapshot,
   DocumentData,
+  orderBy,
+  query,
+  where,
 } from "firebase/firestore";
 import {
   getDayIndex,
@@ -39,13 +42,19 @@ export type ReservationBanPeriodRow = {
   isKinjyou: boolean;
 };
 
+type FirestoreReservationBanPeriod = {
+  startDate: { toDate: () => Date };
+  endDate: { toDate: () => Date };
+  isKinjyou: boolean;
+};
+
 /** setting/reservationBanPeriod の data() から禁止期間配列へ（onSnapshot でも getDoc でも共用） */
 export const parseReservationBanPeriodsFromDocData = (
   data: DocumentData | undefined
 ): ReservationBanPeriodRow[] => {
   const banPeriodsData = data?.periods;
   if (!Array.isArray(banPeriodsData)) return [];
-  return banPeriodsData.map((period: { startDate: { toDate: () => Date }; endDate: { toDate: () => Date }; isKinjyou: boolean }) => ({
+  return banPeriodsData.map((period: FirestoreReservationBanPeriod) => ({
     startDate: period.startDate.toDate(),
     endDate: period.endDate.toDate(),
     isKinjyou: period.isKinjyou,
@@ -151,6 +160,48 @@ export type BanOverlapReservation = {
   endDate: Date;
 };
 
+type ReservationDateRow = {
+  id: string;
+  names: string[];
+  date: Date;
+};
+
+const getEndOfDay = (date: Date): Date => {
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+  return endOfDay;
+};
+
+const docsToReservationDateRows = (
+  docs: QueryDocumentSnapshot<DocumentData>[]
+): ReservationDateRow[] => {
+  return docs
+    .filter((d) => {
+      const dateField = d.data().date;
+      return dateField && typeof dateField.toDate === "function";
+    })
+    .map((d) => ({
+      id: d.id,
+      names: d.data().names,
+      date: d.data().date.toDate(),
+    }));
+};
+
+const getReservationRowsByDateRange = async (
+  collectionName: "reservations" | "reservationsKinjyou",
+  startDate: Date,
+  endDate: Date
+): Promise<ReservationDateRow[]> => {
+  const reservationsQuery = query(
+    collection(db, collectionName),
+    where("date", ">=", Timestamp.fromDate(startDate)),
+    where("date", "<=", Timestamp.fromDate(getEndOfDay(endDate))),
+    orderBy("date")
+  );
+  const reservationsDocs = await getDocs(reservationsQuery);
+  return docsToReservationDateRows(reservationsDocs.docs);
+};
+
 /** 禁止期間設定画面用: Meikou 予約 docs → コマの実時間区間 */
 export const mapMeikouDocsToBanOverlapRows = (
   docs: QueryDocumentSnapshot<DocumentData>[]
@@ -225,6 +276,32 @@ export const mapKinjyouDocsToBanOverlapRows = (
     });
   }
   return rows;
+};
+
+export const getBanOverlapReservationsByDateRange = async (
+  startDate: Date,
+  endDate: Date,
+  isKinjyou: boolean
+): Promise<BanOverlapReservation[]> => {
+  try {
+    const queryStart = new Date(startDate);
+    queryStart.setHours(0, 0, 0, 0);
+    const queryEnd = getEndOfDay(endDate);
+    const collectionName = isKinjyou ? "reservationsKinjyou" : "reservations";
+    const reservationsQuery = query(
+      collection(db, collectionName),
+      where("date", ">=", Timestamp.fromDate(queryStart)),
+      where("date", "<=", Timestamp.fromDate(queryEnd)),
+      orderBy("date")
+    );
+    const reservationsDocs = await getDocs(reservationsQuery);
+    return isKinjyou
+      ? mapKinjyouDocsToBanOverlapRows(reservationsDocs.docs)
+      : mapMeikouDocsToBanOverlapRows(reservationsDocs.docs);
+  } catch (error) {
+    console.error("予約禁止期間と重なる予約の取得に失敗しました:", error);
+    return [];
+  }
 };
 
 // ユーザーを追加する関数
@@ -446,21 +523,20 @@ export const getAllReservations = async (
   }[]
 ): Promise<Reservation[] | undefined> => {
   try {
-    const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
-    const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
+    const { rangeStart, rangeEnd } = getCalendarWeekDateBounds(weekDays);
+    const reservationsDocs = await getReservationRowsByDateRange(
+      "reservations",
+      rangeStart,
+      rangeEnd
+    );
 
-    const reservations = reservationsDocs.docs
-      .filter((doc) => {
-        // dateフィールドが存在し、有効なTimestampかチェック
-        const dateField = doc.data().date;
-        return dateField && typeof dateField.toDate === "function";
-      })
-      .map((doc) => ({
-        id: doc.id,
-        names: doc.data().names,
-        date: doc.data().date.toDate(),
-        dayIndex: getDayIndex(weekDays, doc.data().date.toDate()),
-        timeIndex: getTimeIndex(doc.data().date.toDate()),
+    const reservations = reservationsDocs
+      .map((reservation) => ({
+        id: reservation.id,
+        names: reservation.names,
+        date: reservation.date,
+        dayIndex: getDayIndex(weekDays, reservation.date),
+        timeIndex: getTimeIndex(reservation.date),
       }))
       .filter(
         (reservation) =>
@@ -482,21 +558,20 @@ export const getAllReservationsKinjyou = async (
   }[]
 ): Promise<Reservation[] | undefined> => {
   try {
-    const reservationsColRef = collection(db, "reservationsKinjyou"); // reservationsコレクションの参照を取得
-    const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
+    const { rangeStart, rangeEnd } = getCalendarWeekDateBounds(weekDays);
+    const reservationsDocs = await getReservationRowsByDateRange(
+      "reservationsKinjyou",
+      rangeStart,
+      rangeEnd
+    );
 
-    const reservations = reservationsDocs.docs
-      .filter((doc) => {
-        // dateフィールドが存在し、有効なTimestampかチェック
-        const dateField = doc.data().date;
-        return dateField && typeof dateField.toDate === "function";
-      })
-      .map((doc) => ({
-        id: doc.id,
-        names: doc.data().names,
-        date: doc.data().date.toDate(),
-        dayIndex: getDayIndex(weekDays, doc.data().date.toDate()),
-        timeIndex: getTimeIndexKinjyou(doc.data().date.toDate()),
+    const reservations = reservationsDocs
+      .map((reservation) => ({
+        id: reservation.id,
+        names: reservation.names,
+        date: reservation.date,
+        dayIndex: getDayIndex(weekDays, reservation.date),
+        timeIndex: getTimeIndexKinjyou(reservation.date),
       }))
       .filter(
         (reservation) =>
@@ -515,29 +590,12 @@ export const getReservationsByDateRange = async (
   endDate: Date
 ): Promise<{ id: string; names: string[]; date: Date }[]> => {
   try {
-    const reservationsColRef = collection(db, "reservations"); // reservationsコレクションの参照を取得
-    const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
-
-    const reservations = reservationsDocs.docs
-      .filter((doc) => {
-        // dateフィールドが存在し、有効なTimestampかチェック
-        const dateField = doc.data().date;
-        return dateField && typeof dateField.toDate === "function";
-      })
-      .map((doc) => ({
-        id: doc.id,
-        names: doc.data().names,
-        date: doc.data().date.toDate(),
-      }))
-      .filter(
-        (reservation) =>
-          reservation.date >= startDate &&
-          reservation.date <= new Date(endDate).setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
-      )
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    return reservations;
-  } catch (error) {
+    return await getReservationRowsByDateRange(
+      "reservations",
+      startDate,
+      endDate
+    );
+  } catch {
     return [];
   }
 };
@@ -547,29 +605,12 @@ export const getReservationsByDateRangeKnjyou = async (
   endDate: Date
 ): Promise<{ id: string; names: string[]; date: Date }[]> => {
   try {
-    const reservationsColRef = collection(db, "reservationsKinjyou"); // reservationsコレクションの参照を取得
-    const reservationsDocs = await getDocs(reservationsColRef); // コレクション内の全てのドキュメントを取得
-
-    const reservations = reservationsDocs.docs
-      .filter((doc) => {
-        // dateフィールドが存在し、有効なTimestampかチェック
-        const dateField = doc.data().date;
-        return dateField && typeof dateField.toDate === "function";
-      })
-      .map((doc) => ({
-        id: doc.id,
-        names: doc.data().names,
-        date: doc.data().date.toDate(),
-      }))
-      .filter(
-        (reservation) =>
-          reservation.date >= startDate &&
-          reservation.date <= new Date(endDate).setHours(23, 59, 59, 999) // 終了日の時間を23:59:59に設定
-      )
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    return reservations;
-  } catch (error) {
+    return await getReservationRowsByDateRange(
+      "reservationsKinjyou",
+      startDate,
+      endDate
+    );
+  } catch {
     return [];
   }
 };
@@ -596,7 +637,7 @@ export const getAllPeriodReservations = async (): Promise<
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     return reservations;
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -622,12 +663,12 @@ export const getAllPeriodReservationsKinjyou = async (): Promise<
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
     return reservations;
-  } catch (error) {
+  } catch {
     return [];
   }
 };
 
-//　プリセットをユーザーデータに追加する関数(二次元配列のフィールドを持つには二次元配列ごと渡さないといけないっぽい？)
+// プリセットをユーザーデータに追加する関数(二次元配列のフィールドを持つには二次元配列ごと渡さないといけないっぽい？)
 export const addPresets = async (
   lineId: string,
   presetMemberLineIds: string[],
@@ -942,7 +983,7 @@ export const deleteReservationBanPeriod = async (
     const existingBanPeriods = banPeriodDocSnap.data()?.periods || []; // 既存の禁止期間を配列として取得
 
     // 指定された禁止期間を削除
-    const updatedBanPeriods = existingBanPeriods.filter((period: any) => {
+    const updatedBanPeriods = existingBanPeriods.filter((period: FirestoreReservationBanPeriod) => {
       const periodStart = period.startDate.toDate(); // Firestore の Timestamp から Date に変換
       const periodEnd = period.endDate.toDate(); // Firestore の Timestamp から Date に変換
       return !(

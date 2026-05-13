@@ -58,17 +58,17 @@ function Kinjyou() {
   //部員を管理
   const [members, setMembers] = useState<Member[]>([]);
   useEffect(() => {
+    if (!lineId) return;
+
     const collectionRef = collection(db, "users"); // リアルタイムリスナーを設定
     const unsubscribe = onSnapshot(
       collectionRef,
       (snapshot) => {
         const newMembers = querySnapshotToMembers(snapshot);
         setMembers(newMembers);
-        if (lineId) {
-          setIsRegistrationPopupVisible(
-            !newMembers.some((member) => member.lineId === lineId)
-          );
-        }
+        setIsRegistrationPopupVisible(
+          !newMembers.some((member) => member.lineId === lineId)
+        );
       },
       (error) => {
         console.error("部員情報の取得に失敗しました:", error);

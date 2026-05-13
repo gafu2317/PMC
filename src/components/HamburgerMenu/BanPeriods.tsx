@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import {
   setReservationBanPeriod,
   parseReservationBanPeriodsFromDocData,
-  mapMeikouDocsToBanOverlapRows,
-  mapKinjyouDocsToBanOverlapRows,
+  getBanOverlapReservationsByDateRange,
   deleteReservationBanPeriod,
   deleteReservation,
+  deleteReservationKinjyou,
 } from "../../firebase/userService";
 import { db } from "../../firebase/firebase";
-import { collection, onSnapshot, doc } from "firebase/firestore";
+import { onSnapshot, doc } from "firebase/firestore";
 import Swal from "sweetalert2";
 
 const BanPeriods: React.FC = () => {
@@ -18,38 +18,6 @@ const BanPeriods: React.FC = () => {
   const [banPeriods, setBanPeriods] = useState<
     { startDate: Date; endDate: Date; isKinjyou: boolean }[]
   >([]);
-  const [reservations, setReservations] = useState<
-    { id: string; names: string[]; startDate: Date; endDate: Date }[]
-  >([]);
-  const [reservationsKinjyou, setReservationsKinjyou] = useState<
-    { id: string; names: string[]; startDate: Date; endDate: Date }[]
-  >([]);
-  useEffect(() => {
-    const collectionRef = collection(db, "reservations");
-    const unsubscribe = onSnapshot(
-      collectionRef,
-      (snapshot) => {
-        setReservations(mapMeikouDocsToBanOverlapRows(snapshot.docs));
-      },
-      (error) => {
-        console.error("予約情報の取得に失敗しました:", error);
-      }
-    );
-    return () => unsubscribe();
-  }, []);
-  useEffect(() => {
-    const collectionRef = collection(db, "reservationsKinjyou");
-    const unsubscribe = onSnapshot(
-      collectionRef,
-      (snapshot) => {
-        setReservationsKinjyou(mapKinjyouDocsToBanOverlapRows(snapshot.docs));
-      },
-      (error) => {
-        console.error("予約情報の取得に失敗しました:", error);
-      }
-    );
-    return () => unsubscribe();
-  }, []);
   useEffect(() => {
     const banDocRef = doc(db, "setting", "reservationBanPeriod");
     const unsubscribe = onSnapshot(
@@ -83,18 +51,16 @@ const BanPeriods: React.FC = () => {
       return;
     }
 
-    // 使用する予約リストを選択
-    const overlappingReservations = newIsKinjyou
-      ? reservationsKinjyou.filter(
-          (reservation) =>
-            reservation.startDate < newEndDate &&
-            reservation.endDate > newStartDate
-        )
-      : reservations.filter(
-          (reservation) =>
-            reservation.startDate < newEndDate &&
-            reservation.endDate > newStartDate
-        );
+    const overlappingReservations = (
+      await getBanOverlapReservationsByDateRange(
+        newStartDate,
+        newEndDate,
+        newIsKinjyou
+      )
+    ).filter(
+      (reservation) =>
+        reservation.startDate < newEndDate && reservation.endDate > newStartDate
+    );
 
     if (overlappingReservations.length > 0) {
       // 予約がある場合、確認ダイアログを表示
@@ -110,7 +76,9 @@ const BanPeriods: React.FC = () => {
       if (result.isConfirmed) {
         // 確認された場合、予約を削除する
         for (const reservation of overlappingReservations) {
-          await deleteReservation(reservation.id); // 予約を削除
+          await (newIsKinjyou
+            ? deleteReservationKinjyou(reservation.id)
+            : deleteReservation(reservation.id));
         }
       } else {
         // 削除しない場合、処理を中止
